@@ -109,7 +109,7 @@ async function handleSubmit(event) {
 
 // Função para validar contribuição
 async function validarContribuicao(id) {
-    const senha = prompt('Digite a senha de administrador (2020):');
+    const senha = prompt('Digite a senha de administrador:');
     if (!senha) return;
     
     if (senha !== '2020') {
@@ -149,7 +149,7 @@ async function validarContribuicao(id) {
 
 // Função para rejeitar contribuição
 async function rejeitarContribuicao(id) {
-    const senha = prompt('Digite a senha de administrador (2020):');
+    const senha = prompt('Digite a senha de administrador:');
     if (!senha) return;
     
     if (senha !== '2020') {
@@ -179,7 +179,7 @@ async function excluirContribuicao(id) {
         return;
     }
 
-    const senha = prompt('Digite a senha de administrador (2020):');
+    const senha = prompt('Digite a senha de administrador:');
     if (!senha) return;
     
     if (senha !== '2020') {
@@ -207,7 +207,7 @@ async function limparPontuacoes() {
         return;
     }
 
-    const senha = prompt('Digite a senha de administrador (2020):');
+    const senha = prompt('Digite a senha de administrador:');
     if (!senha) return;
     
     if (senha !== '2020') {
