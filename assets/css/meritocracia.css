@@ -4,12 +4,23 @@
     color: var(--color-white);
     padding: 120px 0 60px;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
 .container-merito {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Remove o backdrop-filter do header na página de meritocracia */
+.header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background-color: var(--color-black);
 }
 
 .headline-merito {
@@ -23,6 +34,7 @@
     color: var(--color-white);
     margin-bottom: 1rem;
     line-height: 1.2;
+    text-shadow: none;
 }
 
 .headline-merito p {
@@ -46,6 +58,8 @@
     padding: 2rem;
     margin-bottom: 3rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .form-header,
@@ -68,6 +82,7 @@
     color: var(--color-white);
     font-size: 1.8rem;
     margin: 0;
+    text-shadow: none;
 }
 
 .form-group {
@@ -161,6 +176,7 @@ table.dataTable {
     margin: 1rem 0 !important;
     color: var(--color-white);
     border-collapse: collapse;
+    background-color: transparent;
 }
 
 table.dataTable thead th {
@@ -181,15 +197,16 @@ table.dataTable tbody td {
     padding: 1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     font-family: var(--font-pequena);
+    background-color: transparent;
 }
 
 table.dataTable tbody tr {
-    background-color: transparent;
+    background-color: transparent !important;
     transition: background-color 0.3s ease;
 }
 
 table.dataTable tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
 .dataTables_wrapper .dataTables_length select,
@@ -210,7 +227,7 @@ table.dataTable tbody tr:hover {
     padding: 0.5rem 1rem;
     margin: 0 0.25rem;
     border-radius: 5px;
-    background-color: var(--color-gray1);
+    background-color: var(--color-gray1) !important;
     color: var(--color-white) !important;
     border: none;
     transition: all 0.3s ease;
