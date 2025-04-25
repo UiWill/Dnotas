@@ -37,8 +37,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializa o formulário
     inicializarFormulario();
     
+    // Configura o evento de submit do formulário
+    const form = document.getElementById('formMerito');
+    if (form) {
+        form.addEventListener('submit', registrarContribuicao);
+    }
+    
     // Adiciona listener para o botão Limpar Tudo
-    document.getElementById('btnLimparTudo').addEventListener('click', limparPontuacoes);
+    const btnLimpar = document.getElementById('btnLimparTudo');
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', limparPontuacoes);
+    }
     
     // Inicializa as tabelas DataTables
     inicializarTabelas();
@@ -61,16 +70,12 @@ function inicializarFormulario() {
         option.textContent = colaborador.nome;
         selectColaborador.appendChild(option);
     });
-    
-    // Configura o evento de submit do formulário
-    document.getElementById('formMerito').addEventListener('submit', function(e) {
-        e.preventDefault();
-        registrarContribuicao();
-    });
 }
 
 // Registra uma nova contribuição
-async function registrarContribuicao() {
+async function registrarContribuicao(e) {
+    if (e) e.preventDefault();
+    
     const colaboradorId = parseInt(document.getElementById('colaborador').value);
     const tipoContribuicao = document.getElementById('tipoContribuicao').value;
     const descricaoContribuicao = document.getElementById('descricaoContribuicao').value;
@@ -84,26 +89,30 @@ async function registrarContribuicao() {
     // Obtém o nome do colaborador
     const colaborador = colaboradores.find(c => c.id === colaboradorId);
     
-    // Cria o objeto de contribuição
-    const novaContribuicao = {
-        id: Date.now(), // Usa timestamp como ID único
-        data: new Date().toLocaleDateString('pt-BR'),
-        colaboradorId: colaboradorId,
-        colaborador: colaborador.nome,
-        tipo: tipoContribuicao,
-        descricao: descricaoContribuicao,
-        status: 'Pendente',
-        pontos: 0
-    };
-    
-    // Salva no Firebase
-    const contribuicoesRef = ref(database, 'contribuicoes/' + novaContribuicao.id);
-    await set(contribuicoesRef, novaContribuicao);
-    
-    // Limpa o formulário
-    document.getElementById('formMerito').reset();
-    
-    alert('Contribuição registrada com sucesso!');
+    try {
+        // Cria o objeto de contribuição
+        const novaContribuicao = {
+            id: Date.now(),
+            data: new Date().toLocaleDateString('pt-BR'),
+            colaboradorId: colaboradorId,
+            colaborador: colaborador.nome,
+            tipo: tipoContribuicao,
+            descricao: descricaoContribuicao,
+            status: 'Pendente',
+            pontos: 0
+        };
+        
+        // Salva no Firebase usando a função global
+        await window.registrarContribuicao(novaContribuicao);
+        
+        // Limpa o formulário
+        document.getElementById('formMerito').reset();
+        
+        alert('Contribuição registrada com sucesso!');
+    } catch (error) {
+        console.error('Erro ao registrar contribuição:', error);
+        alert('Erro ao registrar contribuição. Por favor, tente novamente.');
+    }
 }
 
 // Inicializa as tabelas DataTables
