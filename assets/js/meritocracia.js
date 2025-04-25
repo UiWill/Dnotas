@@ -337,4 +337,71 @@ function limparPontuacoes() {
         atualizarTabelas();
         alert('Todas as contribuições e pontuações foram limpas!');
     }
-} 
+}
+
+// Função para atualizar a tabela de pontos
+function atualizarTabelaPontos(pontos) {
+    const tabelaContainer = document.getElementById('tabela-pontos');
+    if (!tabelaContainer) return;
+
+    let html = `
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Pontos</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    for (const [usuario, pontosUsuario] of Object.entries(pontos)) {
+        html += `
+            <tr>
+                <td>${usuario}</td>
+                <td>${pontosUsuario}</td>
+                <td>
+                    <button onclick="adicionarPontosUsuario('${usuario}', 1)" class="btn btn-success btn-sm">+1</button>
+                    <button onclick="adicionarPontosUsuario('${usuario}', -1)" class="btn btn-danger btn-sm">-1</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    html += `
+            </tbody>
+        </table>
+        <div class="mt-3">
+            <button onclick="adicionarNovoUsuario()" class="btn btn-primary">Adicionar Novo Usuário</button>
+            <button onclick="resetarTodosPontos()" class="btn btn-warning">Resetar Pontos</button>
+        </div>
+    `;
+
+    tabelaContainer.innerHTML = html;
+}
+
+// Função para adicionar pontos a um usuário
+function adicionarPontosUsuario(usuario, quantidade) {
+    window.adicionarPontos(usuario, quantidade);
+}
+
+// Função para adicionar novo usuário
+function adicionarNovoUsuario() {
+    const usuario = prompt("Digite o nome do novo usuário:");
+    if (usuario) {
+        window.adicionarPontos(usuario, 0);
+    }
+}
+
+// Função para resetar todos os pontos
+function resetarTodosPontos() {
+    if (confirm("Tem certeza que deseja resetar todos os pontos?")) {
+        window.resetarPontos();
+    }
+}
+
+// Inicializar observador de pontos
+document.addEventListener('DOMContentLoaded', () => {
+    window.observarPontos(atualizarTabelaPontos);
+}); 
