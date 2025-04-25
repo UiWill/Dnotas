@@ -339,21 +339,23 @@
                 
                 <!-- Botão para Limpar Pontuações -->
                 <div style="text-align: right; margin-bottom: 20px;">
-                    <button id="btnLimparTudo" class="btn-merito btn-perigo">Limpar Pontuações (Reset Mensal)</button>
+                    <button id="btnLimparTudo" class="btn-merito btn-perigo">
+                        <i class="bi bi-trash"></i> Limpar Pontuações (Reset Mensal)
+                    </button>
                 </div>
 
                 <!-- Formulário para adicionar contribuição -->
                 <div class="form-merito" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                    <h2>Registrarr Contribuição</h2>
+                    <h2>Registrar Contribuição</h2>
                     <form id="formContribuicao">
                         <div class="form-group">
                             <label for="nome">Nome:</label>
-                            <input type="text" id="nome" name="nome" required>
+                            <input type="text" id="nome" name="nome" required placeholder="Digite o nome do colaborador">
                         </div>
 
                         <div class="form-group">
                             <label for="descricao">Descrição da Contribuição:</label>
-                            <textarea id="descricao" name="descricao" required></textarea>
+                            <textarea id="descricao" name="descricao" required placeholder="Descreva a contribuição em detalhes..."></textarea>
                         </div>
 
                         <div class="form-group">
@@ -361,7 +363,9 @@
                             <input type="date" id="data" name="data" required>
                         </div>
 
-                        <button type="submit" class="btn-merito btn-primario">Registrar Contribuição</button>
+                        <button type="submit" class="btn-merito btn-primario">
+                            <i class="bi bi-plus-circle"></i> Registrar Contribuição
+                        </button>
                     </form>
                 </div>
                 

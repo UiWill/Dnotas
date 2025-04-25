@@ -1,4 +1,14 @@
 /* Estilos gerais */
+:root {
+    --primary-color: #0077cc;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --text-color: #333;
+    --bg-color: #f8f9fa;
+    --border-color: #dee2e6;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,181 +17,270 @@
 }
 
 body {
-    background-color: #f5f5f5;
-    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
 }
 
-.container {
+.sistema-merito {
+    padding: 50px 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.container-merito {
     max-width: 1200px;
     margin: 0 auto;
-    background-color: white;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    color: #333;
-    margin-bottom: 20px;
+.headline-merito {
     text-align: center;
+    margin-bottom: 40px;
+}
+
+.headline-merito h1 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.headline-merito p {
+    color: #666;
+    font-size: 1.1rem;
 }
 
 /* Estilos do formulário */
-form {
-    display: grid;
-    gap: 15px;
+.form-merito {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     margin-bottom: 30px;
-    max-width: 600px;
-    margin: 0 auto 30px auto;
+}
+
+.form-merito h2 {
+    color: var(--text-color);
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    font-weight: 600;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+    margin-bottom: 20px;
 }
 
-label {
-    font-weight: 600;
-    color: #555;
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 500;
 }
 
-input, textarea {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s;
-}
-
-button[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-/* Estilos da tabela */
-.table-container {
-    overflow-x: auto;
-    margin-top: 20px;
-}
-
-table {
+.form-group input,
+.form-group textarea {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
     background-color: white;
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
 }
 
-th {
-    background-color: #f8f9fa;
-    font-weight: 600;
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Botões */
+.btn-merito {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-primario {
+    background-color: var(--primary-color);
+    color: white;
+    width: 100%;
+}
+
+.btn-primario:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.btn-perigo {
+    background-color: var(--warning-color);
     color: #333;
 }
 
-tr:hover {
-    background-color: #f5f5f5;
+.btn-perigo:hover {
+    background-color: #e0a800;
 }
 
-/* Estilos dos botões de ação */
-.btn-aprovar, .btn-rejeitar, .btn-excluir {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    margin-right: 5px;
-    transition: background-color 0.3s;
+/* Tabela */
+.tabela-merito {
+    background: white;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
 }
 
-.btn-aprovar {
-    background-color: #28a745;
-    color: white;
+.tabela-merito h2 {
+    color: var(--text-color);
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    font-weight: 600;
 }
 
-.btn-aprovar:hover {
-    background-color: #218838;
+/* DataTables customização */
+.dataTables_wrapper {
+    margin-top: 20px;
 }
 
-.btn-rejeitar {
-    background-color: #dc3545;
-    color: white;
+table.dataTable {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
-.btn-rejeitar:hover {
-    background-color: #c82333;
+table.dataTable thead th {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    padding: 15px;
+    border-bottom: 2px solid var(--border-color);
 }
 
-.btn-excluir {
-    background-color: #6c757d;
-    color: white;
+table.dataTable tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
 }
 
-.btn-excluir:hover {
-    background-color: #5a6268;
+table.dataTable tbody tr:hover {
+    background-color: rgba(0, 119, 204, 0.05);
 }
 
 /* Status styles */
-td:nth-child(4) {
-    text-transform: capitalize;
-}
-
-td:nth-child(4):not(:empty) {
-    padding: 4px 8px;
-    border-radius: 4px;
+.status-pendente {
+    color: var(--warning-color);
     font-weight: 500;
 }
 
-td:nth-child(4)[data-status="pendente"] {
-    color: #856404;
-    background-color: #fff3cd;
+.status-validado {
+    color: var(--success-color);
+    font-weight: 500;
 }
 
-td:nth-child(4)[data-status="aprovada"] {
-    color: #155724;
-    background-color: #d4edda;
+.status-rejeitado {
+    color: var(--danger-color);
+    font-weight: 500;
 }
 
-td:nth-child(4)[data-status="rejeitada"] {
-    color: #721c24;
-    background-color: #f8d7da;
+/* Botões de ação */
+.acao-botoes {
+    display: flex;
+    gap: 8px;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-    .container {
+.btn-acao {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-acao.btn-validar {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-acao.btn-validar:hover {
+    background-color: #218838;
+}
+
+.btn-acao:not(.btn-validar) {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-acao:not(.btn-validar):hover {
+    background-color: #c82333;
+}
+
+/* DataTables responsivo */
+@media screen and (max-width: 768px) {
+    .container-merito {
         padding: 10px;
     }
 
-    form {
-        padding: 0 10px;
+    .form-merito,
+    .tabela-merito {
+        padding: 20px;
     }
 
-    th, td {
-        padding: 8px;
+    .headline-merito h1 {
+        font-size: 2rem;
     }
 
-    .btn-aprovar, .btn-rejeitar, .btn-excluir {
+    table.dataTable {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .btn-acao {
         padding: 4px 8px;
-        font-size: 12px;
+        font-size: 0.8rem;
     }
+}
+
+/* Customização do DataTables */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin: 0 5px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 6px 12px;
+    margin: 0 3px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: white;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--primary-color);
+    color: white !important;
+    border-color: var(--primary-color);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--primary-color);
+    color: white !important;
+    border-color: var(--primary-color);
 } 
