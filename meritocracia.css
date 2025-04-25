@@ -1,16 +1,21 @@
-/* Variáveis do tema escuro */
+/* Variáveis do tema */
 :root {
-    --bg-dark: #1a1a1a;
-    --bg-darker: #121212;
-    --bg-light: #2a2a2a;
-    --text-color: #ffffff;
-    --text-muted: #888888;
-    --primary-color: #ffc107;
-    --success-color: #28a745;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --border-color: #333333;
-    --input-bg: #333333;
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success-color: #22c55e;
+    --success-hover: #16a34a;
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --warning-color: #f59e0b;
+    --warning-hover: #d97706;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --gradient-primary: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 
 /* Reset e estilos base */
@@ -18,83 +23,155 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     line-height: 1.6;
-    min-height: 100vh;
-}
-
-/* Sistema de Meritocracia */
-.sistema-merito {
-    padding: 80px 0 50px;
-    background: var(--bg-dark);
-    min-height: calc(100vh - 60px); /* Ajuste para o header */
 }
 
 .container-merito {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 1rem;
 }
 
-/* Cabeçalho */
+/* Header e Navegação */
+.header {
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+.nav-menu a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+    color: var(--primary-color);
+}
+
+/* Sistema de Meritocracia */
+.sistema-merito {
+    padding: 2rem 0;
+}
+
 .headline-merito {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 3rem;
 }
 
 .headline-merito h1 {
     font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
 }
 
 .headline-merito p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Botões e Ações */
+.actions-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.btn-merito {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-merito i {
+    font-size: 1.25rem;
+}
+
+.btn-primario {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-perigo {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-perigo:hover {
+    background: var(--danger-hover);
+    transform: translateY(-2px);
 }
 
 /* Formulário */
 .form-merito {
-    background: var(--bg-light);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    margin-bottom: 30px;
+    background: var(--bg-primary);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 3rem;
 }
 
-.form-merito h2 {
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.form-header i {
+    font-size: 2rem;
     color: var(--primary-color);
-    margin-bottom: 25px;
-    font-size: 1.8rem;
-    font-weight: 600;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 12px 15px;
+    padding: 0.75rem;
     border: 1px solid var(--border-color);
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: var(--input-bg);
-    color: var(--text-color);
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
     transition: all 0.3s ease;
 }
 
@@ -102,232 +179,174 @@ body {
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
-}
-
-.form-group textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* Botões */
-.btn-merito {
-    display: inline-block;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.btn-primario {
-    background-color: var(--primary-color);
-    color: var(--bg-dark);
-    width: 100%;
-}
-
-.btn-primario:hover {
-    background-color: #e0a800;
-    transform: translateY(-1px);
-}
-
-.btn-perigo {
-    background-color: var(--danger-color);
-    color: var(--text-color);
-}
-
-.btn-perigo:hover {
-    background-color: #bd2130;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 /* Tabela */
 .tabela-merito {
-    background: var(--bg-light);
-    border-radius: 10px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    margin-bottom: 30px;
+    background: var(--bg-primary);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
 }
 
-.tabela-merito h2 {
+.table-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.table-header i {
+    font-size: 2rem;
     color: var(--primary-color);
-    margin-bottom: 25px;
-    font-size: 1.8rem;
-    font-weight: 600;
 }
 
-/* DataTables customização */
-.dataTables_wrapper {
-    margin-top: 20px;
-    color: var(--text-color);
+.table-container {
+    overflow-x: auto;
 }
 
-table.dataTable {
-    border-collapse: collapse;
-    width: 100%;
-    margin-bottom: 20px;
-    background-color: var(--bg-light);
-    color: var(--text-color);
+/* DataTables Customização */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--bg-secondary);
 }
 
-table.dataTable thead th {
-    background-color: var(--bg-darker);
-    color: var(--primary-color);
-    font-weight: 600;
-    padding: 15px;
-    border-bottom: 2px solid var(--border-color);
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--primary-color);
+    color: white !important;
+    border: none;
+    border-radius: 0.5rem;
 }
 
-table.dataTable tbody td {
-    padding: 12px 15px;
-    border-bottom: 1px solid var(--border-color);
-    background-color: var(--bg-light);
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--primary-hover);
+    color: white !important;
+    border: none;
 }
 
-table.dataTable tbody tr:hover {
-    background-color: var(--bg-darker);
+/* Status */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 500;
 }
 
-/* Status styles */
 .status-pendente {
+    background: rgba(245, 158, 11, 0.1);
     color: var(--warning-color);
-    font-weight: 500;
 }
 
-.status-validado {
+.status-aprovado {
+    background: rgba(34, 197, 94, 0.1);
     color: var(--success-color);
-    font-weight: 500;
 }
 
 .status-rejeitado {
+    background: rgba(239, 68, 68, 0.1);
     color: var(--danger-color);
-    font-weight: 500;
 }
 
-/* Botões de ação */
-.acao-botoes {
+/* Botões Fixos */
+.fixed-button {
+    position: fixed;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    z-index: 1000;
 }
 
-.btn-acao {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+#backToTop {
+    bottom: 7rem;
+    display: none;
 }
 
-.btn-acao.btn-validar {
-    background-color: var(--success-color);
-    color: white;
+#whatsappButton {
+    bottom: 2rem;
+    background: #25D366;
 }
 
-.btn-acao.btn-validar:hover {
-    background-color: #218838;
+.fixed-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-acao:not(.btn-validar) {
-    background-color: var(--danger-color);
-    color: white;
+/* Animações */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-.btn-acao:not(.btn-validar):hover {
-    background-color: #c82333;
-}
-
-/* DataTables customização adicional */
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter,
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_processing,
-.dataTables_wrapper .dataTables_paginate {
-    color: var(--text-color) !important;
-    margin-bottom: 15px;
-}
-
-.dataTables_wrapper .dataTables_length select,
-.dataTables_wrapper .dataTables_filter input {
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    border: 1px solid var(--border-color);
-    padding: 6px 10px;
-    border-radius: 4px;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    background: var(--bg-light) !important;
-    color: var(--text-color) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 4px;
-    padding: 6px 12px;
-    margin: 0 3px;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: var(--primary-color) !important;
-    color: var(--bg-dark) !important;
-    border-color: var(--primary-color) !important;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Responsividade */
-@media screen and (max-width: 768px) {
-    .sistema-merito {
-        padding: 60px 0 30px;
-    }
-
-    .container-merito {
-        padding: 10px;
-    }
-
-    .form-merito,
-    .tabela-merito {
-        padding: 20px;
+@media (max-width: 768px) {
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
     }
 
     .headline-merito h1 {
         font-size: 2rem;
     }
 
-    table.dataTable {
-        display: block;
+    .form-merito,
+    .tabela-merito {
+        padding: 1.5rem;
+    }
+
+    .actions-container {
+        justify-content: center;
+    }
+
+    .btn-merito {
         width: 100%;
-        overflow-x: auto;
+        justify-content: center;
     }
 
-    .btn-acao {
-        padding: 4px 8px;
-        font-size: 0.8rem;
+    .fixed-button {
+        right: 1rem;
     }
 }
 
-/* Placeholder customizado */
-::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-}
+@media (max-width: 480px) {
+    .headline-merito h1 {
+        font-size: 1.75rem;
+    }
 
-/* Scrollbar customizada */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
+    .form-header,
+    .table-header {
+        flex-direction: column;
+        text-align: center;
+    }
 
-::-webkit-scrollbar-track {
-    background: var(--bg-darker);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 1rem;
+    }
 } 

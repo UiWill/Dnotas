@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/x-icon" href="assets/img/favicon-rmdev.ico">
-    <title>Sistema de Meritocracia</title>
+    <title>Sistema de Meritocracia - Dnotas</title>
 
     <!--CSS-->
     <link rel="stylesheet" href="assets/css/style.css">
@@ -27,6 +27,21 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
+    
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <style>
         .sistema-merito {
             padding: 50px 0;
@@ -326,8 +341,16 @@
         <header class="header">
             <div class="container-merito">
                 <div class="logo">
-                    <img src="assets/img/SUA-LOGO-AQUI.png" alt="Logo">
+                    <img src="assets/img/SUA-LOGO-AQUI.png" alt="Logo Dnotas">
                 </div>
+                <nav class="nav-menu">
+                    <a href="index.html#inicio">INÍCIO</a>
+                    <a href="index.html#sobre">SOBRE</a>
+                    <a href="index.html#servicos">SERVIÇOS</a>
+                    <a href="index.html#planos">PLANOS</a>
+                    <a href="index.html#contato">CONTATO</a>
+                    <a href="meritocracia.html" class="active">MERITOCRACIA</a>
+                </nav>
             </div>
         </header>
         <!--Fim Header-->
@@ -339,58 +362,79 @@
                 <div class="container-merito" data-aos="fade-up" data-aos-duration="1000">
                     <div class="headline-merito">
                         <h1>Sistema de Meritocracia</h1>
-                        <p>Reconheça o bom trabalho e as contribuições dos colaboradores de forma transparente</p>
+                        <p>Um sistema transparente e justo para reconhecer e recompensar as contribuições excepcionais de nossa equipe.</p>
                     </div>
                     
                     <!-- Botão para Limpar Pontuações -->
-                    <div style="text-align: right; margin-bottom: 20px;">
+                    <div class="actions-container" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
                         <button id="btnLimparTudo" class="btn-merito btn-perigo">
-                            <i class="bi bi-trash"></i> Limpar Pontuações (Reset Mensal)
+                            <i class="bi bi-trash3"></i> 
+                            <span>Limpar Pontuações</span>
+                            <small>(Apenas Admin)</small>
                         </button>
                     </div>
 
                     <!-- Formulário para adicionar contribuição -->
-                    <div class="form-merito" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                        <h2>Registrar Contribuição</h2>
+                    <div class="form-merito" data-aos="fade-up" data-aos-delay="300" data-aos-duration="1000">
+                        <div class="form-header">
+                            <i class="bi bi-trophy"></i>
+                            <h2>Registrar Contribuição</h2>
+                        </div>
                         <form id="formContribuicao">
                             <div class="form-group">
-                                <label for="nome">Nome:</label>
-                                <input type="text" id="nome" name="nome" required placeholder="Digite o nome do colaborador">
+                                <label for="nome">
+                                    <i class="bi bi-person"></i> Colaborador:
+                                </label>
+                                <input type="text" id="nome" name="nome" required 
+                                       placeholder="Digite o nome do colaborador"
+                                       class="fade-in">
                             </div>
 
                             <div class="form-group">
-                                <label for="descricao">Descrição da Contribuição:</label>
-                                <textarea id="descricao" name="descricao" required placeholder="Descreva a contribuição em detalhes..."></textarea>
+                                <label for="pontuacao">
+                                    <i class="bi bi-star"></i> Pontuação:
+                                </label>
+                                <input type="number" id="pontuacao" name="pontuacao" required min="1" max="100" class="fade-in">
                             </div>
 
                             <div class="form-group">
-                                <label for="data">Data:</label>
-                                <input type="date" id="data" name="data" required>
+                                <label for="descricao">
+                                    <i class="bi bi-chat-text"></i> Descrição da Contribuição:
+                                </label>
+                                <textarea id="descricao" name="descricao" required 
+                                          placeholder="Descreva a contribuição em detalhes..."
+                                          class="fade-in"></textarea>
                             </div>
 
-                            <button type="submit" class="btn-merito btn-primario">
-                                <i class="bi bi-plus-circle"></i> Registrar Contribuição
+                            <button type="submit" class="btn-merito btn-primario fade-in">
+                                <i class="bi bi-plus-circle"></i>
+                                <span>Registrar Contribuição</span>
                             </button>
                         </form>
                     </div>
                     
                     <!-- Tabela de contribuições -->
                     <div class="tabela-merito" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
-                        <h2>Contribuições Registradas</h2>
-                        <table id="tabelaContribuicoes" class="display" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Nome</th>
-                                    <th>Descrição</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Dados serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
+                        <div class="table-header">
+                            <i class="bi bi-table"></i>
+                            <h2>Contribuições Registradas</h2>
+                        </div>
+                        <div class="table-container fade-in">
+                            <table id="tabelaContribuicoes" class="display">
+                                <thead>
+                                    <tr>
+                                        <th><i class="bi bi-person"></i> Colaborador</th>
+                                        <th><i class="bi bi-star"></i> Pontuação</th>
+                                        <th><i class="bi bi-chat-text"></i> Descrição</th>
+                                        <th><i class="bi bi-check-circle"></i> Status</th>
+                                        <th><i class="bi bi-gear"></i> Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dados serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     
                     <!-- Tabela de ranking de pontos -->
@@ -457,7 +501,11 @@
 
     <!-- Inicialização do AOS -->
     <script>
-        AOS.init();
+        AOS.init({
+            duration: 1000,
+            once: true,
+            mirror: false
+        });
     </script>
 
     <!-- JavaScript principal -->
