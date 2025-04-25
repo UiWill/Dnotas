@@ -478,6 +478,26 @@
         window.databaseGet = get;
         window.databaseOnValue = onValue;
 
+        // Funções globais do Firebase
+        window.observarPontos = function(callback) {
+            const pontosRef = ref(database, 'pontos');
+            onValue(pontosRef, (snapshot) => {
+                callback(snapshot.val() || {});
+            });
+        };
+
+        window.adicionarPontos = async function(usuario, pontos) {
+            const pontosRef = ref(database, 'pontos/' + usuario);
+            const snapshot = await get(pontosRef);
+            const pontosAtuais = snapshot.val() || 0;
+            await set(pontosRef, pontosAtuais + pontos);
+        };
+
+        window.resetarPontos = async function() {
+            const pontosRef = ref(database, 'pontos');
+            await set(pontosRef, {});
+        };
+
         // Configurar listener global para contribuições
         const contribuicoesRef = ref(database, 'contribuicoes');
         onValue(contribuicoesRef, (snapshot) => {
@@ -486,6 +506,76 @@
                 window.atualizarTabelaContribuicoes(Object.values(dados));
             }
         });
+
+        // Função para validar contribuição
+        window.validarContribuicao = async function(id) {
+            const senha = prompt("Digite a senha de administrador (2020):", "");
+            
+            if (!senha) {
+                alert('Operação cancelada.');
+                return;
+            }
+
+            if (senha !== "2020") {
+                alert('Senha incorreta! A senha é: 2020');
+                return;
+            }
+
+            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
+            const snapshot = await get(contribuicaoRef);
+            
+            if (snapshot.exists()) {
+                const contribuicao = snapshot.val();
+                contribuicao.status = 'Validado';
+                contribuicao.pontos = 1;
+                await set(contribuicaoRef, contribuicao);
+                
+                // Atualiza os pontos do colaborador
+                const pontosRef = ref(database, 'pontos/' + contribuicao.colaborador);
+                const pontosSnapshot = await get(pontosRef);
+                const pontosAtuais = pontosSnapshot.val() || 0;
+                await set(pontosRef, pontosAtuais + 1);
+                
+                alert('Contribuição validada com sucesso!');
+            }
+        };
+
+        // Função para rejeitar contribuição
+        window.rejeitarContribuicao = async function(id) {
+            const senha = prompt("Digite a senha de administrador (2020):", "");
+            
+            if (!senha) {
+                alert('Operação cancelada.');
+                return;
+            }
+
+            if (senha !== "2020") {
+                alert('Senha incorreta! A senha é: 2020');
+                return;
+            }
+
+            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
+            const snapshot = await get(contribuicaoRef);
+            
+            if (snapshot.exists()) {
+                const contribuicao = snapshot.val();
+                contribuicao.status = 'Rejeitado';
+                contribuicao.pontos = 0;
+                await set(contribuicaoRef, contribuicao);
+                alert('Contribuição rejeitada!');
+            }
+        };
+
+        // Função para excluir contribuição
+        window.excluirContribuicao = async function(id) {
+            if (!confirm('Tem certeza que deseja excluir esta contribuição?')) {
+                return;
+            }
+
+            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
+            await set(contribuicaoRef, null);
+            alert('Contribuição excluída com sucesso!');
+        };
     </script>
 
     <!--JavaScript-->
