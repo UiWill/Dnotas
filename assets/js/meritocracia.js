@@ -267,11 +267,37 @@ function criarRanking() {
     return rankingData;
 }
 
-// Valida uma contribuição (apenas o chefe pode fazer isso)
-function validarContribuicao(id) {
-    // Em um cenário real, verificaríamos se o usuário logado é o chefe
-    // Para simplificar, vamos permitir que qualquer um valide neste exemplo
+// Função para verificar a senha de administrador (hash da senha 2020*)
+async function verificarSenhaAdmin(senha) {
+    // Usando SHA-256 para criar um hash da senha
+    const encoder = new TextEncoder();
+    const data = encoder.encode(senha);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     
+    // Hash da senha "2020*" - Gerado previamente
+    const senhaCorretaHash = "7c9e0d21490c23c7c1d93b1ce9c57d5c457f58f666a5a96946108714d3dd2039";
+    
+    return hashHex === senhaCorretaHash;
+}
+
+// Valida uma contribuição (apenas com senha correta)
+async function validarContribuicao(id) {
+    const senha = prompt("Digite a senha de administrador para validar:", "");
+    
+    if (!senha) {
+        alert('Operação cancelada.');
+        return;
+    }
+
+    const senhaValida = await verificarSenhaAdmin(senha);
+    
+    if (!senhaValida) {
+        alert('Senha incorreta! Apenas administradores podem validar contribuições.');
+        return;
+    }
+
     // Encontra a contribuição pelo ID
     const index = contribuicoes.findIndex(c => c.id === id);
     
@@ -290,10 +316,21 @@ function validarContribuicao(id) {
     }
 }
 
-// Rejeita uma contribuição (apenas o chefe pode fazer isso)
-function rejeitarContribuicao(id) {
-    // Em um cenário real, verificaríamos se o usuário logado é o chefe
-    // Para simplificar, vamos permitir que qualquer um rejeite neste exemplo
+// Rejeita uma contribuição (apenas com senha correta)
+async function rejeitarContribuicao(id) {
+    const senha = prompt("Digite a senha de administrador para rejeitar:", "");
+    
+    if (!senha) {
+        alert('Operação cancelada.');
+        return;
+    }
+
+    const senhaValida = await verificarSenhaAdmin(senha);
+    
+    if (!senhaValida) {
+        alert('Senha incorreta! Apenas administradores podem rejeitar contribuições.');
+        return;
+    }
     
     // Encontra a contribuição pelo ID
     const index = contribuicoes.findIndex(c => c.id === id);
@@ -329,9 +366,23 @@ function excluirContribuicao(id) {
     }
 }
 
-// Limpa todas as contribuições (Reset Mensal)
-function limparPontuacoes() {
+// Limpa todas as contribuições (Reset Mensal) - Também protegido por senha
+async function limparPontuacoes() {
     if (confirm('ATENÇÃO! Tem certeza que deseja limpar TODAS as contribuições e pontuações? Esta ação é recomendada apenas para o reset mensal e não pode ser desfeita.')) {
+        const senha = prompt("Digite a senha de administrador para resetar:", "");
+        
+        if (!senha) {
+            alert('Operação cancelada.');
+            return;
+        }
+
+        const senhaValida = await verificarSenhaAdmin(senha);
+        
+        if (!senhaValida) {
+            alert('Senha incorreta! Apenas administradores podem resetar as pontuações.');
+            return;
+        }
+
         contribuicoes = []; // Limpa o array de contribuições
         salvarDadosLocais();
         atualizarTabelas();
