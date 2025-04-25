@@ -70,7 +70,7 @@ function inicializarFormulario() {
 }
 
 // Registra uma nova contribuição
-function registrarContribuicao() {
+async function registrarContribuicao() {
     const colaboradorId = parseInt(document.getElementById('colaborador').value);
     const tipoContribuicao = document.getElementById('tipoContribuicao').value;
     const descricaoContribuicao = document.getElementById('descricaoContribuicao').value;
@@ -92,18 +92,13 @@ function registrarContribuicao() {
         colaborador: colaborador.nome,
         tipo: tipoContribuicao,
         descricao: descricaoContribuicao,
-        status: (colaboradorId === 1) ? 'Validado' : 'Pendente', // Auto-valida se for o chefe
-        pontos: (colaboradorId === 1) ? 1 : 0 // Auto-atribui pontos se for o chefe
+        status: 'Pendente',
+        pontos: 0
     };
     
-    // Adiciona à lista de contribuições
-    contribuicoes.push(novaContribuicao);
-    
-    // Salva no localStorage
-    salvarDadosLocais();
-    
-    // Atualiza as tabelas
-    atualizarTabelas();
+    // Salva no Firebase
+    const contribuicoesRef = ref(database, 'contribuicoes/' + novaContribuicao.id);
+    await set(contribuicoesRef, novaContribuicao);
     
     // Limpa o formulário
     document.getElementById('formMerito').reset();
@@ -267,24 +262,36 @@ function criarRanking() {
     return rankingData;
 }
 
-// Função para verificar a senha de administrador (hash da senha 2020*)
+// Função para verificar a senha de administrador
 async function verificarSenhaAdmin(senha) {
-    // Usando SHA-256 para criar um hash da senha
-    const encoder = new TextEncoder();
-    const data = encoder.encode(senha);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    // Hash da senha "2020*" - Gerado previamente
-    const senhaCorretaHash = "7c9e0d21490c23c7c1d93b1ce9c57d5c457f58f666a5a96946108714d3dd2039";
-    
-    return hashHex === senhaCorretaHash;
+    // Senha fixa "2020"
+    return senha === "2020";
 }
 
-// Valida uma contribuição (apenas com senha correta)
+// Função para atualizar a interface com os dados do Firebase
+function atualizarInterface(dados) {
+    if (!dados) return;
+    
+    // Limpa as tabelas
+    tabelaContribuicoes.clear();
+    tabelaRanking.clear();
+    
+    // Adiciona as contribuições à tabela
+    if (dados.contribuicoes) {
+        const contribuicoesArray = Object.values(dados.contribuicoes);
+        tabelaContribuicoes.rows.add(contribuicoesArray).draw();
+    }
+    
+    // Atualiza o ranking
+    if (dados.pontos) {
+        const ranking = criarRanking(dados.pontos);
+        tabelaRanking.rows.add(ranking).draw();
+    }
+}
+
+// Valida uma contribuição
 async function validarContribuicao(id) {
-    const senha = prompt("Digite a senha de administrador para validar:", "");
+    const senha = prompt("Digite a senha de administrador (2020):", "");
     
     if (!senha) {
         alert('Operação cancelada.');
@@ -294,31 +301,35 @@ async function validarContribuicao(id) {
     const senhaValida = await verificarSenhaAdmin(senha);
     
     if (!senhaValida) {
-        alert('Senha incorreta! Apenas administradores podem validar contribuições.');
+        alert('Senha incorreta! A senha é: 2020');
         return;
     }
 
-    // Encontra a contribuição pelo ID
-    const index = contribuicoes.findIndex(c => c.id === id);
+    // Atualiza no Firebase
+    const contribuicaoRef = ref(database, 'contribuicoes/' + id);
+    const snapshot = await get(contribuicaoRef);
     
-    if (index !== -1) {
-        // Atualiza o status e atribui um ponto
-        contribuicoes[index].status = 'Validado';
-        contribuicoes[index].pontos = 1;
+    if (snapshot.exists()) {
+        const contribuicao = snapshot.val();
+        contribuicao.status = 'Validado';
+        contribuicao.pontos = 1;
         
-        // Salva no localStorage
-        salvarDadosLocais();
+        // Atualiza a contribuição
+        await set(contribuicaoRef, contribuicao);
         
-        // Atualiza as tabelas
-        atualizarTabelas();
+        // Atualiza os pontos do colaborador
+        const pontosRef = ref(database, 'pontos/' + contribuicao.colaborador);
+        const pontosSnapshot = await get(pontosRef);
+        const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
+        await set(pontosRef, pontosAtuais + 1);
         
         alert('Contribuição validada com sucesso!');
     }
 }
 
-// Rejeita uma contribuição (apenas com senha correta)
+// Rejeita uma contribuição
 async function rejeitarContribuicao(id) {
-    const senha = prompt("Digite a senha de administrador para rejeitar:", "");
+    const senha = prompt("Digite a senha de administrador (2020):", "");
     
     if (!senha) {
         alert('Operação cancelada.');
@@ -328,24 +339,19 @@ async function rejeitarContribuicao(id) {
     const senhaValida = await verificarSenhaAdmin(senha);
     
     if (!senhaValida) {
-        alert('Senha incorreta! Apenas administradores podem rejeitar contribuições.');
+        alert('Senha incorreta! A senha é: 2020');
         return;
     }
+
+    // Atualiza no Firebase
+    const contribuicaoRef = ref(database, 'contribuicoes/' + id);
+    const snapshot = await get(contribuicaoRef);
     
-    // Encontra a contribuição pelo ID
-    const index = contribuicoes.findIndex(c => c.id === id);
-    
-    if (index !== -1) {
-        // Atualiza o status e zera os pontos
-        contribuicoes[index].status = 'Rejeitado';
-        contribuicoes[index].pontos = 0;
-        
-        // Salva no localStorage
-        salvarDadosLocais();
-        
-        // Atualiza as tabelas
-        atualizarTabelas();
-        
+    if (snapshot.exists()) {
+        const contribuicao = snapshot.val();
+        contribuicao.status = 'Rejeitado';
+        contribuicao.pontos = 0;
+        await set(contribuicaoRef, contribuicao);
         alert('Contribuição rejeitada!');
     }
 }
@@ -366,28 +372,31 @@ function excluirContribuicao(id) {
     }
 }
 
-// Limpa todas as contribuições (Reset Mensal) - Também protegido por senha
+// Limpa todas as contribuições (Reset Mensal)
 async function limparPontuacoes() {
-    if (confirm('ATENÇÃO! Tem certeza que deseja limpar TODAS as contribuições e pontuações? Esta ação é recomendada apenas para o reset mensal e não pode ser desfeita.')) {
-        const senha = prompt("Digite a senha de administrador para resetar:", "");
-        
-        if (!senha) {
-            alert('Operação cancelada.');
-            return;
-        }
-
-        const senhaValida = await verificarSenhaAdmin(senha);
-        
-        if (!senhaValida) {
-            alert('Senha incorreta! Apenas administradores podem resetar as pontuações.');
-            return;
-        }
-
-        contribuicoes = []; // Limpa o array de contribuições
-        salvarDadosLocais();
-        atualizarTabelas();
-        alert('Todas as contribuições e pontuações foram limpas!');
+    if (!confirm('ATENÇÃO! Tem certeza que deseja limpar TODAS as contribuições e pontuações?')) {
+        return;
     }
+
+    const senha = prompt("Digite a senha de administrador (2020):", "");
+    
+    if (!senha) {
+        alert('Operação cancelada.');
+        return;
+    }
+
+    const senhaValida = await verificarSenhaAdmin(senha);
+    
+    if (!senhaValida) {
+        alert('Senha incorreta! A senha é: 2020');
+        return;
+    }
+
+    // Limpa os dados no Firebase
+    await set(ref(database, 'contribuicoes'), null);
+    await set(ref(database, 'pontos'), null);
+    
+    alert('Todas as contribuições e pontuações foram limpas!');
 }
 
 // Função para atualizar a tabela de pontos
