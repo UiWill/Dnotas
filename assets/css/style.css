@@ -912,27 +912,13 @@ a {
 }
 
 .prev,
-.next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    width: auto;
-    padding: 16px;
-    color: var(--color-white);
-    font-size: 2rem;
-    user-select: none;
-    transform: translateY(-50%);
-    border-radius: 50%;
-    z-index: 1;
-}
+
 
 .prev {
     left: 10px;
 }
 
-.next {
-    right: 10px;
-}
+
 
 .textos-case {
     width: 50%;
