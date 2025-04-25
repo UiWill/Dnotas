@@ -478,33 +478,7 @@
         window.databaseGet = get;
         window.databaseOnValue = onValue;
 
-        // Funções para manipular pontos
-        window.adicionarPontos = async function(usuario, pontos) {
-            const pontosRef = ref(database, 'pontos/' + usuario);
-            const snapshot = await get(pontosRef);
-            const pontosAtuais = snapshot.val() || 0;
-            await set(pontosRef, pontosAtuais + pontos);
-        }
-
-        window.resetarPontos = async function() {
-            const pontosRef = ref(database, 'pontos');
-            await set(pontosRef, {});
-        }
-
-        window.observarPontos = function(callback) {
-            const pontosRef = ref(database, 'pontos');
-            onValue(pontosRef, (snapshot) => {
-                callback(snapshot.val() || {});
-            });
-        }
-
-        // Função para registrar contribuição
-        window.registrarContribuicao = async function(dados) {
-            const contribuicaoRef = ref(database, 'contribuicoes/' + Date.now());
-            await set(contribuicaoRef, dados);
-        }
-
-        // Observar mudanças nas contribuições
+        // Configurar listener global para contribuições
         const contribuicoesRef = ref(database, 'contribuicoes');
         onValue(contribuicoesRef, (snapshot) => {
             const dados = snapshot.val() || {};

@@ -29,52 +29,9 @@ function salvarDadosLocais() {
     localStorage.setItem('contribuicoes', JSON.stringify(contribuicoes));
 }
 
-// Inicializa o sistema
-document.addEventListener('DOMContentLoaded', function() {
-    // Carrega dados do localStorage
-    carregarDadosLocais();
-    
-    // Inicializa o formulário
-    inicializarFormulario();
-    
-    // Configura o evento de submit do formulário
-    const form = document.getElementById('formMerito');
-    if (form) {
-        form.addEventListener('submit', registrarContribuicao);
-    }
-    
-    // Adiciona listener para o botão Limpar Tudo
-    const btnLimpar = document.getElementById('btnLimparTudo');
-    if (btnLimpar) {
-        btnLimpar.addEventListener('click', limparPontuacoes);
-    }
-    
-    // Inicializa as tabelas DataTables
-    inicializarTabelas();
-    
-    // Atualiza os dados nas tabelas
-    atualizarTabelas();
-});
-
-// Inicializa o formulário com os colaboradores
-function inicializarFormulario() {
-    const selectColaborador = document.getElementById('colaborador');
-    
-    // Limpa opções existentes
-    selectColaborador.innerHTML = '<option value="" disabled selected>Selecione o colaborador</option>';
-    
-    // Adiciona os colaboradores à lista
-    colaboradores.forEach(colaborador => {
-        const option = document.createElement('option');
-        option.value = colaborador.id;
-        option.textContent = colaborador.nome;
-        selectColaborador.appendChild(option);
-    });
-}
-
 // Registra uma nova contribuição
-async function registrarContribuicao(e) {
-    if (e) e.preventDefault();
+async function handleSubmit(e) {
+    e.preventDefault(); // Impede o recarregamento da página
     
     const colaboradorId = parseInt(document.getElementById('colaborador').value);
     const tipoContribuicao = document.getElementById('tipoContribuicao').value;
@@ -88,6 +45,10 @@ async function registrarContribuicao(e) {
     
     // Obtém o nome do colaborador
     const colaborador = colaboradores.find(c => c.id === colaboradorId);
+    if (!colaborador) {
+        alert('Colaborador não encontrado!');
+        return;
+    }
     
     try {
         // Cria o objeto de contribuição
@@ -102,8 +63,9 @@ async function registrarContribuicao(e) {
             pontos: 0
         };
         
-        // Salva no Firebase usando a função global
-        await window.registrarContribuicao(novaContribuicao);
+        // Salva no Firebase
+        const contribuicaoRef = window.databaseRef(window.database, 'contribuicoes/' + novaContribuicao.id);
+        await window.databaseSet(contribuicaoRef, novaContribuicao);
         
         // Limpa o formulário
         document.getElementById('formMerito').reset();
@@ -115,40 +77,37 @@ async function registrarContribuicao(e) {
     }
 }
 
+// Inicializa o formulário com os colaboradores
+function inicializarFormulario() {
+    const selectColaborador = document.getElementById('colaborador');
+    if (!selectColaborador) return;
+    
+    // Limpa opções existentes
+    selectColaborador.innerHTML = '<option value="" disabled selected>Selecione o colaborador</option>';
+    
+    // Adiciona os colaboradores à lista
+    colaboradores.forEach(colaborador => {
+        const option = document.createElement('option');
+        option.value = colaborador.id;
+        option.textContent = colaborador.nome;
+        selectColaborador.appendChild(option);
+    });
+    
+    // Configura o evento de submit do formulário
+    const form = document.getElementById('formMerito');
+    if (form) {
+        form.removeEventListener('submit', handleSubmit); // Remove listener anterior se existir
+        form.addEventListener('submit', handleSubmit);
+    }
+}
+
 // Inicializa as tabelas DataTables
 function inicializarTabelas() {
     // Tabela de contribuições
-    tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
+    window.tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
         responsive: true,
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
-            search: "Buscar:",
-            lengthMenu: "Mostrar _MENU_ entradas",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-            infoEmpty: "Mostrando 0 a 0 de 0 entradas",
-            infoFiltered: "(filtrado de _MAX_ entradas totais)",
-            paginate: {
-                first:      "Primeiro",
-                last:       "Último",
-                previous:   "Anterior"
-            },
-            zeroRecords: "Nenhum registro encontrado",
-            emptyTable: "Nenhum dado disponível na tabela"
-        },
-        // Adiciona um callback para ser executado a cada redesenho da tabela
-        drawCallback: function(settings) {
-            var api = this.api();
-            // Verifica se a tabela está vazia
-            if (api.data().count() === 0) {
-                // Tenta esconder o container de paginação inteiro se a tabela estiver vazia
-                // Isso deve esconder os botões e textos "Anterior"/"Próximo"
-                $(api.table().container()).find('.dataTables_paginate').hide();
-                // Garante que a mensagem "Nenhum dado disponível" seja exibida corretamente
-                $(api.table().container()).find('.dataTables_empty').show(); 
-            } else {
-                // Mostra o container de paginação se a tabela tiver dados
-                $(api.table().container()).find('.dataTables_paginate').show();
-            }
+            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
         },
         columns: [
             { data: 'data' },
@@ -159,117 +118,52 @@ function inicializarTabelas() {
                 data: 'status',
                 render: function(data) {
                     let classeCor = '';
-                    
-                    if (data === 'Pendente') {
-                        classeCor = 'status-pendente';
-                    } else if (data === 'Validado') {
-                        classeCor = 'status-validado';
-                    } else if (data === 'Rejeitado') {
-                        classeCor = 'status-rejeitado';
-                    }
-                    
+                    if (data === 'Pendente') classeCor = 'status-pendente';
+                    else if (data === 'Validado') classeCor = 'status-validado';
+                    else if (data === 'Rejeitado') classeCor = 'status-rejeitado';
                     return `<span class="${classeCor}">${data}</span>`;
                 }
             },
             { data: 'pontos' },
             {
                 data: null,
-                orderable: false, // Impede ordenação pela coluna de ações
-                render: function(data, type, row) {
-                    let botoesHtml = '<div class="acao-botoes">';
-                    
-                    // Adiciona botões Validar/Rejeitar se pendente
-                    if (row.status === 'Pendente') {
-                        botoesHtml += `<button class="btn-acao btn-validar" onclick="validarContribuicao(${row.id})">Validar</button>`;
-                        botoesHtml += `<button class="btn-acao" onclick="rejeitarContribuicao(${row.id})">Rejeitar</button>`; // Botão Rejeitar já tem estilo vermelho pelo CSS
+                render: function(data) {
+                    let html = '<div class="acao-botoes">';
+                    if (data.status === 'Pendente') {
+                        html += `<button onclick="validarContribuicao(${data.id})" class="btn-acao btn-validar">Validar</button>`;
+                        html += `<button onclick="rejeitarContribuicao(${data.id})" class="btn-acao">Rejeitar</button>`;
                     }
-                    
-                    // Adiciona botão Excluir para todas as linhas
-                    botoesHtml += `<button class="btn-acao btn-excluir" onclick="excluirContribuicao(${row.id})">Excluir</button>`;
-                    
-                    botoesHtml += '</div>';
-                    
-                    // Retorna vazio se não houver botões (nunca deve acontecer agora com Excluir sempre presente)
-                    return botoesHtml !== '<div class="acao-botoes"></div>' ? botoesHtml : '';
+                    html += `<button onclick="excluirContribuicao(${data.id})" class="btn-acao btn-excluir">Excluir</button>`;
+                    html += '</div>';
+                    return html;
                 }
             }
         ]
     });
-    
-    // Tabela de ranking
-    tabelaRanking = $('#tabelaRanking').DataTable({
-        responsive: true,
-        paging: false,
-        searching: false,
-        info: false,
-        order: [[2, 'desc']], // Ordena por pontos (maior para menor)
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
-        },
-        columns: [
-             { data: 'posicao', orderable: false },
-             { data: 'colaborador' },
-             { data: 'pontos' },
-             { data: 'contribuicoes' }
-        ]
-    });
 }
 
-// Atualiza as tabelas com os dados atuais
-function atualizarTabelas() {
-    // Limpa as tabelas
-    tabelaContribuicoes.clear();
-    tabelaRanking.clear();
-    
-    // Adiciona as contribuições à tabela
-    tabelaContribuicoes.rows.add(contribuicoes).draw();
-    
-    // Cria o ranking
-    const ranking = criarRanking();
-    
-    // Limpa e adiciona o ranking à tabela, recalculando a posição
-    tabelaRanking.clear();
-    ranking.sort((a, b) => b.pontos - a.pontos); // Garante a ordenação por pontos
-    ranking.forEach((item, index) => {
-        item.posicao = index + 1; // Atualiza a posição baseada na ordenação
-    });
-    tabelaRanking.rows.add(ranking).draw();
-}
-
-// Cria o ranking de pontos
-function criarRanking() {
-    const rankingData = [];
-    
-    // Agrupa as contribuições por colaborador e calcula os pontos
-    const pontosAgrupados = {};
-    const contribAgrupadas = {};
-    
-    // Inicializa todos os colaboradores com zero
-    colaboradores.forEach(colaborador => {
-        pontosAgrupados[colaborador.id] = 0;
-        contribAgrupadas[colaborador.id] = 0;
-    });
-    
-    // Conta apenas contribuições validadas
-    contribuicoes.forEach(contribuicao => {
-        if (contribuicao.status === 'Validado') {
-            pontosAgrupados[contribuicao.colaboradorId] += contribuicao.pontos;
-            contribAgrupadas[contribuicao.colaboradorId] += 1;
+// Atualiza a tabela de contribuições quando houver mudanças
+window.atualizarTabelaContribuicoes = function(contribuicoes) {
+    if (window.tabelaContribuicoes) {
+        window.tabelaContribuicoes.clear();
+        if (contribuicoes && contribuicoes.length > 0) {
+            window.tabelaContribuicoes.rows.add(contribuicoes);
         }
-    });
+        window.tabelaContribuicoes.draw();
+    }
+};
+
+// Inicializa o sistema quando o documento estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarFormulario();
+    inicializarTabelas();
     
-    // Cria o array de ranking
-    colaboradores.forEach((colaborador, index) => {
-        rankingData.push({
-            posicao: index + 1, // Será reordenado pelo DataTables
-            colaborador: colaborador.nome,
-            pontos: pontosAgrupados[colaborador.id],
-            contribuicoes: contribAgrupadas[colaborador.id]
-        });
-    });
-    
-    return rankingData;
-}
+    // Adiciona listener para o botão Limpar Tudo
+    const btnLimpar = document.getElementById('btnLimparTudo');
+    if (btnLimpar) {
+        btnLimpar.addEventListener('click', limparPontuacoes);
+    }
+});
 
 // Função para verificar a senha de administrador
 async function verificarSenhaAdmin(senha) {
@@ -473,4 +367,60 @@ function resetarTodosPontos() {
 // Inicializar observador de pontos
 document.addEventListener('DOMContentLoaded', () => {
     window.observarPontos(atualizarTabelaPontos);
-}); 
+});
+
+// Cria o ranking de pontos
+function criarRanking() {
+    const rankingData = [];
+    
+    // Agrupa as contribuições por colaborador e calcula os pontos
+    const pontosAgrupados = {};
+    const contribAgrupadas = {};
+    
+    // Inicializa todos os colaboradores com zero
+    colaboradores.forEach(colaborador => {
+        pontosAgrupados[colaborador.id] = 0;
+        contribAgrupadas[colaborador.id] = 0;
+    });
+    
+    // Conta apenas contribuições validadas
+    contribuicoes.forEach(contribuicao => {
+        if (contribuicao.status === 'Validado') {
+            pontosAgrupados[contribuicao.colaboradorId] += contribuicao.pontos;
+            contribAgrupadas[contribuicao.colaboradorId] += 1;
+        }
+    });
+    
+    // Cria o array de ranking
+    colaboradores.forEach((colaborador, index) => {
+        rankingData.push({
+            posicao: index + 1, // Será reordenado pelo DataTables
+            colaborador: colaborador.nome,
+            pontos: pontosAgrupados[colaborador.id],
+            contribuicoes: contribAgrupadas[colaborador.id]
+        });
+    });
+    
+    return rankingData;
+}
+
+// Atualiza as tabelas com os dados atuais
+function atualizarTabelas() {
+    // Limpa as tabelas
+    tabelaContribuicoes.clear();
+    tabelaRanking.clear();
+    
+    // Adiciona as contribuições à tabela
+    tabelaContribuicoes.rows.add(contribuicoes).draw();
+    
+    // Cria o ranking
+    const ranking = criarRanking();
+    
+    // Limpa e adiciona o ranking à tabela, recalculando a posição
+    tabelaRanking.clear();
+    ranking.sort((a, b) => b.pontos - a.pontos); // Garante a ordenação por pontos
+    ranking.forEach((item, index) => {
+        item.posicao = index + 1; // Atualiza a posição baseada na ordenação
+    });
+    tabelaRanking.rows.add(ranking).draw();
+} 
