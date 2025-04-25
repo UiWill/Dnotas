@@ -1,14 +1,19 @@
-/* Estilos gerais */
+/* Variáveis do tema escuro */
 :root {
-    --primary-color: #0077cc;
+    --bg-dark: #1a1a1a;
+    --bg-darker: #121212;
+    --bg-light: #2a2a2a;
+    --text-color: #ffffff;
+    --text-muted: #888888;
+    --primary-color: #ffc107;
     --success-color: #28a745;
     --danger-color: #dc3545;
     --warning-color: #ffc107;
-    --text-color: #333;
-    --bg-color: #f8f9fa;
-    --border-color: #dee2e6;
+    --border-color: #333333;
+    --input-bg: #333333;
 }
 
+/* Reset e estilos base */
 * {
     margin: 0;
     padding: 0;
@@ -17,15 +22,17 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: var(--bg-dark);
     color: var(--text-color);
     line-height: 1.6;
+    min-height: 100vh;
 }
 
+/* Sistema de Meritocracia */
 .sistema-merito {
-    padding: 50px 0;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+    padding: 80px 0 50px;
+    background: var(--bg-dark);
+    min-height: calc(100vh - 60px); /* Ajuste para o header */
 }
 
 .container-merito {
@@ -34,6 +41,7 @@ body {
     padding: 20px;
 }
 
+/* Cabeçalho */
 .headline-merito {
     text-align: center;
     margin-bottom: 40px;
@@ -41,27 +49,27 @@ body {
 
 .headline-merito h1 {
     font-size: 2.5rem;
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 10px;
     font-weight: 600;
 }
 
 .headline-merito p {
-    color: #666;
+    color: var(--text-muted);
     font-size: 1.1rem;
 }
 
-/* Estilos do formulário */
+/* Formulário */
 .form-merito {
-    background: white;
+    background: var(--bg-light);
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     margin-bottom: 30px;
 }
 
 .form-merito h2 {
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 25px;
     font-size: 1.8rem;
     font-weight: 600;
@@ -85,15 +93,16 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 5px;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
-    background-color: white;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
 }
 
 .form-group textarea {
@@ -116,35 +125,35 @@ body {
 
 .btn-primario {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--bg-dark);
     width: 100%;
 }
 
 .btn-primario:hover {
-    background-color: #0056b3;
+    background-color: #e0a800;
     transform: translateY(-1px);
 }
 
 .btn-perigo {
-    background-color: var(--warning-color);
-    color: #333;
+    background-color: var(--danger-color);
+    color: var(--text-color);
 }
 
 .btn-perigo:hover {
-    background-color: #e0a800;
+    background-color: #bd2130;
 }
 
 /* Tabela */
 .tabela-merito {
-    background: white;
+    background: var(--bg-light);
     border-radius: 10px;
     padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     margin-bottom: 30px;
 }
 
 .tabela-merito h2 {
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 25px;
     font-size: 1.8rem;
     font-weight: 600;
@@ -153,17 +162,20 @@ body {
 /* DataTables customização */
 .dataTables_wrapper {
     margin-top: 20px;
+    color: var(--text-color);
 }
 
 table.dataTable {
     border-collapse: collapse;
     width: 100%;
     margin-bottom: 20px;
+    background-color: var(--bg-light);
+    color: var(--text-color);
 }
 
 table.dataTable thead th {
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--bg-darker);
+    color: var(--primary-color);
     font-weight: 600;
     padding: 15px;
     border-bottom: 2px solid var(--border-color);
@@ -172,11 +184,11 @@ table.dataTable thead th {
 table.dataTable tbody td {
     padding: 12px 15px;
     border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
+    background-color: var(--bg-light);
 }
 
 table.dataTable tbody tr:hover {
-    background-color: rgba(0, 119, 204, 0.05);
+    background-color: var(--bg-darker);
 }
 
 /* Status styles */
@@ -229,8 +241,47 @@ table.dataTable tbody tr:hover {
     background-color: #c82333;
 }
 
-/* DataTables responsivo */
+/* DataTables customização adicional */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+    color: var(--text-color) !important;
+    margin-bottom: 15px;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background: var(--bg-light) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 0 3px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--primary-color) !important;
+    color: var(--bg-dark) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Responsividade */
 @media screen and (max-width: 768px) {
+    .sistema-merito {
+        padding: 60px 0 30px;
+    }
+
     .container-merito {
         padding: 10px;
     }
@@ -256,31 +307,27 @@ table.dataTable tbody tr:hover {
     }
 }
 
-/* Customização do DataTables */
-.dataTables_wrapper .dataTables_length select,
-.dataTables_wrapper .dataTables_filter input {
-    padding: 6px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin: 0 5px;
+/* Placeholder customizado */
+::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 6px 12px;
-    margin: 0 3px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: white;
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: var(--primary-color);
-    color: white !important;
-    border-color: var(--primary-color);
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: var(--primary-color);
-    color: white !important;
-    border-color: var(--primary-color);
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 } 

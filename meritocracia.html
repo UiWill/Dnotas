@@ -282,6 +282,28 @@
             color: #fff !important; /* Force white color for titles */
             margin-bottom: 20px; /* Add some space below titles */
         }
+
+        /* Ajuste para o header fixo */
+        .header {
+            background-color: var(--bg-darker);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 10px 0;
+        }
+
+        /* Ajuste para o conteúdo principal */
+        .main-content {
+            padding-top: 60px; /* Altura do header */
+        }
+
+        /* Ajuste para o logo */
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
     </style>
 </head>
 
@@ -302,112 +324,96 @@
 
         <!--Header-->
         <header class="header">
-            <div class="logo">
-                <img src="assets/img/SUA-LOGO-AQUI.png" alt="">
-            </div>
-            <div class="menu">
-                <label class="hamburger">
-                    <input type="checkbox" id="menuToggle">
-                    <svg viewBox="0 0 32 32">
-                        <path class="line line-top-bottom"
-                            d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22">
-                        </path>
-                        <path class="line" d="M7 16 27 16"></path>
-                    </svg>
-                </label>
-            </div>
-            <div class="menu-aberto">
-                <nav class="nav-menu">
-                    <a href="index.html#inicio">INÍCIO</a>
-                    <a href="index.html#sobre">SOBRE</a>
-                    <a href="index.html#servicos">SERVIÇOS</a>
-                    <a href="index.html#planos">PLANOS</a>
-                    <a href="index.html#contato">CONTATO</a>
-                    <a href="meritocracia.html">MERITOCRACIA</a>
-                </nav>
+            <div class="container-merito">
+                <div class="logo">
+                    <img src="assets/img/SUA-LOGO-AQUI.png" alt="Logo">
+                </div>
             </div>
         </header>
         <!--Fim Header-->
 
-        <!--Sistema de Meritocracia-->
-        <section id="merito" class="sistema-merito">
-            <div class="container-merito" data-aos="fade-up" data-aos-duration="1000">
-                <div class="headline-merito">
-                    <h1>Sistema de Meritocracia</h1>
-                    <p>Reconheça o bom trabalho e as contribuições dos colaboradores de forma transparente</p>
-                </div>
-                
-                <!-- Botão para Limpar Pontuações -->
-                <div style="text-align: right; margin-bottom: 20px;">
-                    <button id="btnLimparTudo" class="btn-merito btn-perigo">
-                        <i class="bi bi-trash"></i> Limpar Pontuações (Reset Mensal)
-                    </button>
-                </div>
-
-                <!-- Formulário para adicionar contribuição -->
-                <div class="form-merito" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                    <h2>Registrar Contribuição</h2>
-                    <form id="formContribuicao">
-                        <div class="form-group">
-                            <label for="nome">Nomee:</label>
-                            <input type="text" id="nome" name="nome" required placeholder="Digite o nome do colaborador">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="descricao">Descrição da Contribuição:</label>
-                            <textarea id="descricao" name="descricao" required placeholder="Descreva a contribuição em detalhes..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="data">Data:</label>
-                            <input type="date" id="data" name="data" required>
-                        </div>
-
-                        <button type="submit" class="btn-merito btn-primario">
-                            <i class="bi bi-plus-circle"></i> Registrar Contribuição
+        <!--Conteúdo Principal-->
+        <main class="main-content">
+            <!--Sistema de Meritocracia-->
+            <section id="merito" class="sistema-merito">
+                <div class="container-merito" data-aos="fade-up" data-aos-duration="1000">
+                    <div class="headline-merito">
+                        <h1>Sistema de Meritocracia</h1>
+                        <p>Reconheça o bom trabalho e as contribuições dos colaboradores de forma transparente</p>
+                    </div>
+                    
+                    <!-- Botão para Limpar Pontuações -->
+                    <div style="text-align: right; margin-bottom: 20px;">
+                        <button id="btnLimparTudo" class="btn-merito btn-perigo">
+                            <i class="bi bi-trash"></i> Limpar Pontuações (Reset Mensal)
                         </button>
-                    </form>
+                    </div>
+
+                    <!-- Formulário para adicionar contribuição -->
+                    <div class="form-merito" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
+                        <h2>Registrar Contribuição</h2>
+                        <form id="formContribuicao">
+                            <div class="form-group">
+                                <label for="nome">Nome:</label>
+                                <input type="text" id="nome" name="nome" required placeholder="Digite o nome do colaborador">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="descricao">Descrição da Contribuição:</label>
+                                <textarea id="descricao" name="descricao" required placeholder="Descreva a contribuição em detalhes..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="data">Data:</label>
+                                <input type="date" id="data" name="data" required>
+                            </div>
+
+                            <button type="submit" class="btn-merito btn-primario">
+                                <i class="bi bi-plus-circle"></i> Registrar Contribuição
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Tabela de contribuições -->
+                    <div class="tabela-merito" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
+                        <h2>Contribuições Registradas</h2>
+                        <table id="tabelaContribuicoes" class="display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Tabela de ranking de pontos -->
+                    <div class="tabela-merito" data-aos="fade-up" data-aos-delay="600" data-aos-duration="1000">
+                        <h2>Ranking de Pontos</h2>
+                        <table id="tabelaRanking" class="display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Posição</th>
+                                    <th>Colaborador</th>
+                                    <th>Total de Pontos</th>
+                                    <th>Contribuições</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                
-                <!-- Tabela de contribuições -->
-                <div class="tabela-merito" data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
-                    <h2>Contribuições Registradas</h2>
-                    <table id="tabelaContribuicoes" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Nome</th>
-                                <th>Descrição</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Dados serão carregados via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Tabela de ranking de pontos -->
-                <div class="tabela-merito" data-aos="fade-up" data-aos-delay="600" data-aos-duration="1000">
-                    <h2>Ranking de Pontos</h2>
-                    <table id="tabelaRanking" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Posição</th>
-                                <th>Colaborador</th>
-                                <th>Total de Pontos</th>
-                                <th>Contribuições</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Dados serão carregados via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-        <!--Fim Sistema de Meritocracia-->
+            </section>
+            <!--Fim Sistema de Meritocracia-->
+        </main>
 
         <!--Footer-->
         <footer class="footer" id="footer">
