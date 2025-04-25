@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="icon" type="image/x-icon" href="assets/img/favicon-rmdev.ico">
-    <title>Sistema de Meritocracia - Dnotas</title>
+    <title>Sistema de Meritocracia</title>
 
     <!--CSS-->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/responsividade.css">
+    <link rel="stylesheet" href="meritocracia.css">
     
     <!--Bootstrap Icons-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
@@ -22,6 +23,10 @@
     <!-- DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
         .sistema-merito {
             padding: 50px 0;
@@ -337,26 +342,26 @@
                     <button id="btnLimparTudo" class="btn-merito btn-perigo">Limpar Pontuações (Reset Mensal)</button>
                 </div>
 
-                <!-- Formulário para adicionar pontos -->
+                <!-- Formulário para adicionar contribuição -->
                 <div class="form-merito" data-aos="fade-up" data-aos-delay="200" data-aos-duration="1000">
-                    <h2>Registrar  Contribuição</h2>
-                    <form id="formMerito">
-                        <select id="colaborador" required>
-                            <option value="" disabled selected>Selecione o colaborador</option>
-                            <!-- Opções serão carregadas via JavaScript -->
-                        </select>
-                        
-                        <select id="tipoContribuicao" required>
-                            <option value="" disabled selected>Tipo de contribuição</option>
-                            <option value="Excelente em Serviços">Excelente em Serviços</option>
-                            <option value="Ajuda Externa">Ajuda Externa a outros colaboradores</option>
-                        </select>
-                        
-                        <textarea id="descricaoContribuicao" placeholder="Descreva a contribuição em detalhes..." required></textarea>
-                        
-                        <div class="botoes-form">
-                            <button type="submit" class="btn-merito btn-primario">Registrar Contribuição</button>
+                    <h2>Registrar Contribuição</h2>
+                    <form id="formContribuicao">
+                        <div class="form-group">
+                            <label for="nome">Nome:</label>
+                            <input type="text" id="nome" name="nome" required>
                         </div>
+
+                        <div class="form-group">
+                            <label for="descricao">Descrição da Contribuição:</label>
+                            <textarea id="descricao" name="descricao" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="data">Data:</label>
+                            <input type="date" id="data" name="data" required>
+                        </div>
+
+                        <button type="submit" class="btn-merito btn-primario">Registrar Contribuição</button>
                     </form>
                 </div>
                 
@@ -367,11 +372,9 @@
                         <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Colaborador</th>
-                                <th>Tipo</th>
+                                <th>Nome</th>
                                 <th>Descrição</th>
                                 <th>Status</th>
-                                <th>Pontos</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -447,140 +450,7 @@
         AOS.init();
     </script>
 
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBCqXwINIW2lePnSSo_2o11Uf3KyUWrF1A",
-            authDomain: "merito-b807d.firebaseapp.com",
-            projectId: "merito-b807d",
-            storageBucket: "merito-b807d.firebasestorage.app",
-            messagingSenderId: "247842978800",
-            appId: "1:247842978800:web:f86df2b65e70e973fdbb35",
-            measurementId: "G-1Z8TYCKDS8",
-            databaseURL: "https://merito-b807d-default-rtdb.firebaseio.com"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const database = getDatabase(app);
-
-        // Tornando o database disponível globalmente
-        window.database = database;
-        window.databaseRef = ref;
-        window.databaseSet = set;
-        window.databaseGet = get;
-        window.databaseOnValue = onValue;
-
-        // Funções globais do Firebase
-        window.observarPontos = function(callback) {
-            const pontosRef = ref(database, 'pontos');
-            onValue(pontosRef, (snapshot) => {
-                callback(snapshot.val() || {});
-            });
-        };
-
-        window.adicionarPontos = async function(usuario, pontos) {
-            const pontosRef = ref(database, 'pontos/' + usuario);
-            const snapshot = await get(pontosRef);
-            const pontosAtuais = snapshot.val() || 0;
-            await set(pontosRef, pontosAtuais + pontos);
-        };
-
-        window.resetarPontos = async function() {
-            const pontosRef = ref(database, 'pontos');
-            await set(pontosRef, {});
-        };
-
-        // Configurar listener global para contribuições
-        const contribuicoesRef = ref(database, 'contribuicoes');
-        onValue(contribuicoesRef, (snapshot) => {
-            const dados = snapshot.val() || {};
-            if (window.atualizarTabelaContribuicoes) {
-                window.atualizarTabelaContribuicoes(Object.values(dados));
-            }
-        });
-
-        // Função para validar contribuição
-        window.validarContribuicao = async function(id) {
-            const senha = prompt("Digite a senha de administrador (2020):", "");
-            
-            if (!senha) {
-                alert('Operação cancelada.');
-                return;
-            }
-
-            if (senha !== "2020") {
-                alert('Senha incorreta! A senha é: 2020');
-                return;
-            }
-
-            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
-            const snapshot = await get(contribuicaoRef);
-            
-            if (snapshot.exists()) {
-                const contribuicao = snapshot.val();
-                contribuicao.status = 'Validado';
-                contribuicao.pontos = 1;
-                await set(contribuicaoRef, contribuicao);
-                
-                // Atualiza os pontos do colaborador
-                const pontosRef = ref(database, 'pontos/' + contribuicao.colaborador);
-                const pontosSnapshot = await get(pontosRef);
-                const pontosAtuais = pontosSnapshot.val() || 0;
-                await set(pontosRef, pontosAtuais + 1);
-                
-                alert('Contribuição validada com sucesso!');
-            }
-        };
-
-        // Função para rejeitar contribuição
-        window.rejeitarContribuicao = async function(id) {
-            const senha = prompt("Digite a senha de administrador (2020):", "");
-            
-            if (!senha) {
-                alert('Operação cancelada.');
-                return;
-            }
-
-            if (senha !== "2020") {
-                alert('Senha incorreta! A senha é: 2020');
-                return;
-            }
-
-            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
-            const snapshot = await get(contribuicaoRef);
-            
-            if (snapshot.exists()) {
-                const contribuicao = snapshot.val();
-                contribuicao.status = 'Rejeitado';
-                contribuicao.pontos = 0;
-                await set(contribuicaoRef, contribuicao);
-                alert('Contribuição rejeitada!');
-            }
-        };
-
-        // Função para excluir contribuição
-        window.excluirContribuicao = async function(id) {
-            if (!confirm('Tem certeza que deseja excluir esta contribuição?')) {
-                return;
-            }
-
-            const contribuicaoRef = ref(database, 'contribuicoes/' + id);
-            await set(contribuicaoRef, null);
-            alert('Contribuição excluída com sucesso!');
-        };
-    </script>
-
-    <!--JavaScript-->
-    <script src="assets/js/header.js"></script>
-    <script src="assets/js/menu.js"></script>
+    <!-- JavaScript principal -->
     <script src="assets/js/meritocracia.js"></script>
     
 </body>

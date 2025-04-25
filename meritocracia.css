@@ -1,0 +1,187 @@
+/* Estilos gerais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Estilos do formulário */
+form {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-weight: 600;
+    color: #555;
+}
+
+input, textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Estilos da tabela */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Estilos dos botões de ação */
+.btn-aprovar, .btn-rejeitar, .btn-excluir {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-right: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn-aprovar {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-aprovar:hover {
+    background-color: #218838;
+}
+
+.btn-rejeitar {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-rejeitar:hover {
+    background-color: #c82333;
+}
+
+.btn-excluir {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-excluir:hover {
+    background-color: #5a6268;
+}
+
+/* Status styles */
+td:nth-child(4) {
+    text-transform: capitalize;
+}
+
+td:nth-child(4):not(:empty) {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+td:nth-child(4)[data-status="pendente"] {
+    color: #856404;
+    background-color: #fff3cd;
+}
+
+td:nth-child(4)[data-status="aprovada"] {
+    color: #155724;
+    background-color: #d4edda;
+}
+
+td:nth-child(4)[data-status="rejeitada"] {
+    color: #721c24;
+    background-color: #f8d7da;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    form {
+        padding: 0 10px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .btn-aprovar, .btn-rejeitar, .btn-excluir {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+} 

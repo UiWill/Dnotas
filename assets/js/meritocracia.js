@@ -11,6 +11,32 @@ const colaboradores = [
     { id: 9, nome: "Fabricio" }
 ];
 
+// Configuração do Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDPbFGQy9Tl_9GxQXKrwgNXpHHVkpvDPxE",
+    authDomain: "dnotas-site.firebaseapp.com",
+    projectId: "dnotas-site",
+    storageBucket: "dnotas-site.appspot.com",
+    messagingSenderId: "1093565472044",
+    appId: "1:1093565472044:web:c7c7f7c0f0d5d5d5d5d5d5",
+    databaseURL: "https://dnotas-site-default-rtdb.firebaseio.com"
+};
+
+// Inicializa o Firebase
+let database;
+try {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    console.log('Firebase inicializado com sucesso!');
+} catch (error) {
+    console.error('Erro ao inicializar Firebase:', error);
+    alert('Erro ao conectar ao banco de dados. Por favor, recarregue a página.');
+}
+
+// Referências do banco de dados
+const contribuicoesRef = database.ref('contribuicoes');
+const pontosRef = database.ref('pontos');
+
 // Inicialização das tabelas e contribuições no localStorage
 let contribuicoes = [];
 let tabelaContribuicoes;
@@ -29,47 +55,43 @@ function salvarDadosLocais() {
     localStorage.setItem('contribuicoes', JSON.stringify(contribuicoes));
 }
 
-// Registra uma nova contribuição
-async function handleSubmit(e) {
-    e.preventDefault(); // Impede o recarregamento da página
-    
-    const colaboradorId = parseInt(document.getElementById('colaborador').value);
-    const tipoContribuicao = document.getElementById('tipoContribuicao').value;
-    const descricaoContribuicao = document.getElementById('descricaoContribuicao').value;
-    
-    // Valida os campos
-    if (!colaboradorId || !tipoContribuicao || !descricaoContribuicao) {
+// Função para formatar data
+function formatarData(data) {
+    return new Date(data).toLocaleDateString('pt-BR');
+}
+
+// Função para gerar ID único
+function gerarId() {
+    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+}
+
+// Função para lidar com o envio do formulário
+async function handleSubmit(event) {
+    event.preventDefault();
+
+    const nome = document.getElementById('nome').value;
+    const descricao = document.getElementById('descricao').value;
+    const data = document.getElementById('data').value;
+
+    if (!nome || !descricao || !data) {
         alert('Por favor, preencha todos os campos!');
         return;
     }
-    
-    // Obtém o nome do colaborador
-    const colaborador = colaboradores.find(c => c.id === colaboradorId);
-    if (!colaborador) {
-        alert('Colaborador não encontrado!');
-        return;
-    }
-    
+
     try {
-        // Cria o objeto de contribuição
         const novaContribuicao = {
-            id: Date.now(),
-            data: new Date().toLocaleDateString('pt-BR'),
-            colaboradorId: colaboradorId,
-            colaborador: colaborador.nome,
-            tipo: tipoContribuicao,
-            descricao: descricaoContribuicao,
+            id: gerarId(),
+            nome: nome,
+            descricao: descricao,
+            data: data,
             status: 'Pendente',
-            pontos: 0
+            pontos: 0,
+            timestamp: Date.now()
         };
+
+        await contribuicoesRef.child(novaContribuicao.id).set(novaContribuicao);
         
-        // Salva no Firebase
-        const contribuicaoRef = window.databaseRef(window.database, 'contribuicoes/' + novaContribuicao.id);
-        await window.databaseSet(contribuicaoRef, novaContribuicao);
-        
-        // Limpa o formulário
-        document.getElementById('formMerito').reset();
-        
+        document.getElementById('formContribuicao').reset();
         alert('Contribuição registrada com sucesso!');
     } catch (error) {
         console.error('Erro ao registrar contribuição:', error);
@@ -77,99 +99,166 @@ async function handleSubmit(e) {
     }
 }
 
-// Inicializa o formulário com os colaboradores
-function inicializarFormulario() {
-    const selectColaborador = document.getElementById('colaborador');
-    if (!selectColaborador) return;
+// Função para validar contribuição
+async function validarContribuicao(id) {
+    const senha = prompt('Digite a senha de administrador (2020):');
+    if (!senha) return;
     
-    // Limpa opções existentes
-    selectColaborador.innerHTML = '<option value="" disabled selected>Selecione o colaborador</option>';
-    
-    // Adiciona os colaboradores à lista
-    colaboradores.forEach(colaborador => {
-        const option = document.createElement('option');
-        option.value = colaborador.id;
-        option.textContent = colaborador.nome;
-        selectColaborador.appendChild(option);
-    });
-    
-    // Configura o evento de submit do formulário
-    const form = document.getElementById('formMerito');
-    if (form) {
-        form.removeEventListener('submit', handleSubmit); // Remove listener anterior se existir
-        form.addEventListener('submit', handleSubmit);
+    if (senha !== '2020') {
+        alert('Senha incorreta!');
+        return;
+    }
+
+    try {
+        const snapshot = await contribuicoesRef.child(id).once('value');
+        if (snapshot.exists()) {
+            const contribuicao = snapshot.val();
+            
+            // Atualiza o status e pontos da contribuição
+            await contribuicoesRef.child(id).update({
+                status: 'Validado',
+                pontos: 1
+            });
+
+            // Atualiza os pontos do usuário
+            const pontosSnapshot = await pontosRef.child(contribuicao.nome).once('value');
+            const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
+            await pontosRef.child(contribuicao.nome).set(pontosAtuais + 1);
+
+            alert('Contribuição validada com sucesso!');
+        }
+    } catch (error) {
+        console.error('Erro ao validar contribuição:', error);
+        alert('Erro ao validar contribuição. Tente novamente.');
     }
 }
 
-// Inicializa as tabelas DataTables
-function inicializarTabelas() {
+// Função para rejeitar contribuição
+async function rejeitarContribuicao(id) {
+    const senha = prompt('Digite a senha de administrador (2020):');
+    if (!senha) return;
+    
+    if (senha !== '2020') {
+        alert('Senha incorreta!');
+        return;
+    }
+
+    try {
+        await contribuicoesRef.child(id).update({
+            status: 'Rejeitado',
+            pontos: 0
+        });
+        alert('Contribuição rejeitada com sucesso!');
+    } catch (error) {
+        console.error('Erro ao rejeitar contribuição:', error);
+        alert('Erro ao rejeitar contribuição. Tente novamente.');
+    }
+}
+
+// Função para excluir contribuição
+async function excluirContribuicao(id) {
+    if (!confirm('Tem certeza que deseja excluir esta contribuição?')) {
+        return;
+    }
+
+    const senha = prompt('Digite a senha de administrador (2020):');
+    if (!senha) return;
+    
+    if (senha !== '2020') {
+        alert('Senha incorreta!');
+        return;
+    }
+
+    try {
+        await contribuicoesRef.child(id).remove();
+        alert('Contribuição excluída com sucesso!');
+    } catch (error) {
+        console.error('Erro ao excluir contribuição:', error);
+        alert('Erro ao excluir contribuição. Tente novamente.');
+    }
+}
+
+// Função para limpar todas as pontuações
+async function limparPontuacoes() {
+    if (!confirm('ATENÇÃO! Tem certeza que deseja limpar TODAS as contribuições e pontuações?')) {
+        return;
+    }
+
+    const senha = prompt('Digite a senha de administrador (2020):');
+    if (!senha) return;
+    
+    if (senha !== '2020') {
+        alert('Senha incorreta!');
+        return;
+    }
+
+    try {
+        await contribuicoesRef.remove();
+        await pontosRef.remove();
+        alert('Todas as contribuições e pontuações foram limpas!');
+    } catch (error) {
+        console.error('Erro ao limpar pontuações:', error);
+        alert('Erro ao limpar pontuações. Tente novamente.');
+    }
+}
+
+// Inicialização das tabelas DataTables
+document.addEventListener('DOMContentLoaded', function() {
     // Tabela de contribuições
-    window.tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
-        responsive: true,
+    const tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
         },
+        order: [[0, 'desc']], // Ordena por data decrescente
         columns: [
             { data: 'data' },
-            { data: 'colaborador' },
-            { data: 'tipo' },
+            { data: 'nome' },
             { data: 'descricao' },
             { 
                 data: 'status',
                 render: function(data) {
-                    let classeCor = '';
-                    if (data === 'Pendente') classeCor = 'status-pendente';
-                    else if (data === 'Validado') classeCor = 'status-validado';
-                    else if (data === 'Rejeitado') classeCor = 'status-rejeitado';
-                    return `<span class="${classeCor}">${data}</span>`;
+                    const classes = {
+                        'Pendente': 'status-pendente',
+                        'Validado': 'status-validado',
+                        'Rejeitado': 'status-rejeitado'
+                    };
+                    return `<span class="${classes[data]}">${data}</span>`;
                 }
             },
-            { data: 'pontos' },
             {
                 data: null,
                 render: function(data) {
                     let html = '<div class="acao-botoes">';
                     if (data.status === 'Pendente') {
-                        html += `<button onclick="validarContribuicao(${data.id})" class="btn-acao btn-validar">Validar</button>`;
-                        html += `<button onclick="rejeitarContribuicao(${data.id})" class="btn-acao">Rejeitar</button>`;
+                        html += `<button onclick="validarContribuicao('${data.id}')" class="btn-acao btn-validar">Validar</button>`;
+                        html += `<button onclick="rejeitarContribuicao('${data.id}')" class="btn-acao">Rejeitar</button>`;
                     }
-                    html += `<button onclick="excluirContribuicao(${data.id})" class="btn-acao btn-excluir">Excluir</button>`;
+                    html += `<button onclick="excluirContribuicao('${data.id}')" class="btn-acao btn-excluir">Excluir</button>`;
                     html += '</div>';
                     return html;
                 }
             }
         ]
     });
-}
 
-// Atualiza a tabela de contribuições quando houver mudanças
-window.atualizarTabelaContribuicoes = function(contribuicoes) {
-    if (window.tabelaContribuicoes) {
-        window.tabelaContribuicoes.clear();
-        if (contribuicoes && contribuicoes.length > 0) {
-            window.tabelaContribuicoes.rows.add(contribuicoes);
-        }
-        window.tabelaContribuicoes.draw();
-    }
-};
+    // Atualiza a tabela quando houver mudanças no Firebase
+    contribuicoesRef.on('value', (snapshot) => {
+        const contribuicoes = [];
+        snapshot.forEach((childSnapshot) => {
+            contribuicoes.push(childSnapshot.val());
+        });
+        
+        tabelaContribuicoes.clear();
+        tabelaContribuicoes.rows.add(contribuicoes);
+        tabelaContribuicoes.draw();
+    });
 
-// Inicializa o sistema quando o documento estiver pronto
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarFormulario();
-    inicializarTabelas();
-    
-    // Adiciona listener para o botão Limpar Tudo
-    const btnLimpar = document.getElementById('btnLimparTudo');
-    if (btnLimpar) {
-        btnLimpar.addEventListener('click', limparPontuacoes);
-    }
+    // Configura o formulário
+    document.getElementById('formContribuicao').addEventListener('submit', handleSubmit);
+
+    // Configura o botão de limpar pontuações
+    document.getElementById('btnLimparTudo').addEventListener('click', limparPontuacoes);
 });
-
-// Função para verificar a senha de administrador
-async function verificarSenhaAdmin(senha) {
-    // Senha fixa "2020"
-    return senha === "2020";
-}
 
 // Função para atualizar a interface com os dados do Firebase
 function atualizarInterface(dados) {
@@ -190,116 +279,6 @@ function atualizarInterface(dados) {
         const ranking = criarRanking(dados.pontos);
         tabelaRanking.rows.add(ranking).draw();
     }
-}
-
-// Valida uma contribuição
-async function validarContribuicao(id) {
-    const senha = prompt("Digite a senha de administrador (2020):", "");
-    
-    if (!senha) {
-        alert('Operação cancelada.');
-        return;
-    }
-
-    const senhaValida = await verificarSenhaAdmin(senha);
-    
-    if (!senhaValida) {
-        alert('Senha incorreta! A senha é: 2020');
-        return;
-    }
-
-    // Atualiza no Firebase
-    const contribuicaoRef = ref(database, 'contribuicoes/' + id);
-    const snapshot = await get(contribuicaoRef);
-    
-    if (snapshot.exists()) {
-        const contribuicao = snapshot.val();
-        contribuicao.status = 'Validado';
-        contribuicao.pontos = 1;
-        
-        // Atualiza a contribuição
-        await set(contribuicaoRef, contribuicao);
-        
-        // Atualiza os pontos do colaborador
-        const pontosRef = ref(database, 'pontos/' + contribuicao.colaborador);
-        const pontosSnapshot = await get(pontosRef);
-        const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
-        await set(pontosRef, pontosAtuais + 1);
-        
-        alert('Contribuição validada com sucesso!');
-    }
-}
-
-// Rejeita uma contribuição
-async function rejeitarContribuicao(id) {
-    const senha = prompt("Digite a senha de administrador (2020):", "");
-    
-    if (!senha) {
-        alert('Operação cancelada.');
-        return;
-    }
-
-    const senhaValida = await verificarSenhaAdmin(senha);
-    
-    if (!senhaValida) {
-        alert('Senha incorreta! A senha é: 2020');
-        return;
-    }
-
-    // Atualiza no Firebase
-    const contribuicaoRef = ref(database, 'contribuicoes/' + id);
-    const snapshot = await get(contribuicaoRef);
-    
-    if (snapshot.exists()) {
-        const contribuicao = snapshot.val();
-        contribuicao.status = 'Rejeitado';
-        contribuicao.pontos = 0;
-        await set(contribuicaoRef, contribuicao);
-        alert('Contribuição rejeitada!');
-    }
-}
-
-// Exclui uma contribuição
-function excluirContribuicao(id) {
-    if (confirm('Tem certeza que deseja excluir esta contribuição? Esta ação não pode ser desfeita.')) {
-        const index = contribuicoes.findIndex(c => c.id === id);
-        
-        if (index !== -1) {
-            contribuicoes.splice(index, 1); // Remove a contribuição do array
-            salvarDadosLocais();
-            atualizarTabelas();
-            alert('Contribuição excluída com sucesso!');
-        } else {
-            alert('Erro ao encontrar a contribuição para excluir.');
-        }
-    }
-}
-
-// Limpa todas as contribuições (Reset Mensal)
-async function limparPontuacoes() {
-    if (!confirm('ATENÇÃO! Tem certeza que deseja limpar TODAS as contribuições e pontuações?')) {
-        return;
-    }
-
-    const senha = prompt("Digite a senha de administrador (2020):", "");
-    
-    if (!senha) {
-        alert('Operação cancelada.');
-        return;
-    }
-
-    const senhaValida = await verificarSenhaAdmin(senha);
-    
-    if (!senhaValida) {
-        alert('Senha incorreta! A senha é: 2020');
-        return;
-    }
-
-    // Limpa os dados no Firebase
-    await set(ref(database, 'contribuicoes'), null);
-    await set(ref(database, 'pontos'), null);
-    
-    alert('Todas as contribuições e pontuações foram limpas!');
 }
 
 // Função para atualizar a tabela de pontos
