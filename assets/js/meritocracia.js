@@ -126,7 +126,6 @@ function inicializarTabelas() {
             paginate: {
                 first:      "Primeiro",
                 last:       "Último",
-                next:       "",
                 previous:   "Anterior"
             },
             zeroRecords: "Nenhum registro encontrado",
