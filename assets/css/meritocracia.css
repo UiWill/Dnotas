@@ -1,0 +1,306 @@
+/* Estilos específicos para a página de meritocracia */
+.sistema-merito {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.container-merito {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.headline-merito {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.headline-merito h1 {
+    font-family: var(--font-grande);
+    font-size: 3.5rem;
+    color: var(--color-white);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.headline-merito p {
+    font-family: var(--font-pequena);
+    color: var(--color-gray2);
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.actions-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.form-merito,
+.tabela-merito {
+    background-color: var(--color-gray1);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-header,
+.table-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.form-header i,
+.table-header i {
+    font-size: 2rem;
+    color: var(--color-destaque1);
+}
+
+.form-header h2,
+.table-header h2 {
+    font-family: var(--font-grande);
+    color: var(--color-white);
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-white);
+    font-family: var(--font-pequena);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--color-destaque1);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--color-black);
+    border: 1px solid var(--color-gray2);
+    border-radius: 8px;
+    color: var(--color-white);
+    font-family: var(--font-pequena);
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-destaque1);
+    box-shadow: 0 0 0 2px rgba(128, 161, 233, 0.2);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.btn-merito {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-pequena);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-merito i {
+    font-size: 1.2rem;
+}
+
+.btn-primario {
+    background-color: var(--color-destaque1);
+    color: var(--color-white);
+}
+
+.btn-primario:hover {
+    background-color: #6b8ed6;
+    transform: translateY(-2px);
+}
+
+.btn-perigo {
+    background-color: var(--color-destaque2);
+    color: var(--color-white);
+}
+
+.btn-perigo:hover {
+    background-color: #5f7a5c;
+    transform: translateY(-2px);
+}
+
+/* DataTables customização */
+.dataTables_wrapper {
+    color: var(--color-white);
+    margin-top: 1rem;
+}
+
+table.dataTable {
+    width: 100% !important;
+    margin: 1rem 0 !important;
+    color: var(--color-white);
+    border-collapse: collapse;
+}
+
+table.dataTable thead th {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--color-white);
+    font-family: var(--font-pequena);
+    font-weight: 500;
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-destaque1);
+}
+
+table.dataTable thead th i {
+    color: var(--color-destaque1);
+    margin-right: 0.5rem;
+}
+
+table.dataTable tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: var(--font-pequena);
+}
+
+table.dataTable tbody tr {
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: 1px solid var(--color-gray2);
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin: 0 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 1rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 5px;
+    background-color: var(--color-gray1);
+    color: var(--color-white) !important;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: var(--color-destaque1) !important;
+    color: var(--color-white) !important;
+    border: none;
+}
+
+/* Status badges */
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.status i {
+    font-size: 1rem;
+}
+
+.status-pendente {
+    background-color: rgba(114, 142, 111, 0.2);
+    color: var(--color-destaque2);
+}
+
+.status-aprovado {
+    background-color: rgba(128, 161, 233, 0.2);
+    color: var(--color-destaque1);
+}
+
+.status-rejeitado {
+    background-color: rgba(156, 157, 157, 0.2);
+    color: var(--color-gray2);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container-merito {
+        padding: 0 1rem;
+    }
+
+    .headline-merito h1 {
+        font-size: 2.5rem;
+    }
+
+    .headline-merito p {
+        font-size: 1rem;
+    }
+
+    .form-merito,
+    .tabela-merito {
+        padding: 1.5rem;
+    }
+
+    .btn-merito {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .actions-container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .headline-merito h1 {
+        font-size: 2rem;
+    }
+
+    .form-header,
+    .table-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .form-header h2,
+    .table-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+} 
