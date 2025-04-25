@@ -19,13 +19,15 @@ const firebaseConfig = {
     storageBucket: "dnotas-site.appspot.com",
     messagingSenderId: "1093565472044",
     appId: "1:1093565472044:web:c7c7f7c0f0d5d5d5d5d5d5",
-    databaseURL: "https://dnotas-site-default-rtdb.firebaseio.com"
+    databaseURL: "https://merito-b807d-default-rtdb.firebaseio.com"
 };
 
 // Inicializa o Firebase
 let database;
 try {
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     database = firebase.database();
     console.log('Firebase inicializado com sucesso!');
 } catch (error) {
@@ -34,8 +36,8 @@ try {
 }
 
 // Referências do banco de dados
-const contribuicoesRef = database.ref('contribuicoes');
-const pontosRef = database.ref('pontos');
+const contribuicoesRef = database ? database.ref('contribuicoes') : null;
+const pontosRef = database ? database.ref('pontos') : null;
 
 // Inicialização das tabelas e contribuições no localStorage
 let contribuicoes = [];
@@ -70,10 +72,10 @@ async function handleSubmit(event) {
     event.preventDefault();
 
     const nome = document.getElementById('nome').value;
+    const pontuacao = document.getElementById('pontuacao').value;
     const descricao = document.getElementById('descricao').value;
-    const data = document.getElementById('data').value;
 
-    if (!nome || !descricao || !data) {
+    if (!nome || !pontuacao || !descricao) {
         alert('Por favor, preencha todos os campos!');
         return;
     }
@@ -82,14 +84,20 @@ async function handleSubmit(event) {
         const novaContribuicao = {
             id: gerarId(),
             nome: nome,
+            pontuacao: parseInt(pontuacao, 10),
             descricao: descricao,
-            data: data,
             status: 'Pendente',
-            pontos: 0,
             timestamp: Date.now()
         };
 
-        await contribuicoesRef.child(novaContribuicao.id).set(novaContribuicao);
+        // Verificar se temos acesso ao Firebase
+        if (contribuicoesRef) {
+            await contribuicoesRef.child(novaContribuicao.id).set(novaContribuicao);
+        } else {
+            // Fallback para armazenamento local se o Firebase falhar
+            contribuicoes.push(novaContribuicao);
+            salvarDadosLocais();
+        }
         
         document.getElementById('formContribuicao').reset();
         alert('Contribuição registrada com sucesso!');
@@ -110,20 +118,26 @@ async function validarContribuicao(id) {
     }
 
     try {
+        if (!contribuicoesRef) {
+            alert('Não foi possível conectar ao banco de dados.');
+            return;
+        }
+
         const snapshot = await contribuicoesRef.child(id).once('value');
         if (snapshot.exists()) {
             const contribuicao = snapshot.val();
             
             // Atualiza o status e pontos da contribuição
             await contribuicoesRef.child(id).update({
-                status: 'Validado',
-                pontos: 1
+                status: 'Validado'
             });
 
             // Atualiza os pontos do usuário
-            const pontosSnapshot = await pontosRef.child(contribuicao.nome).once('value');
-            const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
-            await pontosRef.child(contribuicao.nome).set(pontosAtuais + 1);
+            if (pontosRef) {
+                const pontosSnapshot = await pontosRef.child(contribuicao.nome).once('value');
+                const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
+                await pontosRef.child(contribuicao.nome).set(pontosAtuais + contribuicao.pontuacao);
+            }
 
             alert('Contribuição validada com sucesso!');
         }
@@ -144,9 +158,13 @@ async function rejeitarContribuicao(id) {
     }
 
     try {
+        if (!contribuicoesRef) {
+            alert('Não foi possível conectar ao banco de dados.');
+            return;
+        }
+
         await contribuicoesRef.child(id).update({
-            status: 'Rejeitado',
-            pontos: 0
+            status: 'Rejeitado'
         });
         alert('Contribuição rejeitada com sucesso!');
     } catch (error) {
@@ -170,6 +188,11 @@ async function excluirContribuicao(id) {
     }
 
     try {
+        if (!contribuicoesRef) {
+            alert('Não foi possível conectar ao banco de dados.');
+            return;
+        }
+
         await contribuicoesRef.child(id).remove();
         alert('Contribuição excluída com sucesso!');
     } catch (error) {
@@ -193,6 +216,11 @@ async function limparPontuacoes() {
     }
 
     try {
+        if (!contribuicoesRef || !pontosRef) {
+            alert('Não foi possível conectar ao banco de dados.');
+            return;
+        }
+
         await contribuicoesRef.remove();
         await pontosRef.remove();
         alert('Todas as contribuições e pontuações foram limpas!');
@@ -202,204 +230,170 @@ async function limparPontuacoes() {
     }
 }
 
+// Função para observar pontos (adicionada para corrigir o erro)
+function observarPontos() {
+    if (!pontosRef) {
+        console.error('Referência de pontos não disponível');
+        return;
+    }
+    
+    pontosRef.on('value', (snapshot) => {
+        const pontos = {};
+        snapshot.forEach((childSnapshot) => {
+            pontos[childSnapshot.key] = childSnapshot.val();
+        });
+        atualizarTabelaPontos(pontos);
+    });
+}
+
+// Adicionar ao escopo global
+window.observarPontos = observarPontos;
+
 // Inicialização das tabelas DataTables
 document.addEventListener('DOMContentLoaded', function() {
-    // Tabela de contribuições
-    const tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
-        },
-        order: [[0, 'desc']], // Ordena por data decrescente
-        columns: [
-            { data: 'data' },
-            { data: 'nome' },
-            { data: 'descricao' },
-            { 
-                data: 'status',
-                render: function(data) {
-                    const classes = {
-                        'Pendente': 'status-pendente',
-                        'Validado': 'status-validado',
-                        'Rejeitado': 'status-rejeitado'
-                    };
-                    return `<span class="${classes[data]}">${data}</span>`;
-                }
+    // Verifica se o elemento da tabela existe antes de inicializar
+    const tabelaContribuicoesElement = document.getElementById('tabelaContribuicoes');
+    if (tabelaContribuicoesElement) {
+        // Tabela de contribuições
+        tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
             },
-            {
-                data: null,
-                render: function(data) {
-                    let html = '<div class="acao-botoes">';
-                    if (data.status === 'Pendente') {
-                        html += `<button onclick="validarContribuicao('${data.id}')" class="btn-acao btn-validar">Validar</button>`;
-                        html += `<button onclick="rejeitarContribuicao('${data.id}')" class="btn-acao">Rejeitar</button>`;
+            order: [[0, 'desc']], // Ordena por data decrescente
+            columns: [
+                { data: 'nome' },
+                { data: 'pontuacao' },
+                { data: 'descricao' },
+                { 
+                    data: 'status',
+                    render: function(data) {
+                        const classes = {
+                            'Pendente': 'status-pendente',
+                            'Validado': 'status-aprovado',
+                            'Rejeitado': 'status-rejeitado'
+                        };
+                        return `<span class="status ${classes[data]}">${data}</span>`;
                     }
-                    html += `<button onclick="excluirContribuicao('${data.id}')" class="btn-acao btn-excluir">Excluir</button>`;
-                    html += '</div>';
-                    return html;
+                },
+                {
+                    data: null,
+                    render: function(data) {
+                        let html = '<div class="acao-botoes">';
+                        if (data.status === 'Pendente') {
+                            html += `<button onclick="validarContribuicao('${data.id}')" class="btn-merito btn-primario btn-sm">Validar</button>`;
+                            html += `<button onclick="rejeitarContribuicao('${data.id}')" class="btn-merito btn-perigo btn-sm">Rejeitar</button>`;
+                        }
+                        html += `<button onclick="excluirContribuicao('${data.id}')" class="btn-merito btn-perigo btn-sm">Excluir</button>`;
+                        html += '</div>';
+                        return html;
+                    }
                 }
+            ]
+        });
+    } else {
+        console.error('Elemento tabelaContribuicoes não encontrado no DOM');
+    }
+
+    // Inicializar tabela de ranking
+    const tabelaRankingElement = document.getElementById('tabelaRanking');
+    if (tabelaRankingElement) {
+        tabelaRanking = $('#tabelaRanking').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json'
+            },
+            order: [[2, 'desc']], // Ordena por total de pontos
+            columns: [
+                { data: 'posicao' },
+                { data: 'nome' },
+                { data: 'pontos' },
+                { data: 'contribuicoes' }
+            ]
+        });
+    } else {
+        console.error('Elemento tabelaRanking não encontrado no DOM');
+    }
+
+    // Atualiza as tabelas quando houver mudanças no Firebase
+    if (contribuicoesRef) {
+        contribuicoesRef.on('value', (snapshot) => {
+            const contribuicoes = [];
+            snapshot.forEach((childSnapshot) => {
+                contribuicoes.push(childSnapshot.val());
+            });
+            
+            // Limpar e recarregar a tabela
+            if (tabelaContribuicoes) {
+                tabelaContribuicoes.clear();
+                tabelaContribuicoes.rows.add(contribuicoes).draw();
             }
-        ]
-    });
-
-    // Atualiza a tabela quando houver mudanças no Firebase
-    contribuicoesRef.on('value', (snapshot) => {
-        const contribuicoes = [];
-        snapshot.forEach((childSnapshot) => {
-            contribuicoes.push(childSnapshot.val());
         });
-        
-        tabelaContribuicoes.clear();
-        tabelaContribuicoes.rows.add(contribuicoes);
-        tabelaContribuicoes.draw();
-    });
+    } else {
+        console.error('Referência contribuicoesRef não disponível');
+    }
 
-    // Configura o formulário
-    document.getElementById('formContribuicao').addEventListener('submit', handleSubmit);
+    // Iniciar observação de pontos
+    observarPontos();
 
-    // Configura o botão de limpar pontuações
-    document.getElementById('btnLimparTudo').addEventListener('click', limparPontuacoes);
+    // Botão para limpar todas as pontuações
+    const btnLimparTudo = document.getElementById('btnLimparTudo');
+    if (btnLimparTudo) {
+        btnLimparTudo.addEventListener('click', limparPontuacoes);
+    }
+
+    // Formulário de contribuição
+    const formContribuicao = document.getElementById('formContribuicao');
+    if (formContribuicao) {
+        formContribuicao.addEventListener('submit', handleSubmit);
+    } else {
+        console.error('Formulário de contribuição não encontrado');
+    }
 });
 
-// Função para atualizar a interface com os dados do Firebase
-function atualizarInterface(dados) {
-    if (!dados) return;
-    
-    // Limpa as tabelas
-    tabelaContribuicoes.clear();
-    tabelaRanking.clear();
-    
-    // Adiciona as contribuições à tabela
-    if (dados.contribuicoes) {
-        const contribuicoesArray = Object.values(dados.contribuicoes);
-        tabelaContribuicoes.rows.add(contribuicoesArray).draw();
-    }
-    
-    // Atualiza o ranking
-    if (dados.pontos) {
-        const ranking = criarRanking(dados.pontos);
-        tabelaRanking.rows.add(ranking).draw();
-    }
-}
-
-// Função para atualizar a tabela de pontos
 function atualizarTabelaPontos(pontos) {
-    const tabelaContainer = document.getElementById('tabela-pontos');
-    if (!tabelaContainer) return;
-
-    let html = `
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Usuário</th>
-                    <th>Pontos</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    for (const [usuario, pontosUsuario] of Object.entries(pontos)) {
-        html += `
-            <tr>
-                <td>${usuario}</td>
-                <td>${pontosUsuario}</td>
-                <td>
-                    <button onclick="adicionarPontosUsuario('${usuario}', 1)" class="btn btn-success btn-sm">+1</button>
-                    <button onclick="adicionarPontosUsuario('${usuario}', -1)" class="btn btn-danger btn-sm">-1</button>
-                </td>
-            </tr>
-        `;
+    if (!tabelaRanking) {
+        console.error('Tabela de ranking não inicializada');
+        return;
     }
-
-    html += `
-            </tbody>
-        </table>
-        <div class="mt-3">
-            <button onclick="adicionarNovoUsuario()" class="btn btn-primary">Adicionar Novo Usuário</button>
-            <button onclick="resetarTodosPontos()" class="btn btn-warning">Resetar Pontos</button>
-        </div>
-    `;
-
-    tabelaContainer.innerHTML = html;
-}
-
-// Função para adicionar pontos a um usuário
-function adicionarPontosUsuario(usuario, quantidade) {
-    window.adicionarPontos(usuario, quantidade);
-}
-
-// Função para adicionar novo usuário
-function adicionarNovoUsuario() {
-    const usuario = prompt("Digite o nome do novo usuário:");
-    if (usuario) {
-        window.adicionarPontos(usuario, 0);
-    }
-}
-
-// Função para resetar todos os pontos
-function resetarTodosPontos() {
-    if (confirm("Tem certeza que deseja resetar todos os pontos?")) {
-        window.resetarPontos();
-    }
-}
-
-// Inicializar observador de pontos
-document.addEventListener('DOMContentLoaded', () => {
-    window.observarPontos(atualizarTabelaPontos);
-});
-
-// Cria o ranking de pontos
-function criarRanking() {
-    const rankingData = [];
     
-    // Agrupa as contribuições por colaborador e calcula os pontos
-    const pontosAgrupados = {};
-    const contribAgrupadas = {};
+    // Converte o objeto de pontos em um array
+    const pontosArray = Object.entries(pontos).map(([nome, pontos]) => ({
+        nome,
+        pontos
+    }));
     
-    // Inicializa todos os colaboradores com zero
-    colaboradores.forEach(colaborador => {
-        pontosAgrupados[colaborador.id] = 0;
-        contribAgrupadas[colaborador.id] = 0;
-    });
+    // Ordena por pontos (decrescente)
+    pontosArray.sort((a, b) => b.pontos - a.pontos);
     
-    // Conta apenas contribuições validadas
-    contribuicoes.forEach(contribuicao => {
-        if (contribuicao.status === 'Validado') {
-            pontosAgrupados[contribuicao.colaboradorId] += contribuicao.pontos;
-            contribAgrupadas[contribuicao.colaboradorId] += 1;
-        }
-    });
+    // Adiciona posição e formata para a tabela
+    const dados = pontosArray.map((item, index) => ({
+        posicao: index + 1,
+        nome: item.nome,
+        pontos: item.pontos,
+        contribuicoes: 0 // Será calculado mais tarde
+    }));
     
-    // Cria o array de ranking
-    colaboradores.forEach((colaborador, index) => {
-        rankingData.push({
-            posicao: index + 1, // Será reordenado pelo DataTables
-            colaborador: colaborador.nome,
-            pontos: pontosAgrupados[colaborador.id],
-            contribuicoes: contribAgrupadas[colaborador.id]
+    // Contagem de contribuições
+    if (contribuicoesRef) {
+        contribuicoesRef.once('value', (snapshot) => {
+            const contribuicoes = [];
+            snapshot.forEach((childSnapshot) => {
+                contribuicoes.push(childSnapshot.val());
+            });
+            
+            // Conta contribuições por usuário
+            dados.forEach(item => {
+                item.contribuicoes = contribuicoes.filter(
+                    c => c.nome === item.nome && c.status === 'Validado'
+                ).length;
+            });
+            
+            // Atualiza a tabela
+            tabelaRanking.clear();
+            tabelaRanking.rows.add(dados).draw();
         });
-    });
-    
-    return rankingData;
-}
-
-// Atualiza as tabelas com os dados atuais
-function atualizarTabelas() {
-    // Limpa as tabelas
-    tabelaContribuicoes.clear();
-    tabelaRanking.clear();
-    
-    // Adiciona as contribuições à tabela
-    tabelaContribuicoes.rows.add(contribuicoes).draw();
-    
-    // Cria o ranking
-    const ranking = criarRanking();
-    
-    // Limpa e adiciona o ranking à tabela, recalculando a posição
-    tabelaRanking.clear();
-    ranking.sort((a, b) => b.pontos - a.pontos); // Garante a ordenação por pontos
-    ranking.forEach((item, index) => {
-        item.posicao = index + 1; // Atualiza a posição baseada na ordenação
-    });
-    tabelaRanking.rows.add(ranking).draw();
+    } else {
+        // Atualiza a tabela sem contar contribuições
+        tabelaRanking.clear();
+        tabelaRanking.rows.add(dados).draw();
+    }
 } 
