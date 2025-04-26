@@ -203,3 +203,426 @@
         margin-top: 0;
     }
 }
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+    /* Ajustes para o header */
+    .header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .logo img {
+        width: 120px;
+    }
+    
+    /* Menu de navegação mobile */
+    .nav-menu a {
+        font-size: 2.5rem;
+        gap: 3rem;
+    }
+    
+    .menu-aberto.active .nav-menu a {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Ajustes para a seção de início */
+    .container-inicio {
+        padding: 1rem;
+        margin-top: 60px;
+    }
+    
+    .conteudo-inicio {
+        width: 100%;
+    }
+    
+    .titulo-inicio h1 {
+        font-size: 2.2rem;
+    }
+    
+    .destaque-inicio {
+        font-size: 1.8rem;
+        line-height: 1.4;
+    }
+    
+    .paragrafo-inicio p {
+        font-size: 1.2rem;
+    }
+
+    /* Ajustes para seção de serviços */
+    .servicos-cards {
+        padding: 0 1rem;
+    }
+    
+    .card-servicos, 
+    .card-servicos-left {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-titulo h1 {
+        font-size: 1.3rem;
+    }
+    
+    .card-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .card-icon i {
+        font-size: 1.5rem;
+    }
+
+    /* Ajustes para a seção de planos */
+    .pricing-container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .pricing-box {
+        width: 90%;
+        margin: 0 auto 2rem;
+        padding: 1.5rem;
+    }
+    
+    .plan-name {
+        font-size: 1.6rem;
+    }
+    
+    .price {
+        font-size: 1.8rem;
+    }
+    
+    .features li {
+        font-size: 1rem;
+        padding: 0.5rem 0;
+    }
+    
+    /* Ajustes para seção FREE YOUR MIND */
+    .container-free-your-mind {
+        padding: 2rem 1rem;
+    }
+    
+    .line-container span {
+        font-size: 1.5rem;
+    }
+    
+    .line {
+        width: 60px;
+    }
+
+    /* Ajustes para botões fixos */
+    .fixed-button {
+        width: 45px;
+        height: 45px;
+        display: flex !important;
+        opacity: 1 !important;
+    }
+    
+    #backToTop {
+        bottom: 15px;
+        left: 15px;
+    }
+    
+    #whatsappButton {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    #whatsappButton i,
+    #backToTop i {
+        font-size: 20px;
+    }
+    
+    /* Ajustes para footer */
+    .footer {
+        padding: 2rem 1rem;
+    }
+    
+    .container-footer {
+        flex-wrap: wrap;
+    }
+    
+    .footer-column {
+        flex-basis: 45%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .credits-column {
+        flex-basis: 100%;
+        text-align: center;
+    }
+}
+
+/* Ajustes para dispositivos móveis muito pequenos */
+@media (max-width: 480px) {
+    /* Cabeçalho */
+    .header {
+        padding: 1rem 0.8rem;
+    }
+    
+    .logo img {
+        width: 100px;
+    }
+    
+    /* Seção inicial */
+    .titulo-inicio h1 {
+        font-size: 1.8rem;
+    }
+    
+    .destaque-inicio {
+        font-size: 1.6rem;
+        line-height: 1.3;
+    }
+    
+    .paragrafo-inicio p {
+        font-size: 1.1rem;
+    }
+    
+    /* Serviços */
+    .titulo-servicos h1 {
+        font-size: 3.5rem;
+    }
+    
+    .descricao-servicos {
+        font-size: 1.1rem;
+    }
+    
+    .card-servicos, 
+    .card-servicos-left {
+        padding: 1.2rem;
+    }
+    
+    .card-titulo h1 {
+        font-size: 1.1rem;
+    }
+    
+    /* Ajustes para a seção de planos */
+    .pricing-box {
+        width: 95%;
+        padding: 1.2rem;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .plan-name {
+        font-size: 1.4rem;
+    }
+    
+    .price {
+        font-size: 1.6rem;
+    }
+    
+    .features li {
+        font-size: 0.9rem;
+    }
+    
+    /* Botão de WhatsApp nos planos */
+    .btn-whatsapp {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 30px !important;
+    }
+
+    /* Menu navegação */
+    .nav-menu a {
+        font-size: 2rem;
+        gap: 2.5rem;
+    }
+    
+    /* Botões fixos */
+    .fixed-button {
+        width: 40px;
+        height: 40px;
+    }
+    
+    #backToTop {
+        bottom: 10px;
+        left: 10px;
+    }
+    
+    #whatsappButton {
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    #whatsappButton i,
+    #backToTop i {
+        font-size: 20px;
+    }
+
+    /* Footer */
+    .container-footer {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .footer-column {
+        width: 100%;
+    }
+
+    .social-column, 
+    .menu-column,
+    .logo-column {
+        align-items: center;
+        text-align: center;
+    }
+
+    .social-links {
+        align-items: center;
+    }
+
+    .social-links a {
+        justify-content: center;
+    }
+
+    .footer-nav {
+        align-items: center;
+    }
+
+    .credits-column {
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Ajustes de espaçamento e margens */
+    .conteudo-inicio {
+        padding: 2rem 0;
+    }
+    
+    .paragrafo-inicio {
+        margin-top: 1rem;
+    }
+    
+    /* Ajustes para botões e clicáveis */
+    .btn-whatsapp, 
+    .social-links a,
+    .footer-nav a {
+        padding: 0.8rem;  /* Aumenta a área clicável em dispositivos touch */
+    }
+    
+    /* Melhora a visualização de elementos com hover em dispositivos touch */
+    .card-servicos:hover, 
+    .card-servicos-left:hover,
+    .pricing-box:hover {
+        transform: translateY(-5px) !important;
+    }
+    
+    /* Melhora o desempenho de animações em dispositivos móveis */
+    .complemento-sobre img {
+        animation: rotate 20s linear infinite;
+        animation-play-state: paused;
+    }
+    
+    .complemento-sobre:hover img {
+        animation-play-state: running;
+    }
+    
+    /* Assegura que imagens sejam responsivas */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Adiciona uma classe no-scroll para evitar rolagem quando o menu está aberto */
+    body.no-scroll {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
+    
+    /* Ajustes para o menu em dispositivos móveis */
+    .menu-aberto.active {
+        z-index: 97;
+    }
+    
+    /* Animação para cabeçalho responsivo */
+    .header {
+        transition: top 0.3s ease-in-out;
+    }
+}
+
+/* Ajustes para telas extremamente pequenas */
+@media (max-width: 360px) {
+    .header {
+        padding: 0.8rem 0.5rem;
+    }
+    
+    .logo img {
+        width: 90px;
+    }
+    
+    .destaque-inicio {
+        font-size: 1.4rem;
+    }
+    
+    .paragrafo-inicio p {
+        font-size: 1rem;
+    }
+    
+    .card-titulo h1 {
+        font-size: 1rem;
+    }
+    
+    .card-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .card-icon i {
+        font-size: 1.2rem;
+    }
+    
+    .pricing-box {
+        padding: 1rem;
+    }
+    
+    .plan-name {
+        font-size: 1.3rem;
+    }
+    
+    .price {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .features li {
+        font-size: 0.85rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    /* Botão de WhatsApp nos planos */
+    .btn-whatsapp {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 26px !important;
+    }
+    
+    /* Controles de pulsação do botão WhatsApp */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
+        }
+        50% {
+            transform: scale(1.08);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
+        }
+    }
+    
+    .container-free-your-mind {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .line-container span {
+        font-size: 1.3rem;
+    }
+    
+    .line {
+        width: 40px;
+    }
+}
