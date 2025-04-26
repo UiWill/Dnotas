@@ -218,6 +218,8 @@ body {
 .dataTables_wrapper {
     color: var(--color-white);
     margin-top: 1rem;
+    width: 100%;
+    overflow-x: auto;
 }
 
 table.dataTable {
@@ -226,6 +228,7 @@ table.dataTable {
     color: var(--color-white);
     border-collapse: collapse;
     background-color: transparent;
+    table-layout: auto;
 }
 
 table.dataTable thead th {
@@ -235,6 +238,7 @@ table.dataTable thead th {
     font-weight: 500;
     padding: 1rem;
     border-bottom: 2px solid var(--color-destaque1);
+    white-space: nowrap;
 }
 
 table.dataTable thead th i {
@@ -258,35 +262,160 @@ table.dataTable tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
-.dataTables_wrapper .dataTables_length select,
-.dataTables_wrapper .dataTables_filter input {
-    background-color: var(--color-black);
+/* Estilos específicos para DataTables responsive */
+table.dataTable.responsive.nowrap {
+    width: 100% !important;
+}
+
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before {
+    background-color: var(--color-destaque1);
+    border: 1px solid var(--color-white);
+}
+
+table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control:before,
+table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th.dtr-control:before {
+    background-color: var(--color-destaque2);
+}
+
+.dtr-data {
     color: var(--color-white);
-    border: 1px solid var(--color-gray2);
-    padding: 0.5rem;
-    border-radius: 5px;
-    margin: 0 0.5rem;
 }
 
-.dataTables_wrapper .dataTables_paginate {
-    margin-top: 1rem;
+table.dataTable > tbody > tr.child ul.dtr-details > li {
+    border-bottom: 1px solid var(--color-gray2);
+    padding: 0.5rem 0;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 0.5rem 1rem;
-    margin: 0 0.25rem;
-    border-radius: 5px;
-    background-color: var(--color-gray1) !important;
-    color: var(--color-white) !important;
-    border: none;
-    transition: all 0.3s ease;
+/* Tabela Contribuições Registradas */
+.tabela-contribuicoes {
+    width: 100%;
+    margin-bottom: 1.5rem;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: var(--color-destaque1) !important;
-    color: var(--color-white) !important;
-    border: none;
+.tabela-contribuicoes .col-colaborador {
+    min-width: 180px;
+}
+
+.tabela-contribuicoes .col-setor {
+    min-width: 120px;
+}
+
+.tabela-contribuicoes .col-data {
+    min-width: 100px;
+}
+
+.tabela-contribuicoes .col-pontuacao {
+    min-width: 100px;
+}
+
+.tabela-contribuicoes .col-contribuicao {
+    min-width: 200px;
+}
+
+.tabela-contribuicoes .col-status {
+    min-width: 120px;
+}
+
+.tabela-contribuicoes .col-acoes {
+    min-width: 100px;
+}
+
+/* Tabela Ranking de Pontos */
+.tabela-ranking {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.tabela-ranking .col-posicao {
+    min-width: 80px;
+}
+
+.tabela-ranking .col-colaborador {
+    min-width: 180px;
+}
+
+.tabela-ranking .col-setor {
+    min-width: 120px;
+}
+
+.tabela-ranking .col-pontos {
+    min-width: 100px;
+}
+
+/* Media queries para ajustes em dispositivos móveis */
+@media screen and (max-width: 768px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        text-align: left;
+        margin-bottom: 0.5rem;
+        float: none;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        margin-top: 0.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        text-align: center;
+        float: none;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.4rem 0.8rem;
+    }
+
+    table.dataTable thead th, 
+    table.dataTable thead td, 
+    table.dataTable tbody th, 
+    table.dataTable tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.3rem 0.6rem;
+        margin: 0 0.15rem;
+        font-size: 0.9rem;
+    }
+
+    table.dataTable thead th, 
+    table.dataTable thead td, 
+    table.dataTable tbody th, 
+    table.dataTable tbody td {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.9rem;
+    }
+
+    /* Ajustes para detalhes expandidos em mobile */
+    table.dataTable > tbody > tr.child ul.dtr-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    table.dataTable > tbody > tr.child ul.dtr-details > li {
+        border-bottom: 1px solid var(--color-gray2);
+        padding: 0.5rem 0;
+    }
+
+    table.dataTable > tbody > tr.child ul.dtr-details > li:last-child {
+        border-bottom: none;
+    }
+
+    table.dataTable > tbody > tr.child span.dtr-title {
+        font-weight: bold;
+        color: var(--color-destaque1);
+        margin-right: 0.5rem;
+    }
 }
 
 /* Status badges */
@@ -369,4 +498,100 @@ table.dataTable tbody tr:hover {
         text-align: left;
         margin-bottom: 1rem;
     }
+}
+
+/* Estilos específicos para iPhone */
+@media screen and (max-width: 380px) and (-webkit-min-device-pixel-ratio: 2) {
+    /* Isso garante que estamos mirando especificamente em iPhones */
+    .sistema-merito {
+        padding-top: 40px !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+    
+    .form-merito {
+        margin: 0 auto 15px auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px !important;
+        border-radius: 5px !important;
+    }
+    
+    .form-group {
+        margin-bottom: 8px !important;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100% !important;
+        font-size: 16px !important;
+        border-radius: 4px !important;
+        padding: 8px !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #3d4143 !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+    
+    .btn-merito {
+        width: 100% !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        border-radius: 4px !important;
+        font-size: 16px !important;
+        background-color: #80a1e9 !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    
+    /* Melhora a visualização da mensagem de erro */
+    .error-message {
+        margin-top: 4px !important;
+        font-size: 12px !important;
+        color: #ef4444 !important;
+    }
+    
+    /* Corrige o tamanho do texto no título */
+    .form-header h2 {
+        font-size: 16px !important;
+    }
+    
+    /* Ajusta as margens dos campos do formulário */
+    .form-group label {
+        margin-bottom: 2px !important;
+        font-size: 14px !important;
+    }
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: var(--color-black);
+    color: var(--color-white);
+    border: 1px solid var(--color-gray2);
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin: 0 0.5rem;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 1rem;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 5px;
+    background-color: var(--color-gray1) !important;
+    color: var(--color-white) !important;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: var(--color-destaque1) !important;
+    color: var(--color-white) !important;
+    border: none;
 } 

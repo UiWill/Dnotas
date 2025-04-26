@@ -46,15 +46,29 @@ document.addEventListener('DOMContentLoaded', function () {
     // Adiciona o evento de scroll para exibir ou esconder os botões
     document.addEventListener('scroll', toggleButtons);
     
+    // Variável para evitar múltiplos recarregamentos
+    let resizeTimeout;
+    
     // Atualiza em caso de redimensionamento da janela
     window.addEventListener('resize', function() {
-        const wasMobile = isMobile;
-        const newIsMobile = window.innerWidth <= 768;
-        
-        // Se houve uma mudança no estado (mobile/desktop)
-        if (wasMobile !== newIsMobile) {
-            location.reload(); // Recarrega a página para aplicar os estilos corretos
+        // Verifica se estamos na página de meritocracia
+        if (window.location.href.includes('meritocracia.html')) {
+            // Para a página de meritocracia, apenas ajustamos os botões
+            toggleButtons();
+            return;
         }
+        
+        // Para outras páginas, podemos recarregar com um atraso
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+            const wasMobile = isMobile;
+            const newIsMobile = window.innerWidth <= 768;
+            
+            // Se houve uma mudança no estado (mobile/desktop)
+            if (wasMobile !== newIsMobile) {
+                location.reload(); // Recarrega a página para aplicar os estilos corretos
+            }
+        }, 1000); // 1 segundo de atraso para evitar múltiplos recarregamentos
     });
 
     // Ação ao clicar no botão "Voltar ao Topo"

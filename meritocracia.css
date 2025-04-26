@@ -423,22 +423,253 @@ body {
     .fixed-button {
         right: 1rem;
     }
+
+    /* Ajustes para melhorar o formulário em mobile */
+    .form-group input,
+    .form-group textarea {
+        font-size: 16px; /* Evita zoom automático em iOS */
+        padding: 0.6rem;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    
+    /* Ajuste para o container principal */
+    .sistema-merito {
+        padding-top: 70px;
+        padding-bottom: 40px;
+    }
+    
+    .container-merito {
+        padding: 0 1rem;
+    }
 }
 
 @media (max-width: 480px) {
+    /* Header e texto principal */
     .headline-merito h1 {
         font-size: 1.75rem;
     }
-
+    
+    /* Layout dos cabeçalhos */
     .form-header,
     .table-header {
         flex-direction: column;
         text-align: center;
+        margin-bottom: 1rem;
     }
-
+    
+    /* Ajustes para tabelas DataTables */
     .dataTables_wrapper .dataTables_length,
     .dataTables_wrapper .dataTables_filter {
         text-align: left;
         margin-bottom: 1rem;
+    }
+    
+    /* Ajustes para o container principal */
+    .container-merito {
+        padding: 0 0.8rem;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    
+    /* Espaçamento principal */
+    .sistema-merito {
+        padding-top: 60px;
+        min-height: auto;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Ajustes para o grupo de formulário */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    /* Ajustes para o formulário */
+    .form-merito, 
+    .tabela-merito {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    
+    /* Garante que os inputs preencham a largura disponível */
+    .form-group input,
+    .form-group textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 16px !important; /* Evita zoom em iOS */
+        padding: 0.5rem;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Ajusta o tamanho do botão */
+    .btn-merito {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        justify-content: center !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.9rem;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Ajusta o cabeçalho do formulário */
+    .form-header i, 
+    .table-header i {
+        font-size: 1.5rem;
+    }
+    
+    /* Ajusta os ícones nos labels */
+    .form-group label i {
+        font-size: 1rem;
+    }
+    
+    /* Ajusta a área da tabela para dispositivos móveis */
+    .table-container {
+        overflow-x: auto;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Ajusta header e descrição principal */
+    .headline-merito {
+        margin-bottom: 1.5rem;
+    }
+    
+    .headline-merito p {
+        font-size: 0.9rem;
+    }
+    
+    /* Ajusta botão de limpar pontuações */
+    .actions-container {
+        width: 100%;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
+    }
+    
+    .actions-container .btn-merito {
+        font-size: 0.9rem;
+        width: 100%;
+    }
+    
+    /* Corrige os balões de validação e alert no iPhone */
+    input:invalid,
+    textarea:invalid {
+        box-shadow: none;
+    }
+    
+    /* Ajustes gerais para dispositivos Apple */
+    body {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+}
+
+/* Ajustes específicos para iPhone */
+@media screen and (max-width: 428px) {
+    .form-merito,
+    .tabela-merito {
+        padding: 10px !important;
+        border-radius: 8px !important;
+    }
+    
+    .form-group {
+        margin-bottom: 8px !important;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 8px !important;
+    }
+    
+    .btn-merito {
+        padding: 8px 12px !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Corrige o problema de mensagens de erro/validação */
+    .form-merito form:invalid {
+        box-shadow: none !important;
+    }
+    
+    /* Ajusta o layout para formulários com erros de validação */
+    input:focus:invalid {
+        outline: none !important;
+    }
+    
+    /* Remove o estilo padrão de validação do navegador */
+    ::-webkit-validation-bubble-message,
+    ::-webkit-validation-bubble-icon,
+    ::-webkit-validation-bubble-arrow-clipper,
+    ::-webkit-validation-bubble-arrow,
+    ::-webkit-validation-bubble-heading,
+    ::-webkit-validation-bubble {
+        display: none !important;
+    }
+}
+
+/* Ajustes para telas muito pequenas (iPhones menores, etc) */
+@media (max-width: 360px) {
+    .sistema-merito {
+        padding-top: 50px;
+    }
+    
+    .headline-merito h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .headline-merito p {
+        font-size: 0.9rem;
+    }
+    
+    .form-merito,
+    .tabela-merito {
+        padding: 0.8rem;
+    }
+    
+    .form-group label {
+        font-size: 0.85rem;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 0.4rem;
+    }
+    
+    .btn-merito {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Ajusta botões fixos */
+    .fixed-button {
+        width: 2.5rem;
+        height: 2.5rem;
+        right: 0.8rem;
+    }
+    
+    #backToTop {
+        bottom: 5.5rem;
+    }
+    
+    #whatsappButton {
+        bottom: 1.5rem;
     }
 } 
