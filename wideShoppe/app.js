@@ -14,78 +14,94 @@ const orderTemplate = document.getElementById('order-template');
 let currentShopId = '';
 let currentRefreshToken = '';
 let accessToken = '';
+let currentUser = null;
 
 // Endpoint base da API
 const API_BASE_URL = 'https://api.dnotas.com.br';
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-    // Verificar se o usuário já está logado
-    checkLocalStorage();
+// Configuração do Supabase - usar a instância já criada na página index.html
+const supabaseClient = window.supabaseClient;
+
+// Adicionar estilos CSS para o modal de detalhes e ajustar contraste
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('App inicializado - Verificando autenticação');
+    initializeApp();
+});
+
+// Inicialização do aplicativo
+function initializeApp() {
+    // Oculta a tela de carregamento inicial após um breve delay
+    setTimeout(() => {
+        document.getElementById('initial-loading').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('initial-loading').style.display = 'none';
+        }, 300);
+    }, 800);
+
+    // Estilizar o corpo e adicionar o fundo azul escuro com inspiração no Kast.xyz
+    document.body.style.background = 'linear-gradient(150deg, #000000 0%, #0a1128 85%, #0f2a57 100%)';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.minHeight = '100vh';
+    document.body.style.overflow = 'auto';
+    document.body.style.color = '#fff';
+    document.body.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, sans-serif';
     
-    // Adicionar eventos
-    loginBtn.addEventListener('click', handleLogin);
-    logoutBtn.addEventListener('click', handleLogout);
-    refreshBtn.addEventListener('click', loadOrders);
-    dateFilter.addEventListener('change', loadOrders);
-    
-    // Adicionar header com logo da Dnotas
-    const header = document.createElement('header');
-    header.className = 'app-header';
-    header.innerHTML = `
-        <div class="logo-container">
-            <svg class="dnotas-logo" width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="45" stroke="#2196F3" stroke-width="8"/>
-                <circle cx="50" cy="50" r="20" fill="#2196F3"/>
-            </svg>
-            <span class="logo-text">DNOTAS</span>
-        </div>
-        <div class="header-subtitle">Gerenciamento de Pedidos</div>
-    `;
-    
-    // Inserir o header antes do primeiro elemento no body
-    document.body.insertBefore(header, document.body.firstChild);
-    
-    // Adicionar estilos CSS modernos inspirados no site Kast
-    const style = document.createElement('style');
-    style.textContent = `
-        /* Fontes e estilos base */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+    // CSS para todos os elementos
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        :root {
+            --primary-blue: #2563eb;
+            --light-blue: #3b82f6;
+            --dark-blue: #0d1b38;
+            --bg-dark: #000000;
+            --bg-card: rgba(13, 18, 30, 0.7);
+            --text-color: #f8fafc;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
         
-        body {
-            background-color: #0a0a0a;
-            color: #f5f5f5;
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            padding-top: 80px;
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(33, 150, 243, 0.05) 0%, transparent 30%),
-                radial-gradient(circle at 90% 90%, rgba(33, 150, 243, 0.05) 0%, transparent 30%);
-            background-attachment: fixed;
-        }
-        
-        /* Header e Logo */
-        .app-header {
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            height: 70px;
-            background-color: rgba(18, 18, 18, 0.95);
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at top right, rgba(37, 99, 235, 0.1) 0%, transparent 35%),
+                radial-gradient(ellipse at bottom left, rgba(37, 99, 235, 0.05) 0%, transparent 25%);
+            pointer-events: none;
+            z-index: -2;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.025'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Efeitos de vidro e relevo */
+        .app-header {
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.15);
+            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
         }
         
         .logo-container {
@@ -95,215 +111,159 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         .dnotas-logo {
-            animation: pulse 6s infinite alternate;
+            filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.5));
+            animation: pulse 4s infinite;
         }
         
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.3)); }
+            50% { filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.6)); }
         }
         
         .logo-text {
             font-size: 24px;
             font-weight: 700;
-            letter-spacing: 1px;
-            color: white;
-            position: relative;
+            background: linear-gradient(90deg, #f8fafc, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
         }
         
         .header-subtitle {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
-            font-weight: 400;
+            font-weight: 500;
         }
         
-        /* Containers e Seções */
+        /* Seções de login e pedidos */
         #login-section, #orders-section {
-            background-color: rgba(25, 25, 25, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
+            background: rgba(10, 15, 25, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(37, 99, 235, 0.1);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 1px 0 rgba(37, 99, 235, 0.05) inset;
+            padding: 24px;
+            margin: 24px auto;
             max-width: 1200px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
-        }
-        
-        h1, h2, h3 {
-            color: #fff;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-        
-        /* Formulários e inputs */
-        label {
-            color: #ddd;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        input, select {
-            background-color: rgba(45, 45, 45, 0.8);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 400px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-        }
-        
-        input:focus, select:focus {
-            border-color: #2196F3;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
-        }
-        
-        /* Botões */
-        button {
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        button:hover {
-            background-color: #1e88e5;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.2);
-        }
-        
-        button:disabled {
-            background-color: #444;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        /* Filtro de data e botão de atualizar */
-        .filter-controls {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        
-        #date-filter {
-            max-width: 200px;
-            margin-bottom: 0;
-        }
-        
-        /* Container da tabela com rolagem */
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-top: 20px;
-            border-radius: 12px;
-            background-color: rgba(30, 30, 30, 0.6);
             position: relative;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #222;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
         }
         
-        /* Estilizar a barra de rolagem para navegadores WebKit */
+        #login-section::before, #orders-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+            transform: rotate(-3deg);
+            z-index: -1;
+        }
+        
+        /* Tabela de pedidos */
+        .table-container {
+            background: rgba(5, 10, 20, 0.6);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            border: 1px solid rgba(37, 99, 235, 0.08);
+            max-height: 450px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        /* Estilizar a scrollbar para ficar mais moderna */
         .table-container::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
         
         .table-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.4);
         }
         
         .table-container::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+            background: rgba(37, 99, 235, 0.4);
+            border-radius: 3px;
         }
         
         .table-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(37, 99, 235, 0.6);
         }
         
-        /* Fixar cabeçalho da tabela */
         .orders-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background-color: transparent;
-            table-layout: fixed;
+            border-collapse: collapse;
         }
         
         .orders-table thead {
             position: sticky;
             top: 0;
-            z-index: 1;
+            background: rgba(5, 10, 20, 0.95);
+            backdrop-filter: blur(4px);
+            z-index: 10;
         }
         
         .orders-table th {
             text-align: left;
-            padding: 14px 16px;
-            background-color: rgba(20, 20, 20, 0.95);
-            color: #aaa;
-            font-weight: 500;
-            font-size: 13px;
+            padding: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
             text-transform: uppercase;
             letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .orders-table th:first-child {
-            border-top-left-radius: 12px;
-        }
-        
-        .orders-table th:last-child {
-            border-top-right-radius: 12px;
-        }
-        
-        /* Colunas com largura definida */
-        .orders-table th:first-child {
-            width: 35%;
-        }
-        
-        .orders-table th:nth-child(2) {
-            width: 25%;
-        }
-        
-        .orders-table th:last-child {
-            width: 40%;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
         }
         
         .orders-table td {
-            padding: 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: #eee;
-            vertical-align: middle;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 14px;
         }
         
+        .orders-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .orders-table tr:hover {
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        /* Status e botões */
         .status-cell {
             text-align: center;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(5, 10, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status.processed, .status.shipped, .status.completed {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+        
+        .status.ready_to_ship {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.05));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            color: #93c5fd;
+        }
+        
+        .status.cancelled {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
         }
         
         .actions-cell {
@@ -312,497 +272,328 @@ document.addEventListener('DOMContentLoaded', () => {
         
         .actions {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 8px;
         }
         
         .actions button {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 8px;
+            background: rgba(10, 15, 25, 0.7);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 13px;
-            margin-bottom: 4px;
-            min-width: 90px;
-        }
-        
-        .order-row {
-            transition: background-color 0.15s ease;
-        }
-        
-        .order-row:hover {
-            background-color: rgba(50, 50, 50, 0.5) !important;
-        }
-        
-        tr:nth-child(even) {
-            background-color: rgba(40, 40, 40, 0.3);
-        }
-        
-        tr:nth-child(odd) {
-            background-color: rgba(30, 30, 30, 0.3);
-        }
-        
-        .order-id {
             font-weight: 500;
-            color: #2196F3;
-            font-family: monospace;
-            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 80px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .status {
-            font-weight: 500;
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 13px;
-            text-align: center;
-            min-width: 120px;
+        .actions button:hover:not(:disabled) {
+            background: rgba(37, 99, 235, 0.7);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         
-        .status.processed {
-            color: #4CAF50;
-            background-color: rgba(76, 175, 80, 0.1);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-        
-        .status.ready_to_ship {
-            color: #2196F3;
-            background-color: rgba(33, 150, 243, 0.1);
-            border: 1px solid rgba(33, 150, 243, 0.3);
-        }
-        
-        .status.shipped {
-            color: #9C27B0;
-            background-color: rgba(156, 39, 176, 0.1);
-            border: 1px solid rgba(156, 39, 176, 0.3);
-        }
-        
-        .btn-confirm {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .btn-shipping {
-            background-color: #2196F3;
-            color: white;
+        .actions button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .btn-details {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            backdrop-filter: blur(5px);
+            background: rgba(37, 99, 235, 0.05) !important;
+            border: 1px solid rgba(37, 99, 235, 0.2) !important;
+            color: #93c5fd !important;
         }
         
-        .btn-details:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+        .btn-shipping {
+            background: rgba(34, 197, 94, 0.05) !important;
+            border: 1px solid rgba(34, 197, 94, 0.2) !important;
+            color: #4ade80 !important;
         }
         
-        .btn-confirm.processed {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-        
-        /* Estilos para o modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background-color: #121212;
-            width: 80%;
-            max-width: 900px;
-            max-height: 90vh;
-            border-radius: 12px;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: rgba(33, 33, 33, 0.8);
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            backdrop-filter: blur(10px);
-        }
-        
-        .modal-header h2 {
-            margin: 0;
-            font-size: 18px;
-            color: #fff;
-            font-weight: 600;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #aaa;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s;
-        }
-        
-        .close-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .modal-body {
-            padding: 24px;
-            background-color: #121212;
-        }
-        
-        .order-details-section {
-            margin-bottom: 32px;
-            background-color: transparent;
-        }
-        
-        .order-details-section h3 {
-            margin-top: 0;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            color: #2196F3;
-            background-color: #121212;
-            position: sticky;
-            top: 72px;
-            z-index: 1;
-            font-size: 16px;
-            border-bottom: 1px solid rgba(33, 150, 243, 0.3);
-        }
-        
-        .details-table, .items-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 10px;
-            background-color: transparent;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .details-table th, .items-table th {
-            text-align: left;
-            padding: 12px 16px;
-            background-color: rgba(40, 40, 40, 0.8);
-            color: #aaa;
-            font-weight: 500;
-            font-size: 13px;
-        }
-        
-        .details-table td, .items-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: #eee;
-            background-color: transparent;
-        }
-        
-        /* Garantir que as linhas pares nas tabelas também sejam escuras */
-        .details-table tr:nth-child(even) td, 
-        .items-table tr:nth-child(even) td {
-            background-color: rgba(40, 40, 40, 0.3);
-        }
-        
-        .order-details-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            background-color: transparent;
-            position: sticky;
-            bottom: 0;
-            padding: 15px 0;
-            z-index: 1;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .empty-message {
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-            padding: 40px 20px;
-            background-color: rgba(20, 20, 20, 0.5);
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: 15px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-        }
-        
-        .error-message {
-            color: #ff5252;
-            background-color: rgba(255, 82, 82, 0.1);
-            border-left: 4px solid #ff5252;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        
-        /* Indicador de loading */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .loading-content {
-            background-color: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            padding: 30px 40px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #2196F3;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 15px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Adicionar estilo para o template de ordem original */
-        #order-template {
-            display: none;
-        }
-        
-        /* Corrigir estilo para todos os elementos pré-existentes */
-        .hidden {
-            display: none !important;
-        }
-        
-        #no-orders-message {
-            color: rgba(255, 255, 255, 0.7);
-            padding: 40px 20px;
-            background-color: rgba(20, 20, 20, 0.5);
-            border-radius: 12px;
-            text-align: center;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Responsividade para telas menores */
+        /* Responsividade */
         @media (max-width: 768px) {
-            .app-header {
-                padding: 0 16px;
-            }
-            
-            .header-subtitle {
-                display: none;
-            }
-            
-            body {
-                padding-top: 70px;
-            }
-            
-            #login-section, #orders-section {
-                padding: 20px;
-                margin: 15px;
-                border-radius: 10px;
-            }
-            
-            .actions {
-                flex-direction: column;
-                gap: 4px;
-            }
-            
-            .actions button {
-                width: 100%;
-            }
-            
             .table-container {
                 max-height: 350px;
             }
             
-            .modal-content {
-                width: 95%;
+            .actions {
+                flex-direction: column;
+            }
+            
+            .actions button {
+                width: 100%;
+                margin-bottom: 4px;
             }
         }
     `;
-    document.head.appendChild(style);
-    
-    // Reorganizar os elementos de filtro para melhor apresentação
-    const filterControls = document.createElement('div');
-    filterControls.className = 'filter-controls';
-    
-    // Mover elementos existentes para o novo container
-    const dateFilterLabel = document.querySelector('label[for="date-filter"]');
-    if (dateFilterLabel) {
-        filterControls.appendChild(dateFilterLabel);
-        filterControls.appendChild(dateFilter);
-        filterControls.appendChild(refreshBtn);
-        
-        // Encontrar o container principal
-        const container = dateFilter.parentNode;
-        container.insertBefore(filterControls, dateFilter.nextSibling);
-    }
-    
-    console.log('Aplicação inicializada - usando API em:', API_BASE_URL);
-});
+    document.head.appendChild(styleElement);
 
-/**
- * Verifica se há dados de login salvos e inicia sessão automaticamente
- */
-function checkLocalStorage() {
-    const savedShopId = localStorage.getItem('shopId');
-    const savedRefreshToken = localStorage.getItem('refreshToken');
-    
-    if (savedShopId && savedRefreshToken) {
-        shopIdInput.value = savedShopId;
-        refreshTokenInput.value = savedRefreshToken;
-        
-        currentShopId = savedShopId;
-        currentRefreshToken = savedRefreshToken;
-        
-        // Mostrar a seção de pedidos
-        loginSection.classList.add('hidden');
-        ordersSection.classList.remove('hidden');
+    // Verifica se já existe tokens salvos no localStorage
+    const shopId = localStorage.getItem('shopId');
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (shopId && refreshToken) {
+        console.log('Tokens encontrados no localStorage, restaurando sessão');
+        // Restaurar valores globais das variáveis
+        currentShopId = shopId;
+        currentRefreshToken = refreshToken;
         
         // Carregar os pedidos
         loadOrders();
+        showOrdersScreen();
+    } else {
+        // Verifica se existe uma sessão do Supabase
+        const session = supabaseClient?.auth?.session?.();
+        if (session) {
+            console.log('Sessão do Supabase encontrada, buscando tokens');
+            fetchUserTokens(session.user.id);
+        } else {
+            // Sem tokens e sem sessão, mostra a tela de login
+            showLoginScreen();
+        }
+    }
+
+    // Adicionar header com logo da Dnotas
+    const header = document.createElement('header');
+    header.className = 'app-header';
+    header.innerHTML = `
+        <div class="logo-container">
+            <svg class="dnotas-logo" width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" stroke="#2563eb" stroke-width="8"/>
+                <circle cx="50" cy="50" r="20" fill="#2563eb"/>
+            </svg>
+            <span class="logo-text">DNOTAS</span>
+        </div>
+        <div class="header-subtitle">Gerenciamento de Pedidos</div>
+    `;
+    
+    // Inserir o header antes do primeiro elemento no body
+    document.body.insertBefore(header, document.body.firstChild);
+
+    // Configura os event listeners
+    setupEventListeners();
+    
+    console.log('Aplicação inicializada - usando API em:', API_BASE_URL);
+}
+
+/**
+ * Mostra a tela de pedidos
+ */
+function showOrdersScreen() {
+    if (!loginSection || !ordersSection) return;
+    
+    loginSection.style.display = 'none';
+    ordersSection.style.display = 'block';
+    
+    console.log('Exibindo tela de pedidos');
+}
+
+/**
+ * Mostra a tela de login
+ */
+function showLoginScreen() {
+    if (!loginSection || !ordersSection) return;
+    
+    loginSection.style.display = 'block';
+    ordersSection.style.display = 'none';
+    
+    console.log('Exibindo tela de login');
+}
+
+/**
+ * Busca os tokens do usuário na tabela shopee_tokens
+ */
+async function fetchUserTokens(userId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('shopee_tokens')
+            .select('shop_id, refresh_token')
+            .eq('user_id', userId)
+            .single();
+
+        if (error) throw error;
+        
+        if (data) {
+            console.log('Tokens encontrados para o usuário');
+            localStorage.setItem('shopId', data.shop_id);
+            localStorage.setItem('refreshToken', data.refresh_token);
+            
+            // Salvar nas variáveis globais
+            currentShopId = data.shop_id;
+            currentRefreshToken = data.refresh_token;
+            
+            // Carregar os pedidos
+            loadOrders();
+            showOrdersScreen();
+        } else {
+            console.log('Tokens não encontrados para o usuário');
+            showLoginScreen();
+        }
+    } catch (error) {
+        console.error('Erro ao buscar tokens:', error);
+        showLoginScreen();
     }
 }
 
 /**
- * Fazer requisição à API com tratamento especial para CORS
+ * Atualiza o header com informações do usuário logado
  */
-async function fetchApi(url, options = {}) {
-    // Adicionar timestamp para prevenir cache
-    const timestampedUrl = url.includes('?') 
-        ? `${url}&_t=${Date.now()}`
-        : `${url}?_t=${Date.now()}`;
+function updateHeaderUser(userName) {
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    userInfo.innerHTML = `
+        <span class="user-name">${userName}</span>
+        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
+    `;
     
-    console.log("Requisição para:", timestampedUrl);
-    
-    try {
-        // Configuração correta para requisições cross-origin
-        const fetchOptions = {
-            method: options.method || 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(options.headers || {})
-            },
-            credentials: 'include',
-            body: options.body
-        };
-        
-        console.log("Opções de fetch:", fetchOptions);
-        
-        const response = await fetch(timestampedUrl, fetchOptions);
-        
-        if (!response.ok) {
-            throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+    const header = document.querySelector('.app-header');
+    if (header) {
+        // Remover info de usuário existente, se houver
+        const existingInfo = header.querySelector('.user-info');
+        if (existingInfo) {
+            header.removeChild(existingInfo);
         }
         
-        const data = await response.json();
-        console.log("Resposta recebida:", data);
-        return data;
-    } catch (error) {
-        console.error('Erro na requisição:', error);
-        throw error;
+        // Adicionar novo elemento
+        header.appendChild(userInfo);
     }
 }
 
 /**
- * Lida com o processo de login
+ * Mostra um indicador de carregamento
+ */
+function showLoadingIndicator(message = 'Carregando...') {
+    // Remover qualquer loading existente
+    hideLoadingIndicator();
+    
+    // Criar novo loading
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.id = 'loading-overlay';
+    
+    loadingOverlay.innerHTML = `
+        <div class="loading-content">
+            <p>${message}</p>
+            <div class="spinner"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(loadingOverlay);
+}
+
+/**
+ * Esconde o indicador de carregamento
+ */
+function hideLoadingIndicator() {
+    const existing = document.getElementById('loading-overlay');
+    if (existing) {
+        document.body.removeChild(existing);
+    }
+}
+
+/**
+ * Exibe uma notificação para o usuário
+ */
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    // Ícone baseado no tipo
+    let icon = '&#9432;'; // Info
+    if (type === 'success') icon = '&#10004;'; // Check
+    if (type === 'error') icon = '&#10060;'; // X
+    
+    notification.innerHTML = `
+        <div class="notification-icon">${icon}</div>
+        <div class="notification-message">${message}</div>
+    `;
+    
+    // Adicionar à página
+    document.body.appendChild(notification);
+    
+    // Animar entrada
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Remover após alguns segundos
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+/**
+ * Função de login com formulário simples
  */
 function handleLogin() {
     const shopId = shopIdInput.value.trim();
     const refreshToken = refreshTokenInput.value.trim();
     
     if (!shopId || !refreshToken) {
-        alert('Por favor, preencha o Shop ID e o Refresh Token');
+        alert('Por favor, preencha todos os campos.');
         return;
     }
     
-    // Salvar credenciais
+    // Salvar dados e mostrar tela de pedidos
     currentShopId = shopId;
     currentRefreshToken = refreshToken;
     
-    // Salvar no localStorage para login automático
+    // Salvar no localStorage
     localStorage.setItem('shopId', shopId);
     localStorage.setItem('refreshToken', refreshToken);
     
-    // Mostrar a seção de pedidos
-    loginSection.classList.add('hidden');
-    ordersSection.classList.remove('hidden');
+    // Mostrar seção de pedidos
+    showOrdersScreen();
     
-    // Carregar os pedidos
+    // Carregar pedidos
     loadOrders();
 }
 
 /**
  * Encerra a sessão do usuário
  */
-function handleLogout() {
-    // Limpar variáveis de sessão
-    currentShopId = '';
-    currentRefreshToken = '';
-    accessToken = '';
-    
-    // Limpar localStorage
-    localStorage.removeItem('shopId');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('accessToken');
-    
-    // Voltar para a tela de login
-    ordersSection.classList.add('hidden');
-    loginSection.classList.remove('hidden');
-    
-    // Limpar o container de pedidos
-    ordersContainer.innerHTML = '<p class="empty-message">Faça login para ver os pedidos</p>';
+async function handleLogout() {
+    try {
+        showLoadingIndicator('Saindo...');
+        
+        // Deslogar do Supabase, se estiver disponível
+        if (window.supabaseClient) {
+            try {
+                await window.supabaseClient.auth.signOut();
+                console.log('Logout do Supabase realizado');
+            } catch (supaError) {
+                console.error('Erro ao fazer logout do Supabase:', supaError);
+            }
+        }
+        
+        // Limpar variáveis de sessão
+        currentShopId = '';
+        currentRefreshToken = '';
+        accessToken = '';
+        currentUser = null;
+        
+        // Limpar localStorage
+        localStorage.removeItem('shopId');
+        localStorage.removeItem('refreshToken');
+        
+        // Mostrar a tela de login
+        showLoginScreen();
+        
+        console.log('Logout realizado com sucesso');
+        
+    } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        showNotification('Erro ao sair do sistema', 'error');
+    } finally {
+        hideLoadingIndicator();
+    }
 }
 
 /**
@@ -982,6 +773,16 @@ function displayOrders(orders) {
         'UNPAID': 'Não pago'
     };
     
+    // Criar título da seção com estilo
+    const ordersTitle = document.createElement('h2');
+    ordersTitle.textContent = 'Vendas Recentes';
+    ordersTitle.style.fontSize = '24px';
+    ordersTitle.style.fontWeight = '600';
+    ordersTitle.style.marginBottom = '20px';
+    ordersTitle.style.color = 'white';
+    
+    ordersContainer.appendChild(ordersTitle);
+    
     // Criar container para a tabela com rolagem
     const tableContainer = document.createElement('div');
     tableContainer.className = 'table-container';
@@ -994,9 +795,9 @@ function displayOrders(orders) {
     const thead = document.createElement('thead');
     thead.innerHTML = `
         <tr>
-            <th>Pedido</th>
-            <th>Status</th>
-            <th>Ações</th>
+            <th style="width: 35%">Pedido</th>
+            <th style="width: 25%">Status</th>
+            <th style="width: 40%">Ações</th>
         </tr>
     `;
     table.appendChild(thead);
@@ -1553,4 +1354,55 @@ async function handleViewDetails(orderSn) {
             document.body.removeChild(loadingMessage);
         }
     }
+}
+
+// Configura os event listeners para os botões
+function setupEventListeners() {
+    // Event listener para o botão de login
+    document.getElementById('login-btn').addEventListener('click', function() {
+        const shopId = document.getElementById('shop-id').value.trim();
+        const refreshToken = document.getElementById('refresh-token').value.trim();
+        
+        if (shopId && refreshToken) {
+            // Salva os tokens no localStorage
+            localStorage.setItem('shopId', shopId);
+            localStorage.setItem('refreshToken', refreshToken);
+            
+            // Salvar nas variáveis globais
+            currentShopId = shopId;
+            currentRefreshToken = refreshToken;
+            
+            // Carrega os pedidos
+            loadOrders();
+            
+            // Mostra a tela de pedidos
+            showOrdersScreen();
+        } else {
+            alert('Por favor, preencha todos os campos.');
+        }
+    });
+    
+    // Event listener para o botão de logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+        // Remove os tokens do localStorage
+        localStorage.removeItem('shopId');
+        localStorage.removeItem('refreshToken');
+        
+        // Limpar variáveis globais
+        currentShopId = null;
+        currentRefreshToken = null;
+        
+        // Mostra a tela de login
+        showLoginScreen();
+    });
+    
+    // Event listener para o botão de refresh
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        loadOrders();
+    });
+    
+    // Event listener para o filtro de data
+    document.getElementById('date-filter').addEventListener('change', function() {
+        loadOrders();
+    });
 } 
