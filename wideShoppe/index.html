@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoppe - Gerenciador de Vendas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-section" class="card">
+            <h2>Login Shoppe</h2>
+            <div class="form-group">
+                <label for="shop-id">Shop ID:</label>
+                <input type="text" id="shop-id" placeholder="Digite o ID da sua loja">
+            </div>
+            <div class="form-group">
+                <label for="refresh-token">Refresh Token:</label>
+                <input type="password" id="refresh-token" placeholder="Digite seu refresh token">
+            </div>
+            <button id="login-btn" class="btn btn-primary">Entrar</button>
+        </div>
+
+        <div id="orders-section" class="card hidden">
+            <div class="header">
+                <h2>Vendas Recentes</h2>
+                <button id="logout-btn" class="btn btn-secondary">Sair</button>
+            </div>
+            
+            <div class="filters">
+                <label for="date-filter">Filtrar por data:</label>
+                <select id="date-filter">
+                    <option value="7">Últimos 7 dias</option>
+                    <option value="10" selected>Últimos 10 dias</option>
+                    <option value="15">Últimos 15 dias</option>
+                </select>
+                <button id="refresh-btn" class="btn btn-secondary">Atualizar</button>
+            </div>
+
+            <div class="orders-list" id="orders-container">
+                <!-- Lista de pedidos será inserida aqui via JavaScript -->
+                <p class="empty-message">Carregando pedidos...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="order-template">
+        <div class="order-item">
+            <div class="order-header">
+                <div class="order-info">
+                    <h3 class="order-id">Pedido #<span class="order-sn"></span></h3>
+                    <span class="order-date"></span>
+                </div>
+                <span class="order-status"></span>
+            </div>
+            <div class="order-details">
+                <div class="customer-info">
+                    <p>Cliente: <span class="buyer-name"></span></p>
+                </div>
+                <div class="order-value">
+                    <p>Valor: R$ <span class="total-amount"></span></p>
+                </div>
+            </div>
+            <div class="order-actions">
+                <button class="btn btn-confirm">Confirmar Venda</button>
+                <button class="btn btn-shipping">Pegar Etiqueta</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html> 
