@@ -35,4 +35,3 @@ app.listen(port, () => {
   console.log(`Proxy CORS rodando em http://localhost:${port}`);
   console.log(`Use http://localhost:${port}/api/... para acessar https://api.dnotas.com.br/...`);
 }); 
-
