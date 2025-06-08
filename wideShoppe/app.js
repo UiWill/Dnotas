@@ -1,9 +1,10 @@
 // Elementos do DOM
 const loginSection = document.getElementById('login-section');
 const ordersSection = document.getElementById('orders-section');
-const shopIdInput = document.getElementById('shop-id');
-const refreshTokenInput = document.getElementById('refresh-token');
+const userEmailInput = document.getElementById('user-email');
+const userPasswordInput = document.getElementById('user-password');
 const loginBtn = document.getElementById('login-btn');
+const loginError = document.getElementById('login-error');
 const logoutBtn = document.getElementById('logout-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 const dateFilter = document.getElementById('date-filter');
@@ -19,17 +20,149 @@ let currentUser = null;
 // Endpoint base da API
 const API_BASE_URL = 'https://api.dnotas.com.br';
 
+/**
+ * Renova o token de acesso usando o refresh token
+ */
+async function renewAccessToken() {
+    try {
+        console.log('Renovando token de acesso...');
+        
+        const response = await fetch(`${API_BASE_URL}/shopee/tokens/${currentShopId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.tokens && data.tokens.access_token) {
+            // Atualizar tokens na memória
+            accessToken = data.tokens.access_token;
+            currentRefreshToken = data.tokens.refresh_token;
+            
+            // Atualizar no Supabase se o usuário estiver logado
+            if (currentUser && currentUser.email) {
+                try {
+                    await supabaseClient
+                        .from('shopee_tokens')
+                        .update({ 
+                            access_token: data.tokens.access_token,
+                            refresh_token: data.tokens.refresh_token,
+                            token_expiration: data.tokens.expiration_date,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('user_email', currentUser.email);
+                    
+                    console.log('Token renovado e salvo no Supabase');
+                } catch (updateError) {
+                    console.warn('Erro ao salvar token renovado no Supabase:', updateError);
+                }
+            }
+            
+            return data.tokens.access_token;
+        } else {
+            throw new Error(data.message || 'Falha ao renovar token');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao renovar token:', error);
+        
+        // Verificar se é erro de refresh token expirado
+        if (error.message.includes('refresh_token_expired') || 
+            error.message.includes('Your refresh_token expired')) {
+            throw new Error('refresh_token_expired');
+        }
+        
+        throw error;
+    }
+}
+
+/**
+ * Executa uma requisição com renovação automática de token
+ */
+async function executeWithAutoTokenRefresh(requestFunction) {
+    try {
+        // Primeira tentativa
+        return await requestFunction();
+    } catch (error) {
+        console.log('Erro na primeira tentativa:', error.message);
+        
+        // Verificar se é erro de token
+        const isTokenError = error.message.includes('error_auth') || 
+                           error.message.includes('error_permission') ||
+                           error.message.includes('Invalid token') ||
+                           error.message.includes('Token expired') ||
+                           error.message.includes('Authentication failed') ||
+                           error.message.includes('Erro 500') ||
+                           error.message.includes('Internal Server Error') ||
+                           error.status === 401 ||
+                           error.status === 500;
+        
+        if (isTokenError) {
+            console.log('Detectado erro de token, tentando renovar...');
+            
+            try {
+                // Renovar token
+                await renewAccessToken();
+                
+                // Segunda tentativa com token renovado
+                console.log('Token renovado, tentando novamente...');
+                return await requestFunction();
+                
+            } catch (renewError) {
+                console.error('Falha ao renovar token:', renewError);
+                throw new Error('Falha ao renovar token de acesso');
+            }
+        } else {
+            // Não é erro de token, repassar o erro original
+            throw error;
+        }
+    }
+}
+
 // Configuração do Supabase - usar a instância já criada na página index.html
 const supabaseClient = window.supabaseClient;
+
+// Verificar se o Supabase foi carregado corretamente
+function checkSupabaseConnection() {
+    if (!window.supabase) {
+        console.error('Supabase library não foi carregada');
+        return false;
+    }
+    
+    if (!window.supabaseClient) {
+        console.error('Cliente Supabase não foi inicializado');
+        return false;
+    }
+    
+    console.log('Supabase conectado com sucesso');
+    return true;
+}
 
 // Adicionar estilos CSS para o modal de detalhes e ajustar contraste
 document.addEventListener('DOMContentLoaded', function() {
     console.log('App inicializado - Verificando autenticação');
+    
+    // Verificar conexão do Supabase
+    if (!checkSupabaseConnection()) {
+        showLoginError('Erro: Sistema de autenticação não disponível. Recarregue a página.');
+        return;
+    }
+    
+    setupEventListeners();
     initializeApp();
 });
 
 // Inicialização do aplicativo
-function initializeApp() {
+async function initializeApp() {
+    // Verificar se usuário já está logado
+    await checkExistingSession();
+    
     // Oculta a tela de carregamento inicial após um breve delay
     setTimeout(() => {
         document.getElementById('initial-loading').style.opacity = '0';
@@ -372,9 +505,6 @@ function initializeApp() {
     
     // Inserir o header antes do primeiro elemento no body
     document.body.insertBefore(header, document.body.firstChild);
-
-    // Configura os event listeners
-    setupEventListeners();
     
     console.log('Aplicação inicializada - usando API em:', API_BASE_URL);
 }
@@ -385,8 +515,10 @@ function initializeApp() {
 function showOrdersScreen() {
     if (!loginSection || !ordersSection) return;
     
+    const appHeader = document.getElementById('app-header');
     loginSection.style.display = 'none';
     ordersSection.style.display = 'block';
+    if (appHeader) appHeader.style.display = 'flex';
     
     console.log('Exibindo tela de pedidos');
 }
@@ -397,8 +529,10 @@ function showOrdersScreen() {
 function showLoginScreen() {
     if (!loginSection || !ordersSection) return;
     
+    const appHeader = document.getElementById('app-header');
     loginSection.style.display = 'block';
     ordersSection.style.display = 'none';
+    if (appHeader) appHeader.style.display = 'none';
     
     console.log('Exibindo tela de login');
 }
@@ -442,23 +576,11 @@ async function fetchUserTokens(userId) {
  * Atualiza o header com informações do usuário logado
  */
 function updateHeaderUser(userName) {
-    const userInfo = document.createElement('div');
-    userInfo.className = 'user-info';
-    userInfo.innerHTML = `
-        <span class="user-name">${userName}</span>
-        <div class="user-avatar">${userName.charAt(0).toUpperCase()}</div>
-    `;
-    
-    const header = document.querySelector('.app-header');
-    if (header) {
-        // Remover info de usuário existente, se houver
-        const existingInfo = header.querySelector('.user-info');
-        if (existingInfo) {
-            header.removeChild(existingInfo);
-        }
-        
-        // Adicionar novo elemento
-        header.appendChild(userInfo);
+    const userInfoElement = document.getElementById('user-info');
+    if (userInfoElement) {
+        userInfoElement.innerHTML = `
+            <span style="margin-right: 10px;">👤 ${userName}</span>
+        `;
     }
 }
 
@@ -532,28 +654,151 @@ function showNotification(message, type = 'info') {
 /**
  * Função de login com formulário simples
  */
-function handleLogin() {
-    const shopId = shopIdInput.value.trim();
-    const refreshToken = refreshTokenInput.value.trim();
+async function handleLogin() {
+    const email = userEmailInput.value.trim();
+    const password = userPasswordInput.value.trim();
     
-    if (!shopId || !refreshToken) {
-        alert('Por favor, preencha todos os campos.');
+    if (!email || !password) {
+        showLoginError('Por favor, preencha todos os campos.');
         return;
     }
     
-    // Salvar dados e mostrar tela de pedidos
-    currentShopId = shopId;
-    currentRefreshToken = refreshToken;
+    try {
+        showLoadingIndicator('Autenticando...');
+        hideLoginError();
+        
+        // Fazer login no Supabase
+        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+        
+        if (authError) {
+            throw new Error(authError.message);
+        }
+        
+        if (!authData.user) {
+            throw new Error('Falha na autenticação');
+        }
+        
+        currentUser = authData.user;
+        console.log('Usuário autenticado:', currentUser.email);
+        
+        // Buscar tokens da loja do usuário
+        const { data: tokenData, error: tokenError } = await supabaseClient
+            .from('shopee_tokens')
+            .select('shop_id, access_token, refresh_token')
+            .eq('user_email', email)
+            .single();
+        
+        if (tokenError || !tokenData) {
+            throw new Error('Nenhuma loja encontrada para este usuário. Entre em contato com o suporte.');
+        }
+        
+        // Salvar dados da loja
+        currentShopId = tokenData.shop_id;
+        currentRefreshToken = tokenData.refresh_token;
+        accessToken = tokenData.access_token;
+        
+        // Salvar no localStorage
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('shopId', currentShopId);
+        localStorage.setItem('refreshToken', currentRefreshToken);
+        
+        console.log('Login realizado com sucesso para loja:', currentShopId);
+        
+        // Atualizar header com nome do usuário
+        updateHeaderUser(email);
+        
+        // Mostrar seção de pedidos
+        showOrdersScreen();
+        
+        // Carregar pedidos
+        loadOrders();
+        
+    } catch (error) {
+        console.error('Erro no login:', error);
+        
+        // Tratamento específico para diferentes tipos de erro
+        let errorMessage = 'Erro desconhecido ao fazer login';
+        
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        } else if (error.message.includes('Invalid login credentials')) {
+            errorMessage = 'Email ou senha incorretos.';
+        } else if (error.message.includes('Email not confirmed')) {
+            errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
+        } else if (error.message.includes('Too many requests')) {
+            errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
+        } else {
+            errorMessage = error.message;
+        }
+        
+        showLoginError(errorMessage);
+    } finally {
+        hideLoadingIndicator();
+    }
+}
+
+// Função auxiliar para mostrar erro de login
+function showLoginError(message) {
+    loginError.textContent = message;
+    loginError.style.display = 'block';
+}
+
+// Função auxiliar para ocultar erro de login
+function hideLoginError() {
+    loginError.style.display = 'none';
+}
+
+// Verificar se existe sessão ativa
+async function checkExistingSession() {
+    try {
+        // Verificar sessão do Supabase
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (session && session.user) {
+            currentUser = session.user;
+            const email = currentUser.email;
+            
+            // Buscar tokens da loja do usuário
+            const { data: tokenData, error: tokenError } = await supabaseClient
+                .from('shopee_tokens')
+                .select('shop_id, access_token, refresh_token')
+                .eq('user_email', email)
+                .single();
+            
+            if (tokenData) {
+                // Restaurar dados da sessão
+                currentShopId = tokenData.shop_id;
+                currentRefreshToken = tokenData.refresh_token;
+                accessToken = tokenData.access_token;
+                
+                // Salvar no localStorage
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('shopId', currentShopId);
+                localStorage.setItem('refreshToken', currentRefreshToken);
+                
+                console.log('Sessão existente restaurada para:', email);
+                
+                // Atualizar header com nome do usuário
+                updateHeaderUser(email);
+                
+                // Mostrar seção de pedidos
+                showOrdersScreen();
+                
+                // Carregar pedidos
+                loadOrders();
+                
+                return;
+            }
+        }
+    } catch (error) {
+        console.log('Nenhuma sessão existente encontrada:', error.message);
+    }
     
-    // Salvar no localStorage
-    localStorage.setItem('shopId', shopId);
-    localStorage.setItem('refreshToken', refreshToken);
-    
-    // Mostrar seção de pedidos
-    showOrdersScreen();
-    
-    // Carregar pedidos
-    loadOrders();
+    // Se chegou aqui, mostrar tela de login
+    showLoginScreen();
 }
 
 /**
@@ -580,6 +825,7 @@ async function handleLogout() {
         currentUser = null;
         
         // Limpar localStorage
+        localStorage.removeItem('userEmail');
         localStorage.removeItem('shopId');
         localStorage.removeItem('refreshToken');
         
@@ -597,7 +843,7 @@ async function handleLogout() {
 }
 
 /**
- * Carrega os pedidos da API
+ * Carrega os pedidos da API com renovação automática de token
  */
 async function loadOrders() {
     if (!currentShopId) {
@@ -611,48 +857,132 @@ async function loadOrders() {
     refreshBtn.textContent = 'Carregando...';
     
     try {
-        // Construir a URL com parâmetros na querystring para facilitar o CORS
-        const url = `${API_BASE_URL}/shopee/orders?shop_id=${currentShopId}&order_status=ALL`;
-        console.log("Solicitando pedidos da URL:", url);
+        console.log('Exibindo tela de pedidos');
+        console.log('Solicitando pedidos da URL:', `${API_BASE_URL}/shopee/orders`);
         
-        // Abordagem direta usando XMLHttpRequest
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        xhr.withCredentials = true;
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        
-        xhr.onload = function() {
-            console.log("Resposta recebida com status:", xhr.status);
-            if (xhr.status === 200) {
-                try {
-                    const listData = JSON.parse(xhr.responseText);
-                    console.log("Resposta completa da API:", listData);
-                    if (listData.response && listData.response.order_list) {
-                        console.log("Número de pedidos recebidos:", listData.response.order_list.length);
-                    }
-                    processOrdersList(listData);
-                } catch (error) {
-                    console.error("Erro ao processar resposta JSON:", error);
-                    handleOrdersError(error);
+        // Usar o sistema de renovação automática
+        const listData = await executeWithAutoTokenRefresh(async () => {
+            const response = await fetch(`${API_BASE_URL}/shopee/orders?shop_id=${currentShopId}&order_status=ALL`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-            } else {
-                console.error("Erro na resposta da API:", xhr.status, xhr.statusText);
-                handleOrdersError(new Error(`Erro ${xhr.status}: ${xhr.statusText}`));
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erro ${response.status}: ${errorText}`);
             }
-        };
+            
+            return await response.json();
+        });
         
-        xhr.onerror = function(e) {
-            console.error("Erro de rede ao carregar pedidos:", e);
-            // Tentar abordagem alternativa
-            fallbackLoadOrders();
-        };
+        console.log("Resposta completa da API:", listData);
+        processOrdersList(listData);
         
-        xhr.send();
-        console.log("Requisição enviada");
-    } catch (error) {
+            } catch (error) {
         console.error('Erro ao carregar pedidos:', error);
-        // Tentar abordagem alternativa
-        fallbackLoadOrders();
+        
+        // Verificar se é erro de refresh token expirado
+        if (error.message.includes('refresh_token_expired') || 
+            error.message.includes('Your refresh_token expired') ||
+            error.message.includes('Unauthorized')) {
+            
+            ordersContainer.innerHTML = `
+                <div class="error-message">
+                    <h3>🔑 Autorização Expirada</h3>
+                    <p><strong>Seu token de autorização com a Shopee expirou!</strong></p>
+                    <p>É necessário <strong>reautorizar</strong> sua loja com a Shopee para continuar usando o sistema.</p>
+                    <p>⚠️ <em>Isso acontece automaticamente a cada algumas semanas por segurança.</em></p>
+                    
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px;">
+                        <strong>📞 Entre em contato com o suporte:</strong><br>
+                        <span style="color: #ffc107;">suporte@dnotas.com.br</span><br>
+                        <small>Informe o ID da sua loja: <code>${currentShopId}</code></small>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 15px 0;">
+                        <button class="btn btn-primary" id="reauth-btn" style="margin-right: 10px;">🔗 Gerar Link de Reautorização</button>
+                        <button class="btn btn-outline" id="relogin-btn">Fazer Login Novamente</button>
+                    </div>
+                </div>
+            `;
+            
+            // Adicionar eventos aos botões
+            const reauthBtn = document.getElementById('reauth-btn');
+            const reloginBtn = document.getElementById('relogin-btn');
+            
+            if (reauthBtn) {
+                reauthBtn.addEventListener('click', async () => {
+                    try {
+                        reauthBtn.textContent = 'Gerando link...';
+                        reauthBtn.disabled = true;
+                        
+                        const response = await fetch(`${API_BASE_URL}/shopee/auth/link`);
+                        const data = await response.json();
+                        
+                        if (data.authUrl) {
+                            window.open(data.authUrl, '_blank');
+                            
+                            // Mostrar instruções
+                            alert(`Link de reautorização aberto em nova aba!
+
+📋 INSTRUÇÕES:
+1. Complete a autorização na nova aba
+2. Aguarde a confirmação
+3. Volte aqui e clique em "Fazer Login Novamente"
+
+⚠️ Importante: Não feche esta página!`);
+                        } else {
+                            throw new Error('Falha ao gerar link');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao gerar link:', error);
+                        alert('Erro ao gerar link de reautorização. Entre em contato com o suporte.');
+                    } finally {
+                        reauthBtn.textContent = '🔗 Gerar Link de Reautorização';
+                        reauthBtn.disabled = false;
+                    }
+                });
+            }
+            
+            if (reloginBtn) {
+                reloginBtn.addEventListener('click', () => {
+                    handleLogout();
+                });
+            }
+            
+        } else if (error.message.includes('Falha ao renovar token')) {
+            ordersContainer.innerHTML = `
+                <div class="error-message">
+                    <h3>Erro ao carregar pedidos</h3>
+                    <p>Falha ao renovar token de acesso</p>
+                    <p>Você pode precisar fazer login novamente.</p>
+                    <button class="btn btn-primary" id="retry-btn">Tentar Novamente</button>
+                    <button class="btn btn-outline" id="relogin-btn">Fazer Login Novamente</button>
+                </div>
+            `;
+            
+            // Adicionar eventos aos botões
+            const retryBtn = document.getElementById('retry-btn');
+            const reloginBtn = document.getElementById('relogin-btn');
+            
+            if (retryBtn) {
+                retryBtn.addEventListener('click', loadOrders);
+            }
+            
+            if (reloginBtn) {
+                reloginBtn.addEventListener('click', () => {
+                    handleLogout();
+                });
+            }
+        } else {
+            handleOrdersError(error);
+        }
+    } finally {
+        // Restaurar o botão
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = 'Atualizar';
     }
 }
 
@@ -1358,51 +1688,58 @@ async function handleViewDetails(orderSn) {
 
 // Configura os event listeners para os botões
 function setupEventListeners() {
+    console.log('Configurando event listeners...');
+    
     // Event listener para o botão de login
-    document.getElementById('login-btn').addEventListener('click', function() {
-        const shopId = document.getElementById('shop-id').value.trim();
-        const refreshToken = document.getElementById('refresh-token').value.trim();
-        
-        if (shopId && refreshToken) {
-            // Salva os tokens no localStorage
-            localStorage.setItem('shopId', shopId);
-            localStorage.setItem('refreshToken', refreshToken);
-            
-            // Salvar nas variáveis globais
-            currentShopId = shopId;
-            currentRefreshToken = refreshToken;
-            
-            // Carrega os pedidos
-            loadOrders();
-            
-            // Mostra a tela de pedidos
-            showOrdersScreen();
-        } else {
-            alert('Por favor, preencha todos os campos.');
-        }
-    });
+    const loginBtnElement = document.getElementById('login-btn');
+    console.log('Botão de login encontrado:', !!loginBtnElement);
+    
+    if (loginBtnElement) {
+        loginBtnElement.addEventListener('click', handleLogin);
+        console.log('Event listener do botão de login configurado');
+    } else {
+        console.error('Botão de login não encontrado!');
+    }
     
     // Event listener para o botão de logout
-    document.getElementById('logout-btn').addEventListener('click', function() {
-        // Remove os tokens do localStorage
-        localStorage.removeItem('shopId');
-        localStorage.removeItem('refreshToken');
-        
-        // Limpar variáveis globais
-        currentShopId = null;
-        currentRefreshToken = null;
-        
-        // Mostra a tela de login
-        showLoginScreen();
-    });
+    const logoutBtnElement = document.getElementById('logout-btn');
+    if (logoutBtnElement) {
+        logoutBtnElement.addEventListener('click', handleLogout);
+    }
     
     // Event listener para o botão de refresh
-    document.getElementById('refresh-btn').addEventListener('click', function() {
-        loadOrders();
-    });
+    const refreshBtnElement = document.getElementById('refresh-btn');
+    if (refreshBtnElement) {
+        refreshBtnElement.addEventListener('click', function() {
+            loadOrders();
+        });
+    }
     
     // Event listener para o filtro de data
-    document.getElementById('date-filter').addEventListener('change', function() {
-        loadOrders();
-    });
+    const dateFilterElement = document.getElementById('date-filter');
+    if (dateFilterElement) {
+        dateFilterElement.addEventListener('change', function() {
+            loadOrders();
+        });
+    }
+    
+    // Event listener para Enter nos campos de login
+    const emailElement = document.getElementById('user-email');
+    const passwordElement = document.getElementById('user-password');
+    
+    if (emailElement) {
+        emailElement.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    }
+    
+    if (passwordElement) {
+        passwordElement.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    }
 } 

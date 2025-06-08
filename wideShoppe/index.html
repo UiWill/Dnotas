@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DNotas Shopee - Gerenciador de Pedidos</title>
+    <title>DNotes Shopee - Gerenciador de Pedidos</title>
     <style>
         /* Estilos de base */
         :root {
@@ -658,22 +658,41 @@
             <div class="loading-circle"></div>
             <div class="loading-inner-circle"></div>
         </div>
-        <div class="loading-text">Carregando Dnotas...</div>
+        <div class="loading-text">Carregando DNotes...</div>
     </div>
+
+    <!-- Header da aplicação -->
+    <header class="app-header" id="app-header" style="display: none;">
+        <div class="logo-container">
+            <div class="dnotas-logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#2196F3"/>
+                    <path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="logo-text">DNOTAS</div>
+            <div class="header-subtitle">Gerenciamento de Pedidos</div>
+        </div>
+        <div id="user-info" style="color: rgba(255, 255, 255, 0.8);"></div>
+    </header>
 
     <!-- Seção de login -->
     <section id="login-section" style="display: none;">
         <div class="container login-container">
-            <h2>Login DNotas Shopee</h2>
+            <h2>Login DNotes Shopee</h2>
             <div class="form-group">
-                <label for="shop-id">Shop ID</label>
-                <input type="text" id="shop-id" placeholder="Digite o ID da loja">
+                <label for="user-email">E-mail</label>
+                <input type="email" id="user-email" placeholder="Digite seu e-mail">
             </div>
             <div class="form-group">
-                <label for="refresh-token">Refresh Token</label>
-                <input type="password" id="refresh-token" placeholder="Digite o token de acesso">
+                <label for="user-password">Senha</label>
+                <input type="password" id="user-password" placeholder="Digite sua senha">
             </div>
             <button id="login-btn" class="btn btn-primary">Entrar</button>
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="test-connection-btn" class="btn btn-outline" style="font-size: 12px; padding: 5px 10px;">Testar Conexão</button>
+            </div>
+            <div id="login-error" style="color: var(--error-color); margin-top: 10px; display: none;"></div>
         </div>
     </section>
 
@@ -807,8 +826,8 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
         // Inicialização do Supabase
-        const supabaseUrl = 'https://lqfsunirpdcgrshfcqmx.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZnN1bmlycGRjZ3JzaGZjcW14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzY1MDYyODIsImV4cCI6MTk5MjA4MjI4Mn0.vTfaijPKkqrPx8Uqd-cFYwZnvP22NrXNXGi3_jh1-hM';
+        const supabaseUrl = 'https://adgbcgiuaqtkzttpesrv.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZ2JjZ2l1YXF0a3p0dHBlc3J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMjAwODksImV4cCI6MjA1OTY5NjA4OX0.IbsuraTr2JrmCJXmMAo4Qor9IyRXMDKAQ_HTIJE6TW4';
         window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     </script>
     <script src="app.js"></script>
