@@ -58,7 +58,11 @@ async function renewAccessToken() {
         });
         
         if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
+            const errorText = await response.text();
+            if (response.status === 401) {
+                throw new Error('refresh_token_expired');
+            }
+            throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
         }
         
         const data = await response.json();
@@ -123,8 +127,15 @@ async function executeWithAutoTokenRefresh(requestFunction) {
                            error.message.includes('Authentication failed') ||
                            error.message.includes('Erro 500') ||
                            error.message.includes('Internal Server Error') ||
+                           error.message.includes('Falha ao renovar token de acesso') ||
                            error.status === 401 ||
                            error.status === 500;
+        
+        console.log('Verificando se é erro de token:', {
+            isTokenError,
+            errorMessage: error.message,
+            errorStatus: error.status
+        });
         
         if (isTokenError) {
             console.log('Detectado erro de token, tentando renovar...');
@@ -901,7 +912,16 @@ async function loadOrders() {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`Erro ${response.status}: ${errorText}`);
+                console.log('Erro na requisição de pedidos:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorText: errorText
+                });
+                
+                // Criar erro com status para melhor detecção
+                const error = new Error(`Erro ${response.status}: ${errorText}`);
+                error.status = response.status;
+                throw error;
             }
             
             return await response.json();
@@ -916,7 +936,9 @@ async function loadOrders() {
         // Verificar se é erro de refresh token expirado
         if (error.message.includes('refresh_token_expired') || 
             error.message.includes('Your refresh_token expired') ||
-            error.message.includes('Unauthorized')) {
+            error.message.includes('Unauthorized') ||
+            error.message.includes('Erro HTTP: 401') ||
+            error.message.includes('Falha ao renovar token de acesso')) {
             
             ordersContainer.innerHTML = `
                 <div class="error-message">
