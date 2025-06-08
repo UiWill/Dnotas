@@ -1,15 +1,38 @@
-// Elementos do DOM
-const loginSection = document.getElementById('login-section');
-const ordersSection = document.getElementById('orders-section');
-const userEmailInput = document.getElementById('user-email');
-const userPasswordInput = document.getElementById('user-password');
-const loginBtn = document.getElementById('login-btn');
-const loginError = document.getElementById('login-error');
-const logoutBtn = document.getElementById('logout-btn');
-const refreshBtn = document.getElementById('refresh-btn');
-const dateFilter = document.getElementById('date-filter');
-const ordersContainer = document.getElementById('orders-container');
-const orderTemplate = document.getElementById('order-template');
+// Elementos do DOM - serão definidos após o carregamento da página
+let loginSection;
+let ordersSection;
+let userEmailInput;
+let userPasswordInput;
+let loginBtn;
+let loginError;
+let logoutBtn;
+let refreshBtn;
+let dateFilter;
+let ordersContainer;
+let orderTemplate;
+
+// Função para inicializar elementos DOM
+function initializeDOM() {
+    loginSection = document.getElementById('login-section');
+    ordersSection = document.getElementById('orders-section');
+    userEmailInput = document.getElementById('user-email');
+    userPasswordInput = document.getElementById('user-password');
+    loginBtn = document.getElementById('login-btn');
+    loginError = document.getElementById('login-error');
+    logoutBtn = document.getElementById('logout-btn');
+    refreshBtn = document.getElementById('refresh-btn');
+    dateFilter = document.getElementById('date-filter');
+    ordersContainer = document.getElementById('orders-container');
+    orderTemplate = document.getElementById('order-template');
+    
+    console.log('Elementos DOM inicializados:', {
+        loginSection: !!loginSection,
+        userEmailInput: !!userEmailInput,
+        userPasswordInput: !!userPasswordInput,
+        loginBtn: !!loginBtn,
+        loginError: !!loginError
+    });
+}
 
 // Variáveis globais para armazenar o estado da aplicação
 let currentShopId = '';
@@ -148,9 +171,16 @@ function checkSupabaseConnection() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('App inicializado - Verificando autenticação');
     
+    // Inicializar elementos DOM primeiro
+    initializeDOM();
+    
     // Verificar conexão do Supabase
     if (!checkSupabaseConnection()) {
-        showLoginError('Erro: Sistema de autenticação não disponível. Recarregue a página.');
+        if (loginError) {
+            showLoginError('Erro: Sistema de autenticação não disponível. Recarregue a página.');
+        } else {
+            console.error('Sistema de autenticação não disponível e elemento de erro não encontrado');
+        }
         return;
     }
     
@@ -1691,52 +1721,47 @@ function setupEventListeners() {
     console.log('Configurando event listeners...');
     
     // Event listener para o botão de login
-    const loginBtnElement = document.getElementById('login-btn');
-    console.log('Botão de login encontrado:', !!loginBtnElement);
+    console.log('Botão de login encontrado:', !!loginBtn);
     
-    if (loginBtnElement) {
-        loginBtnElement.addEventListener('click', handleLogin);
+    if (loginBtn) {
+        // Remover event listeners existentes para evitar duplicação
+        loginBtn.removeEventListener('click', handleLogin);
+        loginBtn.addEventListener('click', handleLogin);
         console.log('Event listener do botão de login configurado');
     } else {
         console.error('Botão de login não encontrado!');
     }
     
     // Event listener para o botão de logout
-    const logoutBtnElement = document.getElementById('logout-btn');
-    if (logoutBtnElement) {
-        logoutBtnElement.addEventListener('click', handleLogout);
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
     }
     
     // Event listener para o botão de refresh
-    const refreshBtnElement = document.getElementById('refresh-btn');
-    if (refreshBtnElement) {
-        refreshBtnElement.addEventListener('click', function() {
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
             loadOrders();
         });
     }
     
     // Event listener para o filtro de data
-    const dateFilterElement = document.getElementById('date-filter');
-    if (dateFilterElement) {
-        dateFilterElement.addEventListener('change', function() {
+    if (dateFilter) {
+        dateFilter.addEventListener('change', function() {
             loadOrders();
         });
     }
     
     // Event listener para Enter nos campos de login
-    const emailElement = document.getElementById('user-email');
-    const passwordElement = document.getElementById('user-password');
-    
-    if (emailElement) {
-        emailElement.addEventListener('keypress', function(e) {
+    if (userEmailInput) {
+        userEmailInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleLogin();
             }
         });
     }
     
-    if (passwordElement) {
-        passwordElement.addEventListener('keypress', function(e) {
+    if (userPasswordInput) {
+        userPasswordInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 handleLogin();
             }
