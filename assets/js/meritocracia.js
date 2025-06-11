@@ -67,10 +67,25 @@ function setupEventListeners() {
     document.getElementById('formContribuicao').addEventListener('submit', handleSubmit);
     
     // Gerenciamento de funcionários
-    document.getElementById('addEmployeeBtn').addEventListener('click', addEmployee);
+    document.getElementById('addEmployeeBtn').addEventListener('click', function(event) {
+        event.preventDefault();
+        addEmployee();
+    });
     document.getElementById('newEmployee').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            e.preventDefault();
             addEmployee();
+        }
+    });
+    
+    // Easter egg do tubarão - funciona em qualquer campo de texto
+    document.addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if (e.target.value.toLowerCase().includes('tubarao')) {
+                triggerSharkEasterEgg();
+                // Limpar o campo que ativou o easter egg
+                e.target.value = e.target.value.replace(/tubarao/gi, '');
+            }
         }
     });
     
@@ -133,7 +148,7 @@ function addEmployee(nome = null) {
     
     const nomeToAdd = nome || newEmployeeInput.value.trim();
     
-    if (!nomeToAdd) {
+    if (!nomeToAdd || nomeToAdd === '') {
         showNotification('Digite o nome do funcionário', 'warning');
         return;
     }
@@ -184,6 +199,13 @@ function removeEmployeeByIndex(index, nome) {
     if (index < 0 || index >= funcionarios.length) {
         console.error('Índice inválido:', index);
         showNotification('Erro ao remover funcionário', 'error');
+        return;
+    }
+    
+    // Solicitar senha de administrador
+    const senha = prompt('Digite a senha de administrador para remover funcionário:');
+    if (!senha || senha !== '102030') {
+        if (senha) showNotification('Senha incorreta!', 'error');
         return;
     }
     
@@ -342,7 +364,11 @@ function initializeTables() {
             { data: 'contribuicoes', title: 'Contribuições' },
             { data: 'media', title: 'Média', render: renderMedia }
         ],
-        order: [[2, 'desc']] // Ordenar por pontos, maior primeiro
+        order: [[2, 'desc']], // Ordenar por pontos, maior primeiro
+        createdRow: function(row, data, dataIndex) {
+            // Adicionar atributo para destacar funcionários com 0 pontos
+            $(row).attr('data-total-pontos', data.totalPontos);
+        }
     });
 }
 
@@ -543,9 +569,8 @@ function atualizarTabelaRanking(pontos) {
         }
     });
     
-    // Ordenar por pontos
+    // Ordenar por pontos (TODOS os funcionários, incluindo com 0 pontos)
     const rankingData = Object.values(estatisticas)
-        .filter(stat => stat.totalPontos > 0)
         .sort((a, b) => b.totalPontos - a.totalPontos);
     
     tabelaRanking.clear();
@@ -659,8 +684,41 @@ async function excluirContribuicao(id) {
             return;
         }
         
-        await contribuicoesRef.child(id).remove();
-        showNotification('Contribuição excluída!', 'success');
+        // Primeiro, buscar a contribuição para verificar se estava validada
+        const snapshot = await contribuicoesRef.child(id).once('value');
+        if (snapshot.exists()) {
+            const contribuicao = snapshot.val();
+            console.log('Excluindo contribuição:', contribuicao);
+            
+            // Se a contribuição estava validada, remover os pontos do funcionário
+            if (contribuicao.status === 'Validado' && pontosRef) {
+                const pontosSnapshot = await pontosRef.child(contribuicao.nome).once('value');
+                const pontosAtuais = pontosSnapshot.exists() ? pontosSnapshot.val() : 0;
+                const novosPontos = Math.max(0, pontosAtuais - contribuicao.pontuacao); // Não deixar negativo
+                
+                if (novosPontos === 0) {
+                    // Se chegou a zero, remover a entrada
+                    await pontosRef.child(contribuicao.nome).remove();
+                } else {
+                    // Atualizar com o novo valor
+                    await pontosRef.child(contribuicao.nome).set(novosPontos);
+                }
+                
+                console.log(`Pontos de ${contribuicao.nome}: ${pontosAtuais} -> ${novosPontos}`);
+            }
+            
+            // Remover a contribuição
+            await contribuicoesRef.child(id).remove();
+            
+            let mensagem = 'Contribuição excluída!';
+            if (contribuicao.status === 'Validado') {
+                mensagem += ` Pontos de ${contribuicao.nome} foram ajustados (-${contribuicao.pontuacao}).`;
+            }
+            
+            showNotification(mensagem, 'success');
+        } else {
+            showNotification('Contribuição não encontrada!', 'error');
+        }
     } catch (error) {
         console.error('Erro ao excluir contribuição:', error);
         showNotification('Erro ao excluir contribuição. Tente novamente.', 'error');
@@ -670,7 +728,7 @@ async function excluirContribuicao(id) {
 // Limpar todas as pontuações e contribuições
 async function limparPontuacoes() {
     const senha = prompt('Digite a senha de administrador para limpar TODOS os dados:');
-    if (!senha || senha !== '2020') {
+    if (!senha || senha !== '102030') {
         if (senha) showNotification('Senha incorreta!', 'error');
         return;
     }
@@ -764,6 +822,188 @@ function carregarDadosLocais() {
 
 function salvarDadosLocais() {
     localStorage.setItem('contribuicoes', JSON.stringify(contribuicoes));
+}
+
+// Easter Egg do Tubarão 🦈
+function triggerSharkEasterEgg() {
+    // Prevenir múltiplas execuções
+    if (document.getElementById('shark-overlay')) {
+        return;
+    }
+    
+    // Criar overlay do tubarão
+    const sharkOverlay = document.createElement('div');
+    sharkOverlay.id = 'shark-overlay';
+    sharkOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 20, 40, 0.9);
+        z-index: 999999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        animation: sharkFadeIn 0.3s ease;
+    `;
+    
+    // Adicionar CSS da animação
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes sharkFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes sharkBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
+            40% { transform: translateY(-30px) scale(1.1); }
+            60% { transform: translateY(-15px) scale(1.05); }
+        }
+        @keyframes sharkSway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Criar tubarão gigante
+    const shark = document.createElement('div');
+    shark.style.cssText = `
+        font-size: 15rem;
+        animation: sharkBounce 1s ease infinite, sharkSway 2s ease-in-out infinite;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        user-select: none;
+    `;
+    shark.textContent = '🦈';
+    
+    // Texto dramático
+    const text = document.createElement('div');
+    text.style.cssText = `
+        color: #ff4444;
+        font-size: 3rem;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 2rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        animation: sharkBounce 1s ease infinite;
+        user-select: none;
+    `;
+    text.textContent = 'TUBARÃO DETECTADO! 🚨';
+    
+    // Texto adicional
+    const subText = document.createElement('div');
+    subText.style.cssText = `
+        color: #ffffff;
+        font-size: 1.5rem;
+        text-align: center;
+        margin-top: 1rem;
+        opacity: 0.9;
+        user-select: none;
+    `;
+    subText.textContent = 'EVACUEM A ÁREA IMEDIATAMENTE!';
+    
+    sharkOverlay.appendChild(shark);
+    sharkOverlay.appendChild(text);
+    sharkOverlay.appendChild(subText);
+    document.body.appendChild(sharkOverlay);
+    
+    // Tocar "grito" usando Web Audio API
+    playScreamSound();
+    
+    // Remover após 2 segundos
+    setTimeout(() => {
+        sharkOverlay.style.animation = 'sharkFadeIn 0.3s ease reverse';
+        setTimeout(() => {
+            if (document.body.contains(sharkOverlay)) {
+                document.body.removeChild(sharkOverlay);
+            }
+            if (document.head.contains(style)) {
+                document.head.removeChild(style);
+            }
+        }, 300);
+    }, 2000);
+}
+
+// Gerar som de "grito" usando Web Audio API
+function playScreamSound() {
+    try {
+        // Tentar reproduzir som primeiro com interação do usuário
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Verificar se precisa de interação do usuário
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                playActualSound(audioContext);
+            });
+        } else {
+            playActualSound(audioContext);
+        }
+        
+    } catch (error) {
+        console.log('Não foi possível tocar o som do tubarão:', error);
+        // Fallback: mostrar notificação dramática
+        showNotification('🦈 TUBARÃO! AAAHHHHH! 🦈', 'error');
+        
+        // Tentar vibração no dispositivo móvel
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200, 100, 200]);
+        }
+    }
+}
+
+function playActualSound(audioContext) {
+    // Criar som dramático usando osciladores
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const oscillator3 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // Configurar frequências para som mais dramático (como um grito)
+    oscillator1.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator1.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.3);
+    oscillator1.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.8);
+    oscillator1.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 1.5);
+    oscillator1.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 2);
+    
+    oscillator2.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator2.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.4);
+    oscillator2.frequency.exponentialRampToValueAtTime(900, audioContext.currentTime + 1);
+    oscillator2.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
+    
+    oscillator3.frequency.setValueAtTime(1000, audioContext.currentTime);
+    oscillator3.frequency.exponentialRampToValueAtTime(500, audioContext.currentTime + 0.2);
+    oscillator3.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 0.6);
+    oscillator3.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 1.2);
+    oscillator3.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 2);
+    
+    // Configurar tipo de onda para som mais dramático
+    oscillator1.type = 'sawtooth';
+    oscillator2.type = 'square';
+    oscillator3.type = 'triangle';
+    
+    // Configurar volume com mais dramaticidade
+    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.4, audioContext.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.5);
+    gainNode.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 1);
+    gainNode.gain.exponentialRampToValueAtTime(0.1, audioContext.currentTime + 1.5);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+    
+    // Conectar tudo
+    oscillator1.connect(gainNode);
+    oscillator2.connect(gainNode);
+    oscillator3.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Tocar por 2 segundos
+    oscillator1.start();
+    oscillator2.start();
+    oscillator3.start();
+    oscillator1.stop(audioContext.currentTime + 2);
+    oscillator2.stop(audioContext.currentTime + 2);
+    oscillator3.stop(audioContext.currentTime + 2);
 }
 
 // Tornar funções globais para uso nos botões HTML

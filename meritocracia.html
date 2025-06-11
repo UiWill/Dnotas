@@ -404,6 +404,17 @@
             50% { opacity: 0.7; }
         }
 
+        /* Destacar funcionários com 0 pontos no ranking */
+        .dataTables_wrapper tbody tr[data-total-pontos="0"] {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+            opacity: 0.7;
+        }
+        
+        .dataTables_wrapper tbody tr[data-total-pontos="0"] td {
+            color: #888 !important;
+            font-style: italic;
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             .header {
@@ -570,15 +581,7 @@
                     <p>Um sistema transparente e justo para reconhecer e recompensar as contribuições excepcionais de nossa equipe.</p>
                 </div>
 
-                <!-- Ações Rápidas -->
-                <div class="actions-bar" data-aos="fade-up" data-aos-delay="200">
-                    <div class="quick-actions">
-                        <button id="btnLimparTudo" class="btn btn-danger">
-                            <i class="bi bi-trash3"></i>
-                            Resetar Sistema
-                        </button>
-                    </div>
-                </div>
+                <!-- Ações Rápidas removidas daqui - movidas para baixo -->
 
                 <!-- Formulário para adicionar contribuição -->
                 <div class="merit-card" data-aos="fade-up" data-aos-delay="300">
@@ -712,6 +715,16 @@
                     </div>
                     <div class="employee-list" id="employeeList">
                         <!-- Funcionários serão adicionados aqui dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Ações de Sistema -->
+                <div class="actions-bar" data-aos="fade-up" data-aos-delay="700">
+                    <div class="quick-actions">
+                        <button id="btnLimparTudo" class="btn btn-danger">
+                            <i class="bi bi-trash3"></i>
+                            Resetar Sistema
+                        </button>
                     </div>
                 </div>
             </div>
