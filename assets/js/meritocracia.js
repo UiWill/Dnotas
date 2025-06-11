@@ -344,14 +344,20 @@ function initializeTables() {
         ...commonConfig,
         columns: [
             { data: 'nome', title: 'Colaborador' },
-            { data: 'pontuacao', title: 'Pontos' },
-            { data: 'categoria', title: 'Categoria' },
+            { data: 'pontuacao', title: 'Pontos', render: renderPontuacao },
+            { data: 'categoria', title: 'Categoria', render: renderCategoria },
             { data: 'descricao', title: 'Descrição' },
             { data: 'status', title: 'Status', render: renderStatus },
             { data: 'timestamp', title: 'Data', render: renderData },
             { data: null, title: 'Ações', render: renderAcoes, orderable: false }
         ],
-        order: [[5, 'desc']] // Ordenar por data, mais recente primeiro
+        order: [[5, 'desc']], // Ordenar por data, mais recente primeiro
+        createdRow: function(row, data, dataIndex) {
+            // Adicionar classe para penalidades
+            if (data.pontuacao < 0) {
+                $(row).addClass('penalty-row');
+            }
+        }
     });
     
     // Inicializar tabela de ranking
@@ -392,6 +398,25 @@ function renderStatus(data) {
 // Renderizar data
 function renderData(data) {
     return new Date(data).toLocaleDateString('pt-BR');
+}
+
+// Renderizar pontuação com destaque para negativas
+function renderPontuacao(data) {
+    if (data < 0) {
+        return `<span class="penalty-points">${data}</span>`;
+    } else {
+        return `<span style="color: #4caf50; font-weight: bold;">+${data}</span>`;
+    }
+}
+
+// Renderizar categoria com destaque para penalidades
+function renderCategoria(data) {
+    const penaltyCategories = ['Atraso', 'Qualidade-Negativa', 'Comportamento', 'Negligencia', 'Conflito', 'Descumprimento', 'Improdutividade'];
+    
+    if (penaltyCategories.includes(data)) {
+        return `<span class="penalty-category">${data}</span>`;
+    }
+    return data;
 }
 
 // Renderizar posição no ranking
@@ -471,8 +496,8 @@ async function handleSubmit(event) {
         return;
     }
     
-    if (pontuacao < 1 || pontuacao > 100) {
-        showNotification('A pontuação deve estar entre 1 e 100!', 'error');
+    if (pontuacao < -50 || pontuacao > 100 || pontuacao === 0) {
+        showNotification('A pontuação deve estar entre -50 e +100 (não pode ser zero)!', 'error');
         return;
     }
     
@@ -500,7 +525,12 @@ async function handleSubmit(event) {
         // Limpar formulário
         form.reset();
         
-        showNotification('Contribuição registrada com sucesso!', 'success');
+        // Mensagem diferente para penalidades
+        if (pontuacao < 0) {
+            showNotification(`Penalidade de ${Math.abs(pontuacao)} pontos registrada para ${nome}!`, 'warning');
+        } else {
+            showNotification(`Contribuição de +${pontuacao} pontos registrada para ${nome}!`, 'success');
+        }
         
     } catch (error) {
         console.error('Erro ao registrar contribuição:', error);
@@ -616,7 +646,12 @@ async function validarContribuicao(id) {
                 await pontosRef.child(contribuicao.nome).set(pontosAtuais + contribuicao.pontuacao);
             }
             
-            showNotification(`Contribuição de ${contribuicao.nome} aprovada! (+${contribuicao.pontuacao} pontos)`, 'success');
+            // Mensagem diferente para penalidades aprovadas
+            if (contribuicao.pontuacao < 0) {
+                showNotification(`Penalidade de ${contribuicao.nome} aprovada! (${contribuicao.pontuacao} pontos)`, 'warning');
+            } else {
+                showNotification(`Contribuição de ${contribuicao.nome} aprovada! (+${contribuicao.pontuacao} pontos)`, 'success');
+            }
         }
     } catch (error) {
         console.error('Erro ao validar contribuição:', error);

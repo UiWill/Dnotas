@@ -415,6 +415,28 @@
             font-style: italic;
         }
 
+        /* Destacar penalidades (pontos negativos) */
+        .penalty-row {
+            background-color: rgba(244, 67, 54, 0.1) !important;
+            border-left: 3px solid #f44336 !important;
+        }
+        
+        .penalty-points {
+            color: #f44336 !important;
+            font-weight: bold;
+        }
+        
+        .penalty-category {
+            color: #ff5722 !important;
+        }
+        
+        /* Status badge para penalidades */
+        .status-badge.penalty {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             .header {
@@ -607,7 +629,10 @@
                                 Pontuação
                             </label>
                             <input type="number" id="pontuacao" name="pontuacao" class="form-control" 
-                                   placeholder="1-100" required min="1" max="100">
+                                   placeholder="-50 a +100" required min="-50" max="100">
+                            <small class="form-text text-muted">
+                                Pontos positivos para boas ações (+1 a +100) | Pontos negativos para penalidades (-1 a -50)
+                            </small>
                         </div>
 
                         <div class="form-group">
@@ -617,13 +642,24 @@
                             </label>
                             <select id="categoria" name="categoria" class="form-control" required>
                                 <option value="">Selecione uma categoria</option>
-                                <option value="Produtividade">🚀 Produtividade</option>
-                                <option value="Qualidade">⭐ Qualidade</option>
-                                <option value="Inovação">💡 Inovação</option>
-                                <option value="Colaboração">🤝 Colaboração</option>
-                                <option value="Liderança">👑 Liderança</option>
-                                <option value="Atendimento">📞 Atendimento</option>
-                                <option value="Melhoria">🔧 Melhoria de Processo</option>
+                                <optgroup label="🟢 CONTRIBUIÇÕES POSITIVAS">
+                                    <option value="Produtividade">🚀 Produtividade</option>
+                                    <option value="Qualidade">⭐ Qualidade</option>
+                                    <option value="Inovação">💡 Inovação</option>
+                                    <option value="Colaboração">🤝 Colaboração</option>
+                                    <option value="Liderança">👑 Liderança</option>
+                                    <option value="Atendimento">📞 Atendimento</option>
+                                    <option value="Melhoria">🔧 Melhoria de Processo</option>
+                                </optgroup>
+                                <optgroup label="🔴 PENALIDADES">
+                                    <option value="Atraso">⏰ Atrasos/Faltas</option>
+                                    <option value="Qualidade-Negativa">❌ Trabalho Mal Feito</option>
+                                    <option value="Comportamento">⚠️ Comportamento Inadequado</option>
+                                    <option value="Negligencia">🚫 Negligência</option>
+                                    <option value="Conflito">💥 Conflitos/Discussões</option>
+                                    <option value="Descumprimento">📋 Descumprimento de Regras</option>
+                                    <option value="Improdutividade">📉 Baixa Produtividade</option>
+                                </optgroup>
                             </select>
                         </div>
 
