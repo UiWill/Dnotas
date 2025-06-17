@@ -1,4 +1,4 @@
-// Lista de funcionários (será carregada do localStorage ou dados padrão)
+// Lista de prestadores (será carregada do localStorage ou dados padrão)
 let funcionarios = [
     "Diego", "William", "Cristiano", "Eliezer", "Rennan", 
     "Pablo", "Guilherme", "Erick", "Fabricio"
@@ -59,6 +59,9 @@ function initializeSystem() {
     setTimeout(() => {
         showNotification('Sistema de Meritocracia carregado com sucesso!', 'success');
     }, 1000);
+    
+    // Mostrar dica sobre organização das tabelas
+    showTableOrganizationTip();
 }
 
 // Configurar event listeners
@@ -96,15 +99,15 @@ function setupEventListeners() {
     setupFixedButtons();
 }
 
-// Atualizar select de colaboradores
+// Atualizar select de prestadores
 function updateCollaboratorSelect() {
     const selectElement = document.getElementById('nome');
     if (!selectElement) return;
     
     // Limpar opções existentes (exceto a primeira)
-    selectElement.innerHTML = '<option value="">Selecione um colaborador</option>';
+    selectElement.innerHTML = '<option value="">Selecione um prestador</option>';
     
-    // Adicionar funcionários como opções
+    // Adicionar prestadores como opções
     funcionarios.forEach(funcionario => {
         const option = document.createElement('option');
         option.value = funcionario;
@@ -113,7 +116,7 @@ function updateCollaboratorSelect() {
     });
 }
 
-// Carregar funcionários
+// Carregar prestadores
 function loadEmployees() {
     // Tentar carregar do Firebase primeiro
     if (funcionariosRef) {
@@ -138,27 +141,27 @@ function loadEmployees() {
     }
 }
 
-// Adicionar funcionário
+// Adicionar prestador
 function addEmployee(nome = null) {
     const newEmployeeInput = document.getElementById('newEmployee');
     if (!newEmployeeInput) {
-        console.error('Campo de novo funcionário não encontrado');
+        console.error('Campo de novo prestador não encontrado');
         return;
     }
     
     const nomeToAdd = nome || newEmployeeInput.value.trim();
     
     if (!nomeToAdd || nomeToAdd === '') {
-        showNotification('Digite o nome do funcionário', 'warning');
+        showNotification('Digite o nome do prestador', 'warning');
         return;
     }
     
     if (funcionarios.includes(nomeToAdd)) {
-        showNotification('Este funcionário já existe', 'warning');
+        showNotification('Este prestador já existe', 'warning');
         return;
     }
     
-    console.log('Adicionando funcionário:', nomeToAdd);
+    console.log('Adicionando prestador:', nomeToAdd);
     funcionarios.push(nomeToAdd);
     funcionarios.sort(); // Manter lista ordenada
     console.log('Lista atualizada:', funcionarios);
@@ -172,12 +175,12 @@ function addEmployee(nome = null) {
     updateCollaboratorSelect();
     newEmployeeInput.value = '';
     
-    showNotification(`Funcionário "${nomeToAdd}" adicionado com sucesso!`, 'success');
+    showNotification(`Prestador "${nomeToAdd}" adicionado com sucesso!`, 'success');
 }
 
-// Remover funcionário (versão antiga - mantida para compatibilidade)
+// Remover prestador (versão antiga - mantida para compatibilidade)
 function removeEmployee(nome) {
-    if (confirm(`Deseja remover o funcionário "${nome}"?`)) {
+    if (confirm(`Deseja remover o prestador "${nome}"?`)) {
         funcionarios = funcionarios.filter(func => func !== nome);
         
         // Salvar no Firebase e localStorage
@@ -188,32 +191,32 @@ function removeEmployee(nome) {
         updateEmployeeList();
         updateCollaboratorSelect();
         
-        showNotification(`Funcionário "${nome}" removido`, 'success');
+        showNotification(`Prestador "${nome}" removido`, 'success');
     }
 }
 
-// Remover funcionário por índice (versão mais confiável)
+// Remover prestador por índice (versão mais confiável)
 function removeEmployeeByIndex(index, nome) {
-    console.log(`Tentando remover funcionário: ${nome} (índice: ${index})`);
+    console.log(`Tentando remover prestador: ${nome} (índice: ${index})`);
     
     if (index < 0 || index >= funcionarios.length) {
         console.error('Índice inválido:', index);
-        showNotification('Erro ao remover funcionário', 'error');
+        showNotification('Erro ao remover prestador', 'error');
         return;
     }
     
     // Solicitar senha de administrador
-    const senha = prompt('Digite a senha de administrador para remover funcionário:');
+    const senha = prompt('Digite a senha de administrador para remover prestador:');
     if (!senha || senha !== '102030') {
         if (senha) showNotification('Senha incorreta!', 'error');
         return;
     }
     
-    if (confirm(`Deseja remover o funcionário "${nome}"?`)) {
+    if (confirm(`Deseja remover o prestador "${nome}"?`)) {
         // Remover pelo índice para maior precisão
         funcionarios.splice(index, 1);
         
-        console.log('Funcionários restantes:', funcionarios);
+        console.log('Prestadores restantes:', funcionarios);
         
         // Salvar no Firebase e localStorage
         saveEmployeesToFirebase();
@@ -223,30 +226,30 @@ function removeEmployeeByIndex(index, nome) {
         updateEmployeeList();
         updateCollaboratorSelect();
         
-        showNotification(`Funcionário "${nome}" removido com sucesso!`, 'success');
+        showNotification(`Prestador "${nome}" removido com sucesso!`, 'success');
     }
 }
 
-// Salvar funcionários no Firebase
+// Salvar prestadores no Firebase
 function saveEmployeesToFirebase() {
     if (funcionariosRef) {
         funcionariosRef.set(funcionarios)
             .then(() => {
-                console.log('Funcionários salvos no Firebase com sucesso');
+                console.log('Prestadores salvos no Firebase com sucesso');
             })
             .catch((error) => {
-                console.error('Erro ao salvar funcionários no Firebase:', error);
+                console.error('Erro ao salvar prestadores no Firebase:', error);
             });
     } else {
         console.log('Firebase não disponível, salvando apenas no localStorage');
     }
 }
 
-// Atualizar lista de funcionários na interface
+// Atualizar lista de prestadores na interface
 function updateEmployeeList() {
     const employeeList = document.getElementById('employeeList');
     if (!employeeList) {
-        console.error('Lista de funcionários não encontrada');
+        console.error('Lista de prestadores não encontrada');
         return;
     }
     
@@ -333,25 +336,38 @@ function initializeTables() {
         language: {
             url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
         },
-        responsive: true,
+        responsive: {
+            details: {
+                type: 'column',
+                target: 'tr'
+            }
+        },
         pageLength: 10,
         dom: '<"top"lf>rt<"bottom"ip>',
-        order: []
+        order: [],
+        columnDefs: [
+            {
+                targets: '_all',
+                className: 'dt-body-nowrap'
+            }
+        ]
     };
     
     // Inicializar tabela de contribuições
     tabelaContribuicoes = $('#tabelaContribuicoes').DataTable({
         ...commonConfig,
         columns: [
-            { data: 'nome', title: 'Colaborador' },
-            { data: 'pontuacao', title: 'Pontos', render: renderPontuacao },
-            { data: 'categoria', title: 'Categoria', render: renderCategoria },
-            { data: 'descricao', title: 'Descrição' },
-            { data: 'status', title: 'Status', render: renderStatus },
-            { data: 'timestamp', title: 'Data', render: renderData },
-            { data: null, title: 'Ações', render: renderAcoes, orderable: false }
+            { data: 'nome', title: 'Prestador', width: '15%' },
+            { data: 'pontuacao', title: 'Pts', render: renderPontuacao, width: '7%', className: 'text-center' },
+            { data: 'categoria', title: 'Categoria', render: renderCategoria, width: '15%' },
+            { data: 'descricao', title: 'Descrição', width: '30%' },
+            { data: 'status', title: 'Status', render: renderStatus, width: '12%', className: 'text-center' },
+            { data: 'timestamp', title: 'Data', render: renderData, width: '13%', className: 'text-center' },
+            { data: null, title: 'Ações', render: renderAcoes, orderable: false, width: '8%', className: 'text-center' }
         ],
         order: [[5, 'desc']], // Ordenar por data, mais recente primeiro
+        scrollX: true,
+        autoWidth: false,
         createdRow: function(row, data, dataIndex) {
             // Adicionar classe para penalidades
             if (data.pontuacao < 0) {
@@ -440,42 +456,39 @@ function renderAcoes(data, type, row) {
     let botoes = '';
     
     if (row.status === 'Pendente') {
-        // Contribuição pendente - mostrar botões de aprovar e rejeitar
+        // Contribuição pendente - botões compactos apenas com ícones
         botoes = `
-            <button class="btn btn-success btn-sm" onclick="validarContribuicao('${row.id}')" title="Aprovar">
-                <i class="bi bi-check"></i>
-            </button>
-            <button class="btn btn-warning btn-sm" onclick="rejeitarContribuicao('${row.id}')" title="Rejeitar">
-                <i class="bi bi-x"></i>
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 2px; align-items: center; min-width: 45px;">
+                <button class="btn btn-success btn-sm btn-icon" onclick="validarContribuicao('${row.id}')" title="Aprovar">
+                    <i class="bi bi-check"></i>
+                </button>
+                <button class="btn btn-warning btn-sm btn-icon" onclick="rejeitarContribuicao('${row.id}')" title="Rejeitar">
+                    <i class="bi bi-x"></i>
+                </button>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="excluirContribuicao('${row.id}')" title="Excluir">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
         `;
     } else {
-        // Contribuição já aprovada ou rejeitada - mostrar status apenas
-        let statusInfo = '';
-        if (row.status === 'Validado') {
-            statusInfo = `
-                <span class="btn btn-success btn-sm" style="cursor: default; opacity: 0.7;" title="Já aprovado">
-                    <i class="bi bi-check"></i> Aprovado
-                </span>
-            `;
-        } else if (row.status === 'Rejeitado') {
-            statusInfo = `
-                <span class="btn btn-warning btn-sm" style="cursor: default; opacity: 0.7;" title="Já rejeitado">
-                    <i class="bi bi-x"></i> Rejeitado
-                </span>
-            `;
-        }
-        botoes = statusInfo;
+        // Contribuição já aprovada ou rejeitada - apenas botão de excluir
+        botoes = `
+            <button class="btn btn-danger btn-sm btn-icon" onclick="excluirContribuicao('${row.id}')" title="Excluir (Admin)">
+                <i class="bi bi-trash"></i>
+            </button>
+        `;
     }
     
-    // Botão excluir sempre disponível para administradores
-    botoes += `
-        <button class="btn btn-danger btn-sm" onclick="excluirContribuicao('${row.id}')" title="Excluir (Admin)">
+    return botoes;
+}
+
+// Renderizar ações para contribuições processadas (apenas excluir)
+function renderAcoesProcessadas(data, type, row) {
+    return `
+        <button class="btn btn-danger btn-sm btn-icon" onclick="excluirContribuicao('${row.id}')" title="Excluir Contribuição (Remove pontos se aprovada)">
             <i class="bi bi-trash"></i>
         </button>
     `;
-    
-    return `<div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">${botoes}</div>`;
 }
 
 // Manipular envio do formulário
@@ -560,12 +573,20 @@ function observarPontos() {
     }
 }
 
-// Atualizar tabela de contribuições
+// Atualizar tabela de contribuições (apenas pendentes)
 function atualizarTabelaContribuicoes() {
     if (tabelaContribuicoes) {
+        // Filtrar apenas contribuições pendentes
+        const pendingContributions = contribuicoes.filter(contrib => contrib.status === 'Pendente');
+        
         tabelaContribuicoes.clear();
-        tabelaContribuicoes.rows.add(contribuicoes);
+        tabelaContribuicoes.rows.add(pendingContributions);
         tabelaContribuicoes.draw();
+        
+        // Atualizar tabela processadas se estiver visível
+        if (tabelaContribuicoesProcessadas && document.getElementById('processedTable').style.display !== 'none') {
+            updateProcessedTable();
+        }
     }
 }
 
@@ -1041,9 +1062,102 @@ function playActualSound(audioContext) {
     oscillator3.stop(audioContext.currentTime + 2);
 }
 
+// Nova variável global para a tabela de contribuições processadas
+let tabelaContribuicoesProcessadas;
+
+// Função para alternar visibilidade da seção de contribuições processadas
+function toggleProcessedContributions() {
+    const processedTable = document.getElementById('processedTable');
+    const toggleIcon = document.getElementById('processedToggleIcon');
+    
+    if (processedTable.style.display === 'none') {
+        processedTable.style.display = 'block';
+        toggleIcon.style.transform = 'rotate(180deg)';
+        
+        // Inicializar a tabela se ainda não foi inicializada
+        if (!tabelaContribuicoesProcessadas) {
+            initializeProcessedTable();
+        }
+        
+        // Atualizar dados da tabela
+        updateProcessedTable();
+    } else {
+        processedTable.style.display = 'none';
+        toggleIcon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Inicializar tabela de contribuições processadas
+function initializeProcessedTable() {
+    const commonConfig = {
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+        },
+        responsive: true,
+        pageLength: 10,
+        dom: '<"top"lf>rt<"bottom"ip>',
+        order: []
+    };
+    
+    tabelaContribuicoesProcessadas = $('#tabelaContribuicoesProcessadas').DataTable({
+        ...commonConfig,
+        columns: [
+            { data: 'nome', title: 'Prestador', width: '15%' },
+            { data: 'pontuacao', title: 'Pts', render: renderPontuacao, width: '8%', className: 'text-center' },
+            { data: 'categoria', title: 'Categoria', render: renderCategoria, width: '15%' },
+            { data: 'descricao', title: 'Descrição', width: '32%' },
+            { data: 'status', title: 'Status', render: renderStatus, width: '12%', className: 'text-center' },
+            { data: 'timestamp', title: 'Data', render: renderData, width: '10%', className: 'text-center' },
+            { data: null, title: 'Ações', render: renderAcoesProcessadas, orderable: false, width: '8%', className: 'text-center' }
+        ],
+        order: [[5, 'desc']], // Ordenar por data, mais recente primeiro
+        scrollX: true,
+        autoWidth: false,
+        createdRow: function(row, data, dataIndex) {
+            // Adicionar classe para penalidades
+            if (data.pontuacao < 0) {
+                $(row).addClass('penalty-row');
+            }
+            // Adicionar classe baseada no status
+            if (data.status === 'Validado') {
+                $(row).addClass('status-approved');
+            } else if (data.status === 'Rejeitado') {
+                $(row).addClass('status-rejected');
+            }
+        }
+    });
+}
+
+// Atualizar tabela de contribuições processadas
+function updateProcessedTable() {
+    if (!tabelaContribuicoesProcessadas) return;
+    
+    // Filtrar apenas contribuições processadas (aprovadas ou rejeitadas)
+    const processedContributions = contribuicoes.filter(contrib => 
+        contrib.status === 'Validado' || contrib.status === 'Rejeitado'
+    );
+    
+    // Limpar e recarregar dados
+    tabelaContribuicoesProcessadas.clear();
+    tabelaContribuicoesProcessadas.rows.add(processedContributions);
+    tabelaContribuicoesProcessadas.draw();
+}
+
+// Função para notificar sobre nova organização das tabelas
+function showTableOrganizationTip() {
+    const hasSeenTip = localStorage.getItem('seenTableTip');
+    if (!hasSeenTip) {
+        setTimeout(() => {
+            showNotification('💡 Nova organização: Contribuições pendentes ficam na primeira tabela. As processadas (aprovadas/rejeitadas) ficam na seção "Contribuições Processadas" abaixo.', 'info');
+            localStorage.setItem('seenTableTip', 'true');
+        }, 3000);
+    }
+}
+
 // Tornar funções globais para uso nos botões HTML
 window.validarContribuicao = validarContribuicao;
 window.rejeitarContribuicao = rejeitarContribuicao;
 window.excluirContribuicao = excluirContribuicao;
 window.removeEmployee = removeEmployee;
-window.removeEmployeeByIndex = removeEmployeeByIndex; 
+window.removeEmployeeByIndex = removeEmployeeByIndex;
+window.toggleProcessedContributions = toggleProcessedContributions; 

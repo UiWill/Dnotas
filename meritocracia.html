@@ -562,6 +562,210 @@
         .notification.warning {
             border-left-color: var(--warning-color);
         }
+
+        /* Estilos para seção de contribuições processadas */
+        #processedContributions .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: background-color 0.3s;
+        }
+
+        #processedContributions .card-header:hover {
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 8px;
+            margin: -0.5rem;
+            padding: 0.5rem;
+        }
+
+        /* Estilos para linhas processadas */
+        .status-approved {
+            background: rgba(16, 185, 129, 0.05) !important;
+        }
+
+        .status-rejected {
+            background: rgba(239, 68, 68, 0.05) !important;
+        }
+
+        /* Botões de ação compactos */
+        .btn-icon {
+            width: 32px !important;
+            height: 32px !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 0.875rem !important;
+            border-radius: 6px !important;
+        }
+
+        .btn-sm {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.5rem;
+        }
+
+        /* Melhorar responsividade da tabela */
+        .table-container {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* Evitar scroll horizontal */
+        table.dataTable {
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+
+        /* Centralizar conteúdo das colunas específicas */
+        .text-center {
+            text-align: center !important;
+        }
+
+        /* Quebra de linha para descrições longas */
+        table.dataTable td:nth-child(4) {
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            max-width: 0 !important;
+        }
+
+                /* Responsividade para tablets e dispositivos médios */
+        @media (max-width: 768px) {
+            .btn-icon {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 0.8rem !important;
+            }
+            
+            /* Reduzir fonte em telas pequenas */
+            table.dataTable {
+                font-size: 0.85rem !important;
+            }
+            
+            table.dataTable th {
+                font-size: 0.8rem !important;
+                padding: 0.4rem !important;
+            }
+            
+            table.dataTable td {
+                padding: 0.4rem !important;
+                vertical-align: top !important;
+            }
+            
+                         /* Ajustar larguras das colunas para mobile - Tabela Pendentes */
+            #tabelaContribuicoes th:nth-child(1), 
+            #tabelaContribuicoes td:nth-child(1) { width: 18% !important; } /* Prestador */
+            
+            #tabelaContribuicoes th:nth-child(2), 
+            #tabelaContribuicoes td:nth-child(2) { width: 8% !important; } /* Pontos */
+            
+            #tabelaContribuicoes th:nth-child(3), 
+            #tabelaContribuicoes td:nth-child(3) { width: 15% !important; } /* Categoria */
+            
+            #tabelaContribuicoes th:nth-child(4), 
+            #tabelaContribuicoes td:nth-child(4) { width: 25% !important; } /* Descrição */
+            
+            #tabelaContribuicoes th:nth-child(5), 
+            #tabelaContribuicoes td:nth-child(5) { width: 12% !important; } /* Status */
+            
+            #tabelaContribuicoes th:nth-child(6), 
+            #tabelaContribuicoes td:nth-child(6) { width: 12% !important; } /* Data */
+            
+            #tabelaContribuicoes th:nth-child(7), 
+            #tabelaContribuicoes td:nth-child(7) { width: 10% !important; } /* Ações */
+            
+            /* Ajustar larguras das colunas para mobile - Tabela Processadas */
+            #tabelaContribuicoesProcessadas th:nth-child(1), 
+            #tabelaContribuicoesProcessadas td:nth-child(1) { width: 18% !important; } /* Prestador */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(2), 
+            #tabelaContribuicoesProcessadas td:nth-child(2) { width: 8% !important; } /* Pontos */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(3), 
+            #tabelaContribuicoesProcessadas td:nth-child(3) { width: 15% !important; } /* Categoria */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(4), 
+            #tabelaContribuicoesProcessadas td:nth-child(4) { width: 30% !important; } /* Descrição */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(5), 
+            #tabelaContribuicoesProcessadas td:nth-child(5) { width: 12% !important; } /* Status */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(6), 
+            #tabelaContribuicoesProcessadas td:nth-child(6) { width: 10% !important; } /* Data */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(7), 
+            #tabelaContribuicoesProcessadas td:nth-child(7) { width: 7% !important; } /* Ações */
+        }
+
+        @media (max-width: 480px) {
+            .btn-icon {
+                width: 24px !important;
+                height: 24px !important;
+                font-size: 0.7rem !important;
+            }
+            
+            /* Fonte ainda menor */
+            table.dataTable {
+                font-size: 0.75rem !important;
+            }
+            
+            table.dataTable th {
+                font-size: 0.7rem !important;
+                padding: 0.3rem !important;
+            }
+            
+            table.dataTable td {
+                padding: 0.3rem !important;
+                vertical-align: top !important;
+            }
+            
+                         /* Ajustar larguras para telas muito pequenas - Tabela Pendentes */
+            #tabelaContribuicoes th:nth-child(1), 
+            #tabelaContribuicoes td:nth-child(1) { width: 20% !important; } /* Prestador */
+            
+            #tabelaContribuicoes th:nth-child(2), 
+            #tabelaContribuicoes td:nth-child(2) { width: 8% !important; } /* Pontos */
+            
+            #tabelaContribuicoes th:nth-child(3), 
+            #tabelaContribuicoes td:nth-child(3) { width: 12% !important; } /* Categoria */
+            
+            #tabelaContribuicoes th:nth-child(4), 
+            #tabelaContribuicoes td:nth-child(4) { width: 22% !important; } /* Descrição */
+            
+            #tabelaContribuicoes th:nth-child(5), 
+            #tabelaContribuicoes td:nth-child(5) { width: 10% !important; } /* Status */
+            
+            #tabelaContribuicoes th:nth-child(6), 
+            #tabelaContribuicoes td:nth-child(6) { width: 10% !important; } /* Data */
+            
+            #tabelaContribuicoes th:nth-child(7), 
+            #tabelaContribuicoes td:nth-child(7) { width: 18% !important; } /* Ações */
+            
+            /* Ajustar larguras para telas muito pequenas - Tabela Processadas */
+            #tabelaContribuicoesProcessadas th:nth-child(1), 
+            #tabelaContribuicoesProcessadas td:nth-child(1) { width: 22% !important; } /* Prestador */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(2), 
+            #tabelaContribuicoesProcessadas td:nth-child(2) { width: 8% !important; } /* Pontos */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(3), 
+            #tabelaContribuicoesProcessadas td:nth-child(3) { width: 12% !important; } /* Categoria */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(4), 
+            #tabelaContribuicoesProcessadas td:nth-child(4) { width: 25% !important; } /* Descrição */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(5), 
+            #tabelaContribuicoesProcessadas td:nth-child(5) { width: 10% !important; } /* Status */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(6), 
+            #tabelaContribuicoesProcessadas td:nth-child(6) { width: 10% !important; } /* Data */
+            
+            #tabelaContribuicoesProcessadas th:nth-child(7), 
+            #tabelaContribuicoesProcessadas td:nth-child(7) { width: 13% !important; } /* Ações */
+        }
     </style>
 </head>
 
@@ -615,10 +819,10 @@
                         <div class="form-group">
                             <label for="nome">
                                 <i class="bi bi-person"></i>
-                                Colaborador
+                                Prestador de Serviço
                             </label>
                             <select id="nome" name="nome" class="form-control" required>
-                                <option value="">Selecione um colaborador</option>
+                                <option value="">Selecione um prestador</option>
                                 <!-- Opções serão adicionadas dinamicamente -->
                             </select>
                         </div>
@@ -683,14 +887,41 @@
                 <!-- Tabela de contribuições -->
                 <div class="merit-card" data-aos="fade-up" data-aos-delay="400">
                     <div class="card-header">
-                        <i class="bi bi-table"></i>
-                        <h2>Contribuições Registradas</h2>
+                        <i class="bi bi-clock-history"></i>
+                        <h2>Contribuições Pendentes</h2>
                     </div>
                     <div class="table-container">
                         <table id="tabelaContribuicoes" class="display responsive nowrap" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th><i class="bi bi-person"></i> Colaborador</th>
+                                    <th><i class="bi bi-person"></i> Prestador</th>
+                                    <th><i class="bi bi-star"></i> Pontos</th>
+                                    <th><i class="bi bi-tag"></i> Categoria</th>
+                                    <th><i class="bi bi-chat-text"></i> Descrição</th>
+                                    <th><i class="bi bi-check-circle"></i> Status</th>
+                                    <th><i class="bi bi-calendar"></i> Data</th>
+                                    <th><i class="bi bi-gear"></i> Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Seção de Contribuições Processadas (Minimizada por padrão) -->
+                <div class="merit-card" id="processedContributions" data-aos="fade-up" data-aos-delay="450">
+                    <div class="card-header" onclick="toggleProcessedContributions()" style="cursor: pointer;">
+                        <i class="bi bi-archive"></i>
+                        <h2>Contribuições Processadas</h2>
+                        <i class="bi bi-chevron-down" id="processedToggleIcon" style="margin-left: auto; transition: transform 0.3s;"></i>
+                    </div>
+                    <div class="table-container" id="processedTable" style="display: none;">
+                        <table id="tabelaContribuicoesProcessadas" class="display responsive nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th><i class="bi bi-person"></i> Prestador</th>
                                     <th><i class="bi bi-star"></i> Pontos</th>
                                     <th><i class="bi bi-tag"></i> Categoria</th>
                                     <th><i class="bi bi-chat-text"></i> Descrição</th>
@@ -717,7 +948,7 @@
                             <thead>
                                 <tr>
                                     <th>🏆 Posição</th>
-                                    <th><i class="bi bi-person"></i> Colaborador</th>
+                                    <th><i class="bi bi-person"></i> Prestador</th>
                                     <th><i class="bi bi-star-fill"></i> Total de Pontos</th>
                                     <th><i class="bi bi-list-ol"></i> Contribuições</th>
                                     <th><i class="bi bi-graph-up"></i> Média</th>
@@ -730,19 +961,19 @@
                     </div>
                 </div>
 
-                <!-- Gerenciamento de Funcionários -->
+                <!-- Gerenciamento de Prestadores -->
                 <div class="employee-manager merit-card" data-aos="fade-up" data-aos-delay="600">
                     <div class="card-header">
                         <i class="bi bi-people"></i>
-                        <h2>Gerenciar Funcionários</h2>
+                        <h2>Gerenciar Prestadores de Serviço</h2>
                     </div>
                     <div class="form-group">
                         <label for="newEmployee">
                             <i class="bi bi-person-plus"></i>
-                            Adicionar Novo Funcionário
+                            Adicionar Novo Prestador
                         </label>
                         <div style="display: flex; gap: 0.75rem;">
-                            <input type="text" id="newEmployee" class="form-control" placeholder="Nome do funcionário">
+                            <input type="text" id="newEmployee" class="form-control" placeholder="Nome do prestador">
                             <button type="button" id="addEmployeeBtn" class="btn btn-primary">
                                 <i class="bi bi-plus"></i>
                                 Adicionar
@@ -750,7 +981,7 @@
                         </div>
                     </div>
                     <div class="employee-list" id="employeeList">
-                        <!-- Funcionários serão adicionados aqui dinamicamente -->
+                        <!-- Prestadores serão adicionados aqui dinamicamente -->
                     </div>
                 </div>
 
