@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecionando...</title>
+    <script>
+        // Truque para SPA no GitHub Pages
+        // Redireciona /vendas/DATA/CNPJ para /vendas/?data=DATA&cnpj=CNPJ
+        (function() {
+            var path = window.location.pathname;
+
+            // Verifica se e uma URL de vendas: /vendas/DATA/CNPJ
+            var vendasMatch = path.match(/\/vendas\/(\d{8})\/(\d{14})\/?$/);
+
+            if (vendasMatch) {
+                var data = vendasMatch[1];
+                var cnpj = vendasMatch[2];
+                // Redireciona para a pagina de vendas com query params
+                window.location.replace('/vendas/?data=' + data + '&cnpj=' + cnpj);
+            } else {
+                // Se nao for URL de vendas, redireciona para home
+                window.location.replace('/');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <p>Redirecionando...</p>
+</body>
+</html>
