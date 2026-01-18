@@ -34,25 +34,28 @@
             --color-gray-900: #111827;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--color-gray-50);
             color: var(--color-gray-900);
-            min-height: 100vh;
             line-height: 1.6;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Header */
         .header {
             background-color: var(--color-black);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 1rem 2rem;
+            flex-shrink: 0;
         }
 
         .header-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -60,21 +63,26 @@
         }
 
         .logo {
-            height: 40px;
+            height: 36px;
         }
 
         .header-title {
             color: var(--color-white);
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 500;
             letter-spacing: -0.025em;
         }
 
         /* Main Container */
         .main-container {
-            max-width: 1200px;
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         /* Loading State */
@@ -83,7 +91,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 60vh;
+            flex: 1;
             gap: 1.5rem;
         }
 
@@ -111,7 +119,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 60vh;
+            flex: 1;
             text-align: center;
             gap: 1rem;
         }
@@ -132,23 +140,34 @@
             max-width: 400px;
         }
 
+        /* Report Content */
+        .report-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 1.5rem;
+            overflow: hidden;
+        }
+
         /* Report Header */
         .report-header {
             background-color: var(--color-white);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         .company-info {
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .company-name {
-            font-size: 1.75rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--color-black);
             letter-spacing: -0.025em;
@@ -158,7 +177,6 @@
             display: flex;
             flex-wrap: wrap;
             gap: 1.5rem;
-            margin-top: 1rem;
         }
 
         .meta-item {
@@ -179,25 +197,174 @@
             color: var(--color-gray-900);
         }
 
+        /* Summary Section */
+        .summary-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .summary-card {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        .summary-card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-gray-900);
+        }
+
+        .summary-card-icon {
+            color: var(--color-gray-400);
+        }
+
+        .payment-summary-list {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .payment-summary-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        .payment-summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .payment-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+
+        .payment-name {
+            font-weight: 500;
+            color: var(--color-gray-900);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-name i {
+            margin-right: 0.5rem;
+            color: var(--color-gray-400);
+        }
+
+        .payment-count {
+            font-size: 0.75rem;
+            color: var(--color-gray-500);
+            margin-left: 1.5rem;
+        }
+
+        .payment-total {
+            font-weight: 600;
+            color: var(--color-gray-900);
+            font-size: 0.875rem;
+        }
+
+        /* Total Card */
+        .total-card {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .total-card .summary-card-header {
+            border-bottom-color: var(--color-gray-700);
+        }
+
+        .total-card .summary-card-title {
+            color: var(--color-white);
+        }
+
+        .total-card .summary-card-icon {
+            color: var(--color-gray-400);
+        }
+
+        .total-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .total-amount {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .total-label {
+            color: var(--color-gray-400);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .total-details {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-gray-700);
+        }
+
+        .total-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+
+        .total-detail-label {
+            font-size: 0.75rem;
+            color: var(--color-gray-400);
+        }
+
+        .total-detail-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
         /* Sales List */
         .sales-section {
             background-color: var(--color-white);
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .section-header {
-            padding: 1.25rem 2rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--color-gray-100);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .section-title {
-            font-size: 1rem;
+            font-size: 0.875rem;
             font-weight: 600;
             color: var(--color-gray-900);
             display: flex;
@@ -218,26 +385,57 @@
             font-weight: 600;
         }
 
+        /* Table Container with Scroll */
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Custom Scrollbar */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: var(--color-gray-100);
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: var(--color-gray-300);
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-gray-400);
+        }
+
         /* Table */
         .sales-table {
             width: 100%;
             border-collapse: collapse;
         }
 
+        .sales-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
         .sales-table th {
             text-align: left;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.25rem;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--color-gray-500);
             background-color: var(--color-gray-50);
-            border-bottom: 1px solid var(--color-gray-100);
+            border-bottom: 1px solid var(--color-gray-200);
         }
 
         .sales-table td {
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.25rem;
             border-bottom: 1px solid var(--color-gray-100);
             font-size: 0.875rem;
         }
@@ -246,7 +444,7 @@
             border-bottom: none;
         }
 
-        .sales-table tr:hover {
+        .sales-table tbody tr:hover {
             background-color: var(--color-gray-50);
         }
 
@@ -259,21 +457,21 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            min-width: 28px;
+            height: 24px;
+            padding: 0 0.5rem;
             background-color: var(--color-gray-100);
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--color-gray-600);
-            margin-right: 0.75rem;
         }
 
         .payment-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.375rem;
-            padding: 0.375rem 0.75rem;
+            padding: 0.25rem 0.625rem;
             background-color: var(--color-gray-100);
             border-radius: 9999px;
             font-size: 0.75rem;
@@ -282,7 +480,7 @@
         }
 
         .payment-badge i {
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .sale-value {
@@ -296,134 +494,13 @@
             font-size: 0.75rem;
         }
 
-        /* Summary Section */
-        .summary-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .summary-card {
-            background-color: var(--color-white);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .summary-card-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--color-gray-100);
-        }
-
-        .summary-card-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--color-gray-900);
-        }
-
-        .summary-card-icon {
-            color: var(--color-gray-400);
-        }
-
-        .payment-summary-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--color-gray-100);
-        }
-
-        .payment-summary-item:last-child {
-            border-bottom: none;
-        }
-
-        .payment-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-        }
-
-        .payment-name {
-            font-weight: 500;
-            color: var(--color-gray-900);
-            font-size: 0.875rem;
-        }
-
-        .payment-count {
-            font-size: 0.75rem;
-            color: var(--color-gray-500);
-        }
-
-        .payment-total {
-            font-weight: 600;
-            color: var(--color-gray-900);
-            font-size: 0.875rem;
-        }
-
-        /* Total Card */
-        .total-card {
-            background-color: var(--color-black);
-            color: var(--color-white);
-        }
-
-        .total-card .summary-card-header {
-            border-bottom-color: var(--color-gray-700);
-        }
-
-        .total-card .summary-card-title {
-            color: var(--color-white);
-        }
-
-        .total-card .summary-card-icon {
-            color: var(--color-gray-400);
-        }
-
-        .total-amount {
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.025em;
-        }
-
-        .total-label {
-            color: var(--color-gray-400);
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
-
-        .total-details {
-            display: flex;
-            gap: 2rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--color-gray-700);
-        }
-
-        .total-detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-        }
-
-        .total-detail-label {
-            font-size: 0.75rem;
-            color: var(--color-gray-400);
-        }
-
-        .total-detail-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
         /* Footer */
         .footer {
             text-align: center;
-            padding: 2rem;
+            padding: 1rem;
             color: var(--color-gray-500);
-            font-size: 0.875rem;
+            font-size: 0.75rem;
+            flex-shrink: 0;
         }
 
         .footer a {
@@ -437,61 +514,73 @@
         }
 
         /* Responsive */
+        @media (max-width: 900px) {
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 padding: 1rem;
             }
 
             .report-header {
-                padding: 1.5rem;
+                padding: 1rem;
+            }
+
+            .company-info {
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .company-name {
-                font-size: 1.25rem;
+                font-size: 1rem;
             }
 
             .report-meta {
-                flex-direction: column;
-                gap: 0.75rem;
+                gap: 1rem;
             }
 
             .section-header {
-                padding: 1rem 1.25rem;
+                padding: 0.75rem 1rem;
             }
 
             .sales-table th,
             .sales-table td {
-                padding: 0.75rem 1rem;
+                padding: 0.5rem 0.75rem;
             }
 
             .sales-table .hide-mobile {
                 display: none;
             }
 
-            .summary-section {
-                grid-template-columns: 1fr;
-            }
-
             .total-amount {
-                font-size: 2rem;
+                font-size: 1.75rem;
             }
 
             .total-details {
-                flex-direction: column;
-                gap: 1rem;
+                gap: 1.5rem;
             }
         }
 
         /* Print Styles */
         @media print {
-            .header {
-                position: static;
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
+            body {
+                height: auto;
             }
 
-            .sales-table tr:hover {
-                background-color: transparent;
+            .main-container {
+                overflow: visible;
+            }
+
+            .table-container {
+                overflow: visible;
+                max-height: none;
+            }
+
+            .sales-table thead {
+                position: static;
             }
 
             .total-card {
@@ -499,12 +588,6 @@
                 -webkit-print-color-adjust: exact;
             }
         }
-
-        /* Payment Icons Mapping */
-        .payment-icon-dinheiro::before { content: "\F4C0"; }
-        .payment-icon-pix::before { content: "\F5A5"; }
-        .payment-icon-credito::before { content: "\F4AD"; }
-        .payment-icon-debito::before { content: "\F4AD"; }
     </style>
 </head>
 <body>
@@ -608,110 +691,116 @@
             const dataFormatada = data.data;
 
             mainContent.innerHTML = `
-                <!-- Report Header -->
-                <div class="report-header">
-                    <div class="company-info">
-                        <h1 class="company-name">CNPJ: ${formatCNPJ(data.cnpj)}</h1>
-                        <div class="report-meta">
-                            <div class="meta-item">
-                                <i class="bi bi-calendar3"></i>
-                                <span>Data:</span>
-                                <span class="meta-value">${dataFormatada}</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="bi bi-receipt"></i>
-                                <span>Total de vendas:</span>
-                                <span class="meta-value">${data.total_registros}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sales List -->
-                <div class="sales-section">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <i class="bi bi-list-ul"></i>
-                            Vendas do Dia
-                        </h2>
-                        <span class="sales-count">${data.total_registros} registros</span>
-                    </div>
-                    <table class="sales-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Nota Fiscal</th>
-                                <th class="hide-mobile">Hora</th>
-                                <th>Pagamento</th>
-                                <th style="text-align: right;">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.vendas.map((venda, index) => `
-                                <tr>
-                                    <td>
-                                        <span class="sale-index">${index + 1}</span>
-                                    </td>
-                                    <td>
-                                        <span class="sale-number">${venda.numero_nf}</span>
-                                    </td>
-                                    <td class="hide-mobile">
-                                        <span class="sale-time">${formatTime(venda.data_emissao)}</span>
-                                    </td>
-                                    <td>
-                                        <span class="payment-badge">
-                                            <i class="bi ${getPaymentIcon(venda.forma_pagamento)}"></i>
-                                            ${venda.forma_pagamento}
-                                        </span>
-                                    </td>
-                                    <td class="sale-value">${formatCurrency(venda.valor)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Summary Section -->
-                <div class="summary-section">
-                    <!-- Payment Summary -->
-                    <div class="summary-card">
-                        <div class="summary-card-header">
-                            <i class="bi bi-pie-chart summary-card-icon"></i>
-                            <h3 class="summary-card-title">Resumo por Forma de Pagamento</h3>
-                        </div>
-                        <div class="payment-summary-list">
-                            ${data.totais_por_forma_pagamento.map(item => `
-                                <div class="payment-summary-item">
-                                    <div class="payment-info">
-                                        <span class="payment-name">
-                                            <i class="bi ${getPaymentIcon(item.forma_pagamento)}" style="margin-right: 0.5rem; color: var(--color-gray-400);"></i>
-                                            ${item.forma_pagamento}
-                                        </span>
-                                        <span class="payment-count">${item.quantidade} ${item.quantidade === 1 ? 'venda' : 'vendas'}</span>
-                                    </div>
-                                    <span class="payment-total">${formatCurrency(item.total)}</span>
+                <div class="report-content">
+                    <!-- Report Header -->
+                    <div class="report-header">
+                        <div class="company-info">
+                            <h1 class="company-name">CNPJ: ${formatCNPJ(data.cnpj)}</h1>
+                            <div class="report-meta">
+                                <div class="meta-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span>Data:</span>
+                                    <span class="meta-value">${dataFormatada}</span>
                                 </div>
-                            `).join('')}
+                                <div class="meta-item">
+                                    <i class="bi bi-receipt"></i>
+                                    <span>Total de vendas:</span>
+                                    <span class="meta-value">${data.total_registros}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Total Card -->
-                    <div class="summary-card total-card">
-                        <div class="summary-card-header">
-                            <i class="bi bi-graph-up-arrow summary-card-icon"></i>
-                            <h3 class="summary-card-title">Total do Dia</h3>
+                    <!-- Summary Section (ANTES da lista de vendas) -->
+                    <div class="summary-section">
+                        <!-- Total Card -->
+                        <div class="summary-card total-card">
+                            <div class="summary-card-header">
+                                <i class="bi bi-graph-up-arrow summary-card-icon"></i>
+                                <h3 class="summary-card-title">Total do Dia</h3>
+                            </div>
+                            <div class="total-content">
+                                <div class="total-amount">${formatCurrency(data.total_geral)}</div>
+                                <p class="total-label">Valor total de vendas</p>
+                                <div class="total-details">
+                                    <div class="total-detail-item">
+                                        <span class="total-detail-label">Vendas</span>
+                                        <span class="total-detail-value">${data.total_registros}</span>
+                                    </div>
+                                    <div class="total-detail-item">
+                                        <span class="total-detail-label">Formas de Pagamento</span>
+                                        <span class="total-detail-value">${data.totais_por_forma_pagamento.length}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="total-amount">${formatCurrency(data.total_geral)}</div>
-                        <p class="total-label">Valor total de vendas</p>
-                        <div class="total-details">
-                            <div class="total-detail-item">
-                                <span class="total-detail-label">Vendas</span>
-                                <span class="total-detail-value">${data.total_registros}</span>
+
+                        <!-- Payment Summary -->
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <i class="bi bi-pie-chart summary-card-icon"></i>
+                                <h3 class="summary-card-title">Resumo por Forma de Pagamento</h3>
                             </div>
-                            <div class="total-detail-item">
-                                <span class="total-detail-label">Formas de Pagamento</span>
-                                <span class="total-detail-value">${data.totais_por_forma_pagamento.length}</span>
+                            <div class="payment-summary-list">
+                                ${data.totais_por_forma_pagamento.map(item => `
+                                    <div class="payment-summary-item">
+                                        <div class="payment-info">
+                                            <span class="payment-name">
+                                                <i class="bi ${getPaymentIcon(item.forma_pagamento)}"></i>
+                                                ${item.forma_pagamento}
+                                            </span>
+                                            <span class="payment-count">${item.quantidade} ${item.quantidade === 1 ? 'venda' : 'vendas'}</span>
+                                        </div>
+                                        <span class="payment-total">${formatCurrency(item.total)}</span>
+                                    </div>
+                                `).join('')}
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Sales List (com scroll interno) -->
+                    <div class="sales-section">
+                        <div class="section-header">
+                            <h2 class="section-title">
+                                <i class="bi bi-list-ul"></i>
+                                Vendas do Dia
+                            </h2>
+                            <span class="sales-count">${data.total_registros} registros</span>
+                        </div>
+                        <div class="table-container">
+                            <table class="sales-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nota Fiscal</th>
+                                        <th class="hide-mobile">Hora</th>
+                                        <th>Pagamento</th>
+                                        <th style="text-align: right;">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.vendas.map((venda, index) => `
+                                        <tr>
+                                            <td>
+                                                <span class="sale-index">${index + 1}</span>
+                                            </td>
+                                            <td>
+                                                <span class="sale-number">${venda.numero_nf}</span>
+                                            </td>
+                                            <td class="hide-mobile">
+                                                <span class="sale-time">${formatTime(venda.data_emissao)}</span>
+                                            </td>
+                                            <td>
+                                                <span class="payment-badge">
+                                                    <i class="bi ${getPaymentIcon(venda.forma_pagamento)}"></i>
+                                                    ${venda.forma_pagamento}
+                                                </span>
+                                            </td>
+                                            <td class="sale-value">${formatCurrency(venda.valor)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
