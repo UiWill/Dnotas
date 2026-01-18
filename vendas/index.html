@@ -47,6 +47,16 @@
             flex-direction: column;
         }
 
+        /* Mobile: permite scroll da pagina toda */
+        @media (max-width: 768px) {
+            html, body {
+                height: auto;
+            }
+            body {
+                display: block;
+            }
+        }
+
         /* Header */
         .header {
             background-color: var(--color-black);
@@ -523,6 +533,13 @@
         @media (max-width: 768px) {
             .main-container {
                 padding: 1rem;
+                overflow: visible;
+                flex: none;
+            }
+
+            .report-content {
+                overflow: visible;
+                height: auto;
             }
 
             .report-header {
@@ -539,20 +556,20 @@
             }
 
             .report-meta {
+                gap: 0.75rem;
+            }
+
+            .summary-section {
                 gap: 1rem;
             }
 
-            .section-header {
-                padding: 0.75rem 1rem;
+            .summary-card {
+                padding: 1rem;
             }
 
-            .sales-table th,
-            .sales-table td {
-                padding: 0.5rem 0.75rem;
-            }
-
-            .sales-table .hide-mobile {
-                display: none;
+            .payment-summary-list {
+                max-height: none;
+                overflow: visible;
             }
 
             .total-amount {
@@ -561,6 +578,56 @@
 
             .total-details {
                 gap: 1.5rem;
+            }
+
+            .sales-section {
+                flex: none;
+                min-height: auto;
+            }
+
+            .section-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .table-container {
+                overflow: visible;
+                flex: none;
+            }
+
+            .sales-table thead {
+                position: static;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                padding: 0.625rem 0.75rem;
+            }
+
+            .sales-table .hide-mobile {
+                display: none;
+            }
+
+            .sale-index {
+                min-width: 24px;
+                height: 22px;
+                font-size: 0.7rem;
+            }
+
+            .payment-badge {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.7rem;
+            }
+
+            .payment-badge i {
+                font-size: 0.65rem;
+            }
+
+            .sale-value {
+                font-size: 0.8rem;
+            }
+
+            .sale-number {
+                font-size: 0.8rem;
             }
         }
 
