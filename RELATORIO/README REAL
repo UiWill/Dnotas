@@ -1,0 +1,230 @@
+================================================================================
+                    ESPECIFICACAO DO SISTEMA DE RELATORIO DE VENDAS
+================================================================================
+
+OBJETIVO:
+---------
+Criar um endpoint na API Node.js que consulta o banco de dados Oracle e retorna
+os dados de vendas (NFCe) de um cliente especifico em uma data especifica.
+
+--------------------------------------------------------------------------------
+ESTRUTURA DA URL DO FRONTEND
+--------------------------------------------------------------------------------
+
+URL: https://dnotas.com.br/vendas/{DATA}/{CNPJ}
+
+Exemplo: https://dnotas.com.br/vendas/17012026/54461575000130
+
+Parametros:
+- DATA: Data do relatorio no formato DDMMYYYY (ex: 17012026 = 17/01/2026)
+- CNPJ: CNPJ do cliente sem pontuacao (apenas numeros, 14 digitos)
+
+--------------------------------------------------------------------------------
+ENDPOINT DA API NODE.JS A SER CRIADO
+--------------------------------------------------------------------------------
+
+Rota sugerida: GET /api/relatorio/vendas/:data/:cnpj
+
+Parametros da rota:
+- :data  -> String no formato DDMMYYYY
+- :cnpj  -> String com 14 digitos numericos
+
+Exemplo de chamada:
+GET https://sua-api.com/api/relatorio/vendas/17012026/54461575000130
+
+--------------------------------------------------------------------------------
+CREDENCIAIS DO BANCO DE DADOS ORACLE (PREENCHER)
+--------------------------------------------------------------------------------
+
+HOST: Sao dois esse : nuvem.dnotas.com.br e tbm tem esse: bd00.dnotas.com.br
+PORT: 1521
+SERVICE_NAME (ou SID): SID : xe
+USER: ERP_46566434000154_VENDAS_COM como pode ver o nome de usuarios é um padrao ERP_CNPJ_VENDAS_COM
+PASSWORD: D_d2017
+
+Obs: Essas credenciais devem ficar em variaveis de ambiente (.env) no servidor,
+NUNCA no codigo fonte.
+
+Exemplo de .env:
+ORACLE_HOST=seu_host
+ORACLE_PORT=1521
+ORACLE_SERVICE=seu_service
+ORACLE_USER=seu_usuario
+ORACLE_PASSWORD=sua_senha
+
+--------------------------------------------------------------------------------
+QUERY SQL PARA CONSULTA
+--------------------------------------------------------------------------------
+
+SELECT
+    I.NNF_B08,
+    I.DHEMI_B09,
+    'CUPOM FISCAL ELETRONICO - NFCe' AS TIPO,
+    P.TPAG_YA02 AS COD_TPAG,
+    CASE P.TPAG_YA02
+        WHEN '01' THEN 'Dinheiro'
+        WHEN '02' THEN 'Cheque'
+        WHEN '03' THEN 'Cartao de Credito'
+        WHEN '04' THEN 'Cartao de Debito'
+        WHEN '05' THEN 'Credito Loja'
+        WHEN '10' THEN 'Vale Alimentacao'
+        WHEN '11' THEN 'Vale Refeicao'
+        WHEN '12' THEN 'Vale Presente'
+        WHEN '13' THEN 'Vale Combustivel'
+        WHEN '14' THEN 'Duplicata Mercantil'
+        WHEN '15' THEN 'Boleto Bancario'
+        WHEN '16' THEN 'Deposito Bancario'
+        WHEN '17' THEN 'Pagamento Instantaneo (PIX)'
+        WHEN '18' THEN 'Transferencia Bancaria (TED/DOC)'
+        WHEN '19' THEN 'Fidelidade / Cashback'
+        WHEN '20' THEN 'PIX'
+        WHEN '90' THEN 'Sem pagamento'
+        WHEN '99' THEN 'Outros'
+        ELSE 'Nao identificado'
+    END AS DESCR_TPAG,
+    P.VPAG_YA03
+FROM NFCE_IDENTIF I
+JOIN NFCE_PAG P ON P.ID = I.ID
+WHERE TRUNC(I.DHEMI_B09) = TO_DATE(:data, 'DD/MM/YYYY')
+  AND I.CNPJ_EMITENTE = :cnpj
+ORDER BY I.NNF_B08 DESC;
+
+ATENCAO:
+- Substitua :data pelo parametro da data convertido para formato DD/MM/YYYY
+- Substitua :cnpj pelo CNPJ recebido na URL
+- Use bind variables para evitar SQL Injection!
+
+--------------------------------------------------------------------------------
+FORMATO DE RESPOSTA ESPERADO (JSON)
+--------------------------------------------------------------------------------
+
+Sucesso (HTTP 200):
+{
+    "success": true,
+    "data": {
+        "cnpj": "54461575000130",
+        "data": "17/01/2026",
+        "total_registros": 15,
+        "vendas": [
+            {
+                "numero_nf": "000123",
+                "data_emissao": "2026-01-17T14:30:00",
+                "tipo": "CUPOM FISCAL ELETRONICO - NFCe",
+                "codigo_pagamento": "17",
+                "forma_pagamento": "Pagamento Instantaneo (PIX)",
+                "valor": 150.00
+            },
+            ...
+        ],
+        "totais_por_forma_pagamento": [
+            {
+                "forma_pagamento": "PIX",
+                "quantidade": 10,
+                "total": 1500.00
+            },
+            {
+                "forma_pagamento": "Cartao de Credito",
+                "quantidade": 5,
+                "total": 750.00
+            }
+        ],
+        "total_geral": 2250.00
+    }
+}
+
+Erro - Parametros invalidos (HTTP 400):
+{
+    "success": false,
+    "error": "Parametros invalidos",
+    "message": "Data deve estar no formato DDMMYYYY"
+}
+
+Erro - Nao encontrado (HTTP 404):
+{
+    "success": false,
+    "error": "Nao encontrado",
+    "message": "Nenhuma venda encontrada para os parametros informados"
+}
+
+Erro - Servidor (HTTP 500):
+{
+    "success": false,
+    "error": "Erro interno",
+    "message": "Erro ao conectar com o banco de dados"
+}
+
+--------------------------------------------------------------------------------
+VALIDACOES NECESSARIAS
+--------------------------------------------------------------------------------
+
+1. DATA:
+   - Deve ter exatamente 8 caracteres
+   - Deve conter apenas numeros
+   - Deve ser uma data valida (dia entre 01-31, mes entre 01-12)
+   - Converter de DDMMYYYY para DD/MM/YYYY antes de usar na query
+
+2. CNPJ:
+   - Deve ter exatamente 14 caracteres
+   - Deve conter apenas numeros
+   - (Opcional) Validar digitos verificadores do CNPJ
+
+-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+EXEMPLO DE IMPLEMENTACAO BASICA
+--------------------------------------------------------------------------------
+
+const oracledb = require('oracledb');
+require('dotenv').config();
+
+async function getVendas(data, cnpj) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection({
+            user: process.env.ORACLE_USER,
+            password: process.env.ORACLE_PASSWORD,
+            connectString: `${process.env.ORACLE_HOST}:${process.env.ORACLE_PORT}/${process.env.ORACLE_SERVICE}`
+        });
+
+        // Converter data de DDMMYYYY para DD/MM/YYYY
+        const dataFormatada = `${data.substring(0,2)}/${data.substring(2,4)}/${data.substring(4,8)}`;
+
+        const result = await connection.execute(
+            `SELECT ... FROM ... WHERE TRUNC(I.DHEMI_B09) = TO_DATE(:data, 'DD/MM/YYYY') AND I.CNPJ_EMITENTE = :cnpj`,
+            { data: dataFormatada, cnpj: cnpj },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+
+        return result.rows;
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+CONSIDERACOES DE SEGURANCA
+--------------------------------------------------------------------------------
+
+1. NUNCA expor credenciais no codigo fonte
+2. Usar variaveis de ambiente (.env) no servidor
+3. Usar bind variables na query SQL (previne SQL Injection)
+4. Configurar CORS para aceitar apenas requisicoes do dominio dnotas.com.br
+5. (Opcional) Implementar rate limiting para evitar abusos
+6. (Opcional) Adicionar autenticacao via token na URL ou header
+
+--------------------------------------------------------------------------------
+CORS - CONFIGURACAO SUGERIDA
+--------------------------------------------------------------------------------
+
+const cors = require('cors');
+
+app.use(cors({
+    origin: ['https://dnotas.com.br', 'http://localhost:3000'],
+    methods: ['GET'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+================================================================================
+                              FIM DA ESPECIFICACAO
+================================================================================

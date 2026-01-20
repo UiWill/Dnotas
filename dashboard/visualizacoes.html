@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
+    <title>Dashboard de Visualizacoes - Dnotas</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-black: #000000;
+            --color-white: #ffffff;
+            --color-gray-50: #f9fafb;
+            --color-gray-100: #f3f4f6;
+            --color-gray-200: #e5e7eb;
+            --color-gray-300: #d1d5db;
+            --color-gray-400: #9ca3af;
+            --color-gray-500: #6b7280;
+            --color-gray-600: #4b5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1f2937;
+            --color-gray-900: #111827;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-900);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--color-black);
+            padding: 1rem 2rem;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            height: 36px;
+        }
+
+        .header-title {
+            color: var(--color-white);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: -0.025em;
+        }
+
+        /* Main Container */
+        .main-container {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--color-gray-200);
+            border-top-color: var(--color-black);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--color-gray-500);
+            font-size: 1rem;
+        }
+
+        /* Error State */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--color-gray-300);
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-gray-900);
+        }
+
+        .error-message {
+            color: var(--color-gray-500);
+            max-width: 400px;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Total Card */
+        .total-card {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-card-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .total-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .total-label {
+            color: var(--color-gray-400);
+            font-size: 0.875rem;
+        }
+
+        .total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .total-description {
+            color: var(--color-gray-400);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .total-description i {
+            font-size: 1.25rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--color-gray-100);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--color-gray-600);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-gray-900);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--color-gray-500);
+        }
+
+        /* Franquias Section */
+        .franquias-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--color-gray-400);
+        }
+
+        /* Franquia Card */
+        .franquia-card {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .franquia-header {
+            padding: 1rem 1.5rem;
+            background-color: var(--color-gray-900);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .franquia-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-white);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .franquia-name i {
+            color: var(--color-gray-400);
+        }
+
+        .franquia-count {
+            background-color: var(--color-white);
+            color: var(--color-gray-900);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .empresas-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .empresas-table th {
+            text-align: left;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-gray-500);
+            background-color: var(--color-gray-50);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .empresas-table td {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--color-gray-100);
+            font-size: 0.875rem;
+        }
+
+        .empresas-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .empresas-table tbody tr:hover {
+            background-color: var(--color-gray-50);
+        }
+
+        .empresa-cnpj {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.8125rem;
+            color: var(--color-gray-600);
+        }
+
+        .empresa-nome {
+            font-weight: 500;
+            color: var(--color-gray-900);
+        }
+
+        .empresa-visualizacoes {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background-color: var(--color-gray-100);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+        }
+
+        .empresa-visualizacoes i {
+            font-size: 0.875rem;
+            color: var(--color-gray-500);
+        }
+
+        .empresa-visualizacoes.high {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .empresa-visualizacoes.high i {
+            color: #22c55e;
+        }
+
+        .empresa-visualizacoes.medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .empresa-visualizacoes.medium i {
+            color: #f59e0b;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--color-gray-500);
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .footer a {
+            color: var(--color-gray-700);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            color: var(--color-black);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .total-value {
+                font-size: 2rem;
+            }
+
+            .franquia-header {
+                padding: 0.875rem 1rem;
+            }
+
+            .franquia-name {
+                font-size: 0.875rem;
+            }
+
+            .empresas-table th,
+            .empresas-table td {
+                padding: 0.75rem 1rem;
+            }
+
+            .empresas-table .hide-mobile {
+                display: none;
+            }
+
+            .empresa-cnpj {
+                font-size: 0.75rem;
+            }
+
+            .empresa-visualizacoes {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Refresh Button */
+        .refresh-btn {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-gray-300);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-gray-700);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background-color: var(--color-gray-100);
+            border-color: var(--color-gray-400);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Search/Filter */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--color-white);
+            border: 1px solid var(--color-gray-300);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-box i {
+            color: var(--color-gray-400);
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        .search-box input::placeholder {
+            color: var(--color-gray-400);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--color-gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--color-gray-300);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <span class="header-title">Dashboard de Visualizacoes</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container" id="mainContent">
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p class="loading-text">Carregando dados...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> - Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        // Funcao para formatar CNPJ
+        function formatCNPJ(cnpj) {
+            return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+
+        // Funcao para obter classe de destaque baseado nas visualizacoes
+        function getVisualizacoesClass(visualizacoes) {
+            if (visualizacoes >= 50) return 'high';
+            if (visualizacoes >= 20) return 'medium';
+            return '';
+        }
+
+        // Funcao para mostrar erro
+        function showError(title, message) {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="error-container">
+                    <i class="bi bi-exclamation-circle error-icon"></i>
+                    <h2 class="error-title">${title}</h2>
+                    <p class="error-message">${message}</p>
+                    <button class="refresh-btn" onclick="fetchVisualizacoes()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Tentar novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // Funcao para calcular estatisticas
+        function calcularEstatisticas(franquias) {
+            let totalVisualizacoes = 0;
+            let totalEmpresas = 0;
+
+            franquias.forEach(franquia => {
+                totalEmpresas += franquia.empresas.length;
+                franquia.empresas.forEach(empresa => {
+                    totalVisualizacoes += empresa.visualizacoes;
+                });
+            });
+
+            return {
+                totalVisualizacoes,
+                totalEmpresas,
+                totalFranquias: franquias.length
+            };
+        }
+
+        // Funcao para renderizar o dashboard
+        function renderDashboard(data) {
+            const mainContent = document.getElementById('mainContent');
+            const stats = calcularEstatisticas(data.franquias);
+
+            mainContent.innerHTML = `
+                <div class="dashboard-content">
+                    <!-- Total Card -->
+                    <div class="total-card">
+                        <div class="total-card-content">
+                            <div class="total-info">
+                                <span class="total-label">Total de Empresas</span>
+                                <span class="total-value">${data.total_empresas}</span>
+                                <span class="total-description">
+                                    <i class="bi bi-eye"></i>
+                                    ${stats.totalVisualizacoes} visualizacoes no total
+                                </span>
+                            </div>
+                            <button class="refresh-btn" onclick="fetchVisualizacoes()" id="refreshBtn">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Atualizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalFranquias}</span>
+                                <span class="stat-label">Franquias</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-shop"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalEmpresas}</span>
+                                <span class="stat-label">Empresas ativas</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-eye"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalVisualizacoes}</span>
+                                <span class="stat-label">Visualizacoes</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value">${stats.totalEmpresas > 0 ? (stats.totalVisualizacoes / stats.totalEmpresas).toFixed(1) : 0}</span>
+                                <span class="stat-label">Media por empresa</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="toolbar">
+                        <h2 class="section-title">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                            Visualizacoes por Franquia
+                        </h2>
+                        <div class="search-box">
+                            <i class="bi bi-search"></i>
+                            <input type="text" placeholder="Buscar empresa..." id="searchInput" oninput="filterEmpresas()">
+                        </div>
+                    </div>
+
+                    <!-- Franquias Section -->
+                    <div class="franquias-section" id="franquiasContainer">
+                        ${renderFranquias(data.franquias)}
+                    </div>
+                </div>
+            `;
+
+            // Guardar dados para filtragem
+            window.dashboardData = data;
+        }
+
+        // Funcao para renderizar franquias
+        function renderFranquias(franquias, searchTerm = '') {
+            if (franquias.length === 0) {
+                return `
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <p>Nenhuma franquia encontrada</p>
+                    </div>
+                `;
+            }
+
+            return franquias.map(franquia => {
+                // Filtrar empresas se houver termo de busca
+                let empresas = franquia.empresas;
+                if (searchTerm) {
+                    empresas = empresas.filter(e =>
+                        e.nome_fantasia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        e.cnpj.includes(searchTerm)
+                    );
+                }
+
+                // Se nao houver empresas apos filtro, nao renderizar o card
+                if (empresas.length === 0) return '';
+
+                return `
+                    <div class="franquia-card">
+                        <div class="franquia-header">
+                            <span class="franquia-name">
+                                <i class="bi bi-building"></i>
+                                ${franquia.franquia}
+                            </span>
+                            <span class="franquia-count">${empresas.length} ${empresas.length === 1 ? 'empresa' : 'empresas'}</span>
+                        </div>
+                        <table class="empresas-table">
+                            <thead>
+                                <tr>
+                                    <th>CNPJ</th>
+                                    <th>Nome Fantasia</th>
+                                    <th style="text-align: right;">Visualizacoes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${empresas.map(empresa => `
+                                    <tr>
+                                        <td>
+                                            <span class="empresa-cnpj">${formatCNPJ(empresa.cnpj)}</span>
+                                        </td>
+                                        <td>
+                                            <span class="empresa-nome">${empresa.nome_fantasia}</span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span class="empresa-visualizacoes ${getVisualizacoesClass(empresa.visualizacoes)}">
+                                                <i class="bi bi-eye"></i>
+                                                ${empresa.visualizacoes}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Funcao para filtrar empresas
+        function filterEmpresas() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const container = document.getElementById('franquiasContainer');
+
+            if (window.dashboardData) {
+                const html = renderFranquias(window.dashboardData.franquias, searchTerm);
+                container.innerHTML = html || `
+                    <div class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <p>Nenhuma empresa encontrada para "${searchTerm}"</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Funcao principal para buscar dados
+        async function fetchVisualizacoes() {
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            // Se o botao existe, mostrar loading
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.classList.add('loading');
+            }
+
+            try {
+                const apiUrl = 'https://api.dnotas.com.br/api/dashboard/visualizacoes';
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderDashboard(result);
+                } else {
+                    showError(
+                        result.error || 'Erro',
+                        result.message || 'Nao foi possivel carregar os dados.'
+                    );
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                showError(
+                    'Erro de conexao',
+                    'Nao foi possivel conectar ao servidor. Verifique sua conexao e tente novamente.'
+                );
+            }
+        }
+
+        // Inicializar quando a pagina carregar
+        document.addEventListener('DOMContentLoaded', fetchVisualizacoes);
+    </script>
+</body>
+</html>

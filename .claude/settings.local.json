@@ -5,7 +5,8 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nAdiciona página de política de privacidade para validação do app Dnotas\n\nCriada página completa de política de privacidade em conformidade com a LGPD, incluindo informações sobre coleta, uso, compartilhamento e proteção de dados pessoais.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git push)",
       "Bash(git pull:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
