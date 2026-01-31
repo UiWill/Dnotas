@@ -753,9 +753,34 @@
             }
         }
 
+        // Funcao para obter parametro da URL
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
         // Funcao principal para buscar dados
         async function fetchVisualizacoes() {
             const refreshBtn = document.getElementById('refreshBtn');
+
+            // Verificar se o parametro franquia foi informado
+            const franquiaParam = getUrlParam('franquia');
+            if (!franquiaParam) {
+                showError(
+                    'Franquia nao informada',
+                    'Informe o parametro da franquia na URL. Exemplo: ?franquia=1'
+                );
+                return;
+            }
+
+            const franquiaIndex = parseInt(franquiaParam) - 1; // Converter para indice (0-based)
+            if (isNaN(franquiaIndex) || franquiaIndex < 0) {
+                showError(
+                    'Franquia invalida',
+                    'O parametro franquia deve ser um numero valido (1, 2, 3...).'
+                );
+                return;
+            }
 
             // Se o botao existe, mostrar loading
             if (refreshBtn) {
@@ -769,7 +794,23 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    renderDashboard(result);
+                    // Filtrar apenas a franquia especificada
+                    if (franquiaIndex >= result.franquias.length) {
+                        showError(
+                            'Franquia nao encontrada',
+                            `A franquia ${franquiaParam} nao existe. Total de franquias: ${result.franquias.length}`
+                        );
+                        return;
+                    }
+
+                    // Criar novo objeto com apenas a franquia filtrada
+                    const filteredResult = {
+                        success: true,
+                        total_empresas: result.franquias[franquiaIndex].empresas.length,
+                        franquias: [result.franquias[franquiaIndex]]
+                    };
+
+                    renderDashboard(filteredResult);
                 } else {
                     showError(
                         result.error || 'Erro',
