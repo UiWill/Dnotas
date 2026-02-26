@@ -72,19 +72,18 @@ retornando em JSON todos os campos do serviço **e** todos os campos do cliente 
 GET /api/servicos
 ```
 
-**Query params obrigatórios:**
+**Todos os parâmetros são obrigatórios:**
 
-| Param | Formato     | Exemplo        | Descrição             |
-|-------|-------------|----------------|-----------------------|
-| `de`  | YYYY-MM-DD  | `2026-01-01`   | Data início do período |
-| `ate` | YYYY-MM-DD  | `2026-01-31`   | Data fim do período   |
+| Param  | Formato    | Exemplo          | Descrição                                        |
+|--------|------------|------------------|--------------------------------------------------|
+| `cnpj` | 14 dígitos | `12345678000199` | CNPJ da empresa (só dígitos, sem pontos/barras)  |
+| `de`   | YYYY-MM-DD | `2026-01-01`     | Data início do período                           |
+| `ate`  | YYYY-MM-DD | `2026-01-31`     | Data fim do período                              |
 
-**Query params opcionais:**
-
-| Param        | Exemplo           | Descrição                                  |
-|--------------|-------------------|--------------------------------------------|
-| `cnpj`       | `12345678000199`  | Filtrar por CNPJ da empresa (só dígitos)   |
-| `pagamento`  | `pix`             | Filtrar por forma de pagamento             |
+**Exemplo de chamada:**
+```
+GET /api/servicos?cnpj=12345678000199&de=2026-01-01&ate=2026-01-31
+```
 
 ---
 
@@ -93,6 +92,8 @@ GET /api/servicos
 ```json
 {
   "success": true,
+  "cnpj_empresa": "12345678000199",
+  "nome_empresa": "Salão da Maria",
   "periodo": {
     "de": "2026-01-01",
     "ate": "2026-01-31"
@@ -135,14 +136,13 @@ GET /api/servicos
 }
 ```
 
-### Resposta de erro
+### Respostas de erro
 
 ```json
-{
-  "success": false,
-  "error": "Parâmetros 'de' e 'ate' são obrigatórios",
-  "servicos": []
-}
+{ "success": false, "error": "Parâmetros 'cnpj', 'de' e 'ate' são obrigatórios", "servicos": [] }
+{ "success": false, "error": "CNPJ deve ter 14 dígitos numéricos", "servicos": [] }
+{ "success": false, "error": "Data 'de' não pode ser maior que 'ate'", "servicos": [] }
+{ "success": false, "error": "Empresa não encontrada para o CNPJ informado", "servicos": [] }
 ```
 
 ---
@@ -209,6 +209,7 @@ const { data, error } = await supabase
       id, cnpj, nome_empresa
     )
   `)
+  .eq('cnpj_empresa', cnpj)
   .gte('data', de)
   .lte('data', ate)
   .order('data', { ascending: false });
@@ -220,11 +221,12 @@ Depois formatar o resultado para o JSON esperado (renomear `clientes` → `clien
 
 ## Validações obrigatórias
 
-- `de` e `ate` são obrigatórios → retornar erro 400 se ausentes
+- `cnpj`, `de` e `ate` são todos **obrigatórios** → retornar erro 400 se qualquer um estiver ausente
+- `cnpj` deve ter exatamente 14 dígitos numéricos → remover formatação (pontos, barra, traço) antes de validar
+- Verificar se o `cnpj` existe na tabela `empresas_nfs` → retornar erro 404 se não existir
+- Formato das datas deve ser `YYYY-MM-DD` → validar com regex `/^\d{4}-\d{2}-\d{2}$/`
 - `de` deve ser ≤ `ate` → retornar erro 400 se não for
-- Formato das datas deve ser `YYYY-MM-DD` → validar com regex ou `Date.parse`
-- Se `cnpj` for passado, remover formatação (manter só dígitos) antes de filtrar
-- Se não houver resultados, retornar `servicos: []` com `success: true`
+- Se não houver serviços no período, retornar `servicos: []` com `success: true`
 
 ---
 
@@ -250,18 +252,19 @@ Somar todos os valores dos serviços retornados e incluir no response root como 
 Após criar a API, testar com curl ou Postman:
 
 ```bash
-# Buscar todos os serviços de janeiro/2026
-GET /api/servicos?de=2026-01-01&ate=2026-01-31
+# Buscar todos os serviços do Salão da Maria em janeiro/2026
+GET /api/servicos?cnpj=12345678000199&de=2026-01-01&ate=2026-01-31
 
-# Filtrar por empresa específica
-GET /api/servicos?de=2026-01-01&ate=2026-01-31&cnpj=12345678000199
+# Buscar apenas fevereiro
+GET /api/servicos?cnpj=12345678000199&de=2026-02-01&ate=2026-02-28
 
-# Filtrar por pagamento pix
-GET /api/servicos?de=2026-01-01&ate=2026-01-31&pagamento=pix
-
-# Erro esperado (sem datas)
+# Erro: faltando parâmetros
 GET /api/servicos
-→ { "success": false, "error": "Parâmetros 'de' e 'ate' são obrigatórios" }
+→ { "success": false, "error": "Parâmetros 'cnpj', 'de' e 'ate' são obrigatórios" }
+
+# Erro: CNPJ não cadastrado
+GET /api/servicos?cnpj=99999999000199&de=2026-01-01&ate=2026-01-31
+→ { "success": false, "error": "Empresa não encontrada para o CNPJ informado" }
 ```
 
 ---
