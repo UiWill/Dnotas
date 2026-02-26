@@ -1,0 +1,25 @@
+SIte com e paginas sendo a primeira pagina com duas opecoes
+Cadastro cliente e a outra opcao sera Anotar servico (ou algum nome melhor qeu descreva oque vai fazer)
+
+quando clica em Cadastro Cliente (ou se achar algum onme mais profissional pode ) oqeu vai ter nessa parte vai ser o seguinte 
+um local para colocar o CPF
+CEP (quando colocar o cep ja prencher as outras informcaoes do endereco e tbm ja pegar o codigo IBGE da cidade)
+complento opcional caso a pessoa queira colocar e tbm Numero de telefone e o botao para salvar 
+
+Agora na segunda pagina onde tem o anotar servico
+ai se clicar nessa parte a pessoa vai ter que fazer login para fazer login a pessoa vai ter que colocar o cnpj e os 6 primeiros digitos do cnpj vai ser a senha
+nessa parte apos entrar vai verificar se tem esse login e ao entrar oque vai ter que ter nessa parte ~e o seguinte
+
+ID (gera altomatico cada servico realizado vai ter um id)
+atividade realidas/serviço  
+Valor
+e forma de pagamento (pix/debito/credito)
+DATA 
+e o botao de confirmar servico
+e selecionar o cliente (esse botao do selecionar cliente vai ter como pesquisar por nome ou cpf que vai ser uma consulta naquela tabela onde cadastramos o cliente )
+
+OBS( na parte de login desse de registrar servico coloque la em baixo um botao de criar login e se clicar nesse botao vai pedir uma senha pq so eu que vou criar esse login a senha sera Dnotas8486*) e ai depois de colocar essa senha ai sim vai poder criar um login para a parte do servico 
+
+agora vou te explicar o pq estamos fazendo isso nossa empresa emite notas de servicos para outros lugares como salao papelarias e etc esse site sera onde vamos fazer as consultas para emitirmos as notas ei prescisamos de todas as informacoes passadas ali em cima 
+
+LEMBRANDO que quando salvar um servico tbm tem que ter a tabela CNPJ que o valor é o cnpj de login que estamos usando para saber de qual empresa é esse servico 

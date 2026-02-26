@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
+    <title>Anotar Serviço - Dnotas</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black:    #000000;
+            --white:    #ffffff;
+            --gray-50:  #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green:    #16a34a;
+            --green-bg: #dcfce7;
+            --red:      #dc2626;
+            --red-bg:   #fee2e2;
+            --blue:     #2563eb;
+            --blue-bg:  #dbeafe;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        .header {
+            background-color: var(--black);
+            padding: 1rem 2rem;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .header-content {
+            max-width: 700px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { height: 34px; }
+        .header-right { display: flex; align-items: center; gap: 1rem; }
+        .back-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            color: var(--gray-400); text-decoration: none;
+            font-size: 0.875rem; font-weight: 500; transition: color .15s;
+        }
+        .back-btn:hover { color: var(--white); }
+        .logout-btn {
+            display: none; align-items: center; gap: 0.4rem;
+            color: var(--gray-400); background: none; border: none;
+            font-size: 0.875rem; font-weight: 500; cursor: pointer;
+            font-family: inherit; transition: color .15s;
+        }
+        .logout-btn:hover { color: var(--white); }
+        .logout-btn.show { display: flex; }
+
+        /* ── Session Badge ── */
+        .session-badge {
+            display: none;
+            background: var(--gray-800);
+            border: 1px solid var(--gray-700);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+            color: var(--gray-300);
+            margin-bottom: 1.5rem;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .session-badge.show { display: flex; }
+        .session-badge strong { color: var(--white); }
+
+        /* ── Main ── */
+        .main-container {
+            max-width: 700px; margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+        }
+
+        /* ── Views ── */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .page-title {
+            font-size: 1.5rem; font-weight: 700;
+            letter-spacing: -0.03em; margin-bottom: 0.375rem;
+        }
+        .page-subtitle {
+            color: var(--gray-500); font-size: 0.9rem; margin-bottom: 2rem;
+        }
+
+        /* ── Card ── */
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+
+        .form-section-title {
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: .06em;
+            color: var(--gray-400); margin: 1.5rem 0 0.875rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-100);
+        }
+        .form-section-title:first-of-type { margin-top: 0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .col-span-2 { grid-column: span 2; }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.375rem; }
+        .form-group label { font-size: 0.8125rem; font-weight: 500; color: var(--gray-700); }
+
+        .form-control {
+            width: 100%; padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300); border-radius: 8px;
+            font-size: 0.875rem; font-family: inherit;
+            color: var(--gray-900); background: var(--white);
+            transition: border-color .15s, box-shadow .15s; outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+        }
+        .form-control.error { border-color: var(--red); }
+
+        /* Pagamento pills */
+        .pagamento-group {
+            display: flex; gap: 0.5rem; flex-wrap: wrap;
+        }
+        .pagamento-pill {
+            flex: 1; min-width: 80px;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--gray-300); border-radius: 8px;
+            background: var(--white); font-family: inherit;
+            font-size: 0.875rem; font-weight: 500; color: var(--gray-600);
+            cursor: pointer; text-align: center; transition: all .15s;
+        }
+        .pagamento-pill:hover { border-color: var(--gray-500); color: var(--gray-800); }
+        .pagamento-pill.selected {
+            background: var(--black); border-color: var(--black);
+            color: var(--white);
+        }
+
+        /* Cliente search */
+        .cliente-search-box {
+            display: flex; gap: 0.5rem;
+        }
+        .cliente-search-box .form-control { flex: 1; }
+        .btn-search-cliente {
+            padding: 0.625rem 1rem;
+            background: var(--gray-100); border: 1px solid var(--gray-300);
+            border-radius: 8px; cursor: pointer; font-family: inherit;
+            font-size: 0.875rem; font-weight: 500; color: var(--gray-700);
+            display: flex; align-items: center; gap: 0.375rem;
+            white-space: nowrap; transition: background .15s;
+        }
+        .btn-search-cliente:hover { background: var(--gray-200); }
+
+        .search-results {
+            display: none; margin-top: 0.5rem;
+            border: 1px solid var(--gray-200); border-radius: 8px;
+            overflow: hidden; background: var(--white);
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+        .search-results.show { display: block; }
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer; transition: background .1s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: var(--gray-50); }
+        .result-nome { font-size: 0.875rem; font-weight: 500; color: var(--gray-900); }
+        .result-cpf  { font-size: 0.8125rem; color: var(--gray-400); font-family: monospace; }
+
+        .cliente-selecionado {
+            display: none; margin-top: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--green-bg); border: 1px solid #bbf7d0;
+            border-radius: 8px; font-size: 0.875rem; color: var(--green);
+            align-items: center; justify-content: space-between; gap: 0.5rem;
+        }
+        .cliente-selecionado.show { display: flex; }
+        .btn-remover-cliente {
+            background: none; border: none; cursor: pointer;
+            color: var(--green); font-size: 1rem; line-height: 1;
+            transition: color .15s;
+        }
+        .btn-remover-cliente:hover { color: var(--red); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; padding: 0.75rem 1.5rem;
+            border-radius: 8px; font-size: 0.9375rem; font-weight: 600;
+            font-family: inherit; cursor: pointer; border: none; transition: all .2s;
+        }
+        .btn-primary {
+            background-color: var(--black); color: var(--white);
+            width: 100%; margin-top: 1.5rem;
+        }
+        .btn-primary:hover { background-color: var(--gray-800); }
+        .btn-primary:disabled { background-color: var(--gray-300); cursor: not-allowed; }
+
+        .btn-outline {
+            background: var(--white); color: var(--gray-700);
+            border: 1px solid var(--gray-300); width: 100%; margin-top: 0.75rem;
+        }
+        .btn-outline:hover { background: var(--gray-50); }
+
+        .btn .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin .8s linear infinite; display: none;
+        }
+        .btn.loading .spinner { display: block; }
+        .btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Divisor */
+        .divider {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin: 1.5rem 0; color: var(--gray-400); font-size: 0.8125rem;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--gray-200);
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            max-width: 360px; padding: 1rem 1.25rem; border-radius: 10px;
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12); font-size: 0.875rem;
+            z-index: 200; opacity: 0; transform: translateY(10px);
+            transition: opacity .25s, transform .25s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .toast.success { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+        .toast.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #fecaca; }
+        .toast i { font-size: 1.125rem; margin-top: 1px; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); z-index: 50;
+            align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--white); border-radius: 16px;
+            padding: 2rem; width: 100%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.2);
+        }
+        .modal-title {
+            font-size: 1.125rem; font-weight: 700;
+            letter-spacing: -0.02em; margin-bottom: 0.375rem;
+        }
+        .modal-subtitle { color: var(--gray-500); font-size: 0.875rem; margin-bottom: 1.5rem; }
+        .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+        .modal-actions .btn { margin-top: 0; flex: 1; }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center; padding: 1.5rem;
+            color: var(--gray-400); font-size: 0.75rem;
+        }
+        .footer a { color: var(--gray-600); text-decoration: none; font-weight: 500; }
+        .footer a:hover { color: var(--black); }
+
+        @media (max-width: 580px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .col-span-2 { grid-column: span 1; }
+            .form-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <img src="../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <div class="header-right">
+                <button class="logout-btn" id="logoutBtn" onclick="fazerLogout()">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </button>
+                <a href="index.html" class="back-btn">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- ══════════════════════════════════════
+             VIEW 1 — LOGIN
+        ══════════════════════════════════════ -->
+        <div class="view active" id="viewLogin">
+            <h1 class="page-title">Anotar Serviço</h1>
+            <p class="page-subtitle">Faça login com o CNPJ da empresa para registrar serviços.</p>
+
+            <div class="form-card">
+                <p class="form-section-title"><i class="bi bi-lock"></i> Acesso da Empresa</p>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label for="loginCnpj">CNPJ da Empresa</label>
+                    <input type="text" id="loginCnpj" class="form-control"
+                        placeholder="00.000.000/0000-00" maxlength="18" autocomplete="off">
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label for="loginSenha">Senha <span style="color:var(--gray-400);font-size:.75rem;font-weight:400;">(6 primeiros dígitos do CNPJ)</span></label>
+                    <input type="password" id="loginSenha" class="form-control"
+                        placeholder="••••••" maxlength="6" autocomplete="off">
+                </div>
+
+                <button class="btn btn-primary" id="btnLogin" onclick="fazerLogin()">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-arrow-right-circle"></i> Entrar</span>
+                </button>
+
+                <div class="divider">ou</div>
+
+                <button class="btn btn-outline" onclick="abrirModalCriarLogin()">
+                    <i class="bi bi-person-plus"></i> Criar Login de Empresa
+                </button>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 2 — FORMULÁRIO DE SERVIÇO
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewServico">
+            <div class="session-badge show" id="sessionBadge">
+                <i class="bi bi-building"></i>
+                <span>Empresa: <strong id="sessionNome"></strong></span>
+                <span style="margin-left:auto;color:var(--gray-500);font-family:monospace;font-size:.75rem;" id="sessionCnpj"></span>
+            </div>
+
+            <h1 class="page-title">Novo Serviço</h1>
+            <p class="page-subtitle">Preencha as informações do serviço prestado.</p>
+
+            <div class="form-card">
+
+                <!-- Atividade -->
+                <p class="form-section-title"><i class="bi bi-clipboard-text"></i> Serviço</p>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label for="atividade">Atividade / Serviço realizado</label>
+                    <input type="text" id="atividade" class="form-control"
+                        placeholder="Ex: Emissão de nota fiscal mensal" autocomplete="off">
+                </div>
+
+                <div class="form-grid" style="margin-bottom:1rem;">
+                    <div class="form-group">
+                        <label for="valor">Valor (R$)</label>
+                        <input type="text" id="valor" class="form-control"
+                            placeholder="0,00" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="dataServico">Data</label>
+                        <input type="date" id="dataServico" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label>Forma de pagamento</label>
+                    <div class="pagamento-group">
+                        <button class="pagamento-pill" data-pag="pix"     onclick="selecionarPagamento('pix')">
+                            <i class="bi bi-qr-code"></i> Pix
+                        </button>
+                        <button class="pagamento-pill" data-pag="debito"  onclick="selecionarPagamento('debito')">
+                            <i class="bi bi-credit-card"></i> Débito
+                        </button>
+                        <button class="pagamento-pill" data-pag="credito" onclick="selecionarPagamento('credito')">
+                            <i class="bi bi-credit-card-2-front"></i> Crédito
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cliente -->
+                <p class="form-section-title"><i class="bi bi-person-check"></i> Cliente</p>
+
+                <div class="form-group">
+                    <label>Selecionar Cliente</label>
+                    <div class="cliente-search-box">
+                        <input type="text" id="buscaCliente" class="form-control"
+                            placeholder="Pesquisar por nome ou CPF..."
+                            oninput="pesquisarCliente()"
+                            autocomplete="off">
+                        <button class="btn-search-cliente" onclick="pesquisarCliente()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+
+                    <div class="search-results" id="searchResults"></div>
+
+                    <div class="cliente-selecionado" id="clienteSelecionado">
+                        <div>
+                            <i class="bi bi-person-check-fill"></i>
+                            <strong id="clienteNome" style="margin-left:.4rem;"></strong>
+                            <span id="clienteCpf" style="margin-left:.5rem;color:var(--green);opacity:.8;font-size:.8125rem;"></span>
+                        </div>
+                        <button class="btn-remover-cliente" onclick="removerCliente()" title="Remover">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btnSalvarServico" onclick="salvarServico()">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-check2-circle"></i> Confirmar Serviço</span>
+                </button>
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> — Todos os direitos reservados</p>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+
+    <!-- Modal: Senha Admin para criar login -->
+    <div class="modal-overlay" id="modalSenhaAdmin">
+        <div class="modal">
+            <h2 class="modal-title">Criar Login de Empresa</h2>
+            <p class="modal-subtitle">Digite a senha de administrador para continuar.</p>
+            <div class="form-group">
+                <label for="senhaAdmin">Senha de administrador</label>
+                <input type="password" id="senhaAdmin" class="form-control" placeholder="••••••••••"
+                    autocomplete="off" onkeydown="if(event.key==='Enter') verificarSenhaAdmin()">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="fecharModal('modalSenhaAdmin')" style="margin-top:0;">Cancelar</button>
+                <button class="btn btn-primary" onclick="verificarSenhaAdmin()" style="margin-top:0;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Criar login de empresa -->
+    <div class="modal-overlay" id="modalCriarLogin">
+        <div class="modal">
+            <h2 class="modal-title">Nova Empresa</h2>
+            <p class="modal-subtitle">Cadastre a empresa. A senha será os 6 primeiros dígitos do CNPJ.</p>
+            <div class="form-group" style="margin-bottom:1rem;">
+                <label for="novoCnpj">CNPJ da Empresa</label>
+                <input type="text" id="novoCnpj" class="form-control"
+                    placeholder="00.000.000/0000-00" maxlength="18" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="novoNome">Nome da Empresa</label>
+                <input type="text" id="novoNome" class="form-control"
+                    placeholder="Ex: Salão da Maria" autocomplete="off">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="fecharModal('modalCriarLogin')" style="margin-top:0;">Cancelar</button>
+                <button class="btn btn-primary" id="btnCriarLogin" onclick="criarLogin()" style="margin-top:0;">
+                    <div class="spinner"></div>
+                    <span class="btn-text">Criar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Supabase ──────────────────────────────────────────────────
+        const SUPABASE_URL = 'https://adgbcgiuaqtkzttpesrv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZ2JjZ2l1YXF0a3p0dHBlc3J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMjAwODksImV4cCI6MjA1OTY5NjA4OX0.IbsuraTr2JrmCJXmMAo4Qor9IyRXMDKAQ_HTIJE6TW4';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ── Estado ────────────────────────────────────────────────────
+        let sessao = null;         // { id, cnpj, nome_empresa }
+        let clienteId = null;      // UUID do cliente selecionado
+        let pagamento = null;      // 'pix' | 'debito' | 'credito'
+        let searchTimer = null;
+
+        // ── Máscara CNPJ ─────────────────────────────────────────────
+        function maskCnpj(el) {
+            let v = el.value.replace(/\D/g, '').slice(0, 14);
+            v = v.replace(/(\d{2})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1/$2');
+            v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            el.value = v;
+        }
+
+        document.getElementById('loginCnpj').addEventListener('input', function () { maskCnpj(this); });
+        document.getElementById('novoCnpj').addEventListener('input', function () { maskCnpj(this); });
+
+        // Máscara valor monetário
+        document.getElementById('valor').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '');
+            if (!v) { this.value = ''; return; }
+            v = (parseInt(v) / 100).toFixed(2).replace('.', ',');
+            this.value = v;
+        });
+
+        // Data padrão = hoje
+        document.getElementById('dataServico').value = new Date().toISOString().split('T')[0];
+
+        // ── Login ─────────────────────────────────────────────────────
+        async function fazerLogin() {
+            const cnpjRaw = document.getElementById('loginCnpj').value.replace(/\D/g, '');
+            const senha   = document.getElementById('loginSenha').value.trim();
+
+            if (cnpjRaw.length !== 14) { showToast('CNPJ inválido. Digite os 14 dígitos.', 'error'); return; }
+            if (!senha)                 { showToast('Digite a senha.', 'error'); return; }
+
+            const senhaCorreta = cnpjRaw.substring(0, 6);
+            if (senha !== senhaCorreta) { showToast('Senha incorreta.', 'error'); return; }
+
+            const btn = document.getElementById('btnLogin');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { data, error } = await db
+                    .from('empresas_nfs')
+                    .select('*')
+                    .eq('cnpj', cnpjRaw)
+                    .single();
+
+                if (error || !data) {
+                    showToast('CNPJ não cadastrado. Crie um login primeiro.', 'error');
+                    return;
+                }
+
+                sessao = data;
+                abrirServico();
+
+            } catch {
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        function abrirServico() {
+            document.getElementById('viewLogin').classList.remove('active');
+            document.getElementById('viewServico').classList.add('active');
+            document.getElementById('logoutBtn').classList.add('show');
+            document.getElementById('sessionNome').textContent = sessao.nome_empresa;
+            document.getElementById('sessionCnpj').textContent = formatCnpj(sessao.cnpj);
+            // Reset form
+            limparFormServico();
+        }
+
+        function fazerLogout() {
+            sessao = null; clienteId = null; pagamento = null;
+            document.getElementById('viewServico').classList.remove('active');
+            document.getElementById('viewLogin').classList.add('active');
+            document.getElementById('logoutBtn').classList.remove('show');
+            document.getElementById('loginCnpj').value = '';
+            document.getElementById('loginSenha').value = '';
+        }
+
+        // ── Pagamento ─────────────────────────────────────────────────
+        function selecionarPagamento(tipo) {
+            pagamento = tipo;
+            document.querySelectorAll('.pagamento-pill').forEach(el => {
+                el.classList.toggle('selected', el.dataset.pag === tipo);
+            });
+        }
+
+        // ── Buscar cliente ────────────────────────────────────────────
+        async function pesquisarCliente() {
+            const termo = document.getElementById('buscaCliente').value.trim();
+            if (termo.length < 2) {
+                document.getElementById('searchResults').classList.remove('show');
+                return;
+            }
+
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(async () => {
+                const cpfLimpo = termo.replace(/\D/g, '');
+
+                let query = db.from('clientes').select('id, nome, cpf').limit(8);
+
+                if (cpfLimpo.length >= 3) {
+                    query = query.ilike('cpf', `%${cpfLimpo}%`);
+                } else {
+                    query = query.ilike('nome', `%${termo}%`);
+                }
+
+                const { data } = await query;
+                renderResultados(data || []);
+            }, 300);
+        }
+
+        function renderResultados(lista) {
+            const box = document.getElementById('searchResults');
+            if (!lista.length) {
+                box.innerHTML = `<div class="search-result-item" style="color:var(--gray-400);">
+                    <span>Nenhum cliente encontrado</span></div>`;
+                box.classList.add('show');
+                return;
+            }
+            box.innerHTML = lista.map(c => `
+                <div class="search-result-item" onclick="selecionarCliente('${c.id}','${c.nome}','${c.cpf}')">
+                    <span class="result-nome">${c.nome}</span>
+                    <span class="result-cpf">${c.cpf}</span>
+                </div>
+            `).join('');
+            box.classList.add('show');
+        }
+
+        function selecionarCliente(id, nome, cpf) {
+            clienteId = id;
+            document.getElementById('clienteNome').textContent = nome;
+            document.getElementById('clienteCpf').textContent  = cpf;
+            document.getElementById('clienteSelecionado').classList.add('show');
+            document.getElementById('searchResults').classList.remove('show');
+            document.getElementById('buscaCliente').value = '';
+        }
+
+        function removerCliente() {
+            clienteId = null;
+            document.getElementById('clienteSelecionado').classList.remove('show');
+        }
+
+        // ── Salvar serviço ────────────────────────────────────────────
+        async function salvarServico() {
+            const atividade = document.getElementById('atividade').value.trim();
+            const valorStr  = document.getElementById('valor').value.replace(',', '.').replace(/[^\d.]/g, '');
+            const data      = document.getElementById('dataServico').value;
+
+            if (!atividade)          { showToast('Informe a atividade/serviço.', 'error'); return; }
+            if (!valorStr || isNaN(parseFloat(valorStr)) || parseFloat(valorStr) <= 0) {
+                showToast('Informe um valor válido.', 'error'); return;
+            }
+            if (!pagamento)          { showToast('Selecione a forma de pagamento.', 'error'); return; }
+            if (!data)               { showToast('Informe a data do serviço.', 'error'); return; }
+            if (!clienteId)          { showToast('Selecione um cliente.', 'error'); return; }
+
+            const btn = document.getElementById('btnSalvarServico');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('servicos_prestados').insert([{
+                    empresa_id:      sessao.id,
+                    cnpj_empresa:    sessao.cnpj,
+                    cliente_id:      clienteId,
+                    atividade,
+                    valor:           parseFloat(valorStr),
+                    forma_pagamento: pagamento,
+                    data
+                }]);
+
+                if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+
+                showToast('Serviço registrado com sucesso!', 'success');
+                setTimeout(() => limparFormServico(), 1500);
+
+            } catch {
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        function limparFormServico() {
+            document.getElementById('atividade').value = '';
+            document.getElementById('valor').value = '';
+            document.getElementById('dataServico').value = new Date().toISOString().split('T')[0];
+            document.getElementById('buscaCliente').value = '';
+            document.getElementById('searchResults').classList.remove('show');
+            removerCliente();
+            pagamento = null;
+            document.querySelectorAll('.pagamento-pill').forEach(el => el.classList.remove('selected'));
+        }
+
+        // ── Criar Login ───────────────────────────────────────────────
+        function abrirModalCriarLogin() {
+            document.getElementById('senhaAdmin').value = '';
+            document.getElementById('modalSenhaAdmin').classList.add('show');
+            setTimeout(() => document.getElementById('senhaAdmin').focus(), 100);
+        }
+
+        function verificarSenhaAdmin() {
+            const senha = document.getElementById('senhaAdmin').value;
+            if (senha !== 'Dnotas8486*') {
+                showToast('Senha de administrador incorreta.', 'error');
+                document.getElementById('senhaAdmin').value = '';
+                return;
+            }
+            fecharModal('modalSenhaAdmin');
+            document.getElementById('novoCnpj').value = '';
+            document.getElementById('novoNome').value = '';
+            document.getElementById('modalCriarLogin').classList.add('show');
+            setTimeout(() => document.getElementById('novoCnpj').focus(), 100);
+        }
+
+        async function criarLogin() {
+            const cnpjRaw = document.getElementById('novoCnpj').value.replace(/\D/g, '');
+            const nome    = document.getElementById('novoNome').value.trim();
+
+            if (cnpjRaw.length !== 14) { showToast('CNPJ inválido.', 'error'); return; }
+            if (!nome)                  { showToast('Informe o nome da empresa.', 'error'); return; }
+
+            const btn = document.getElementById('btnCriarLogin');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('empresas_nfs').insert([{
+                    cnpj:         cnpjRaw,
+                    nome_empresa: nome
+                }]);
+
+                if (error) {
+                    if (error.code === '23505') {
+                        showToast('Este CNPJ já possui login cadastrado.', 'error');
+                    } else {
+                        showToast('Erro: ' + error.message, 'error');
+                    }
+                    return;
+                }
+
+                fecharModal('modalCriarLogin');
+                showToast(`Login criado! Senha: ${cnpjRaw.substring(0, 6)}`, 'success');
+
+            } catch {
+                showToast('Erro de conexão.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        function fecharModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        // Fechar modal clicando fora
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function (e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+
+        // Enter no login
+        document.getElementById('loginSenha').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') fazerLogin();
+        });
+
+        // ── Helpers ───────────────────────────────────────────────────
+        function formatCnpj(v) {
+            return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').className =
+                type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+    </script>
+
+</body>
+</html>

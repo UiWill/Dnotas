@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
+    <title>Cadastrar Cliente - Dnotas</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black:    #000000;
+            --white:    #ffffff;
+            --gray-50:  #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green:    #16a34a;
+            --green-bg: #dcfce7;
+            --red:      #dc2626;
+            --red-bg:   #fee2e2;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        .header {
+            background-color: var(--black);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header-content {
+            max-width: 700px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo { height: 34px; }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--gray-400);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color .15s;
+        }
+        .back-btn:hover { color: var(--white); }
+
+        /* ── Main ── */
+        .main-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.375rem;
+        }
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Card / Form ── */
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+
+        .form-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--gray-400);
+            margin: 1.5rem 0 0.875rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .form-section-title:first-of-type { margin-top: 0; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-grid.cols-3 { grid-template-columns: 2fr 1fr 1fr; }
+        .col-span-2 { grid-column: span 2; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+        .form-group label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        .form-group label .optional {
+            font-weight: 400;
+            color: var(--gray-400);
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            color: var(--gray-900);
+            background: var(--white);
+            transition: border-color .15s, box-shadow .15s;
+            outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+        }
+        .form-control:disabled {
+            background-color: var(--gray-50);
+            color: var(--gray-500);
+            cursor: not-allowed;
+        }
+        .form-control.error { border-color: var(--red); }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .input-group:focus-within {
+            border-color: var(--black);
+            box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+        }
+        .input-group .form-control {
+            border: none;
+            border-radius: 0;
+            flex: 1;
+            box-shadow: none !important;
+        }
+        .input-addon {
+            padding: 0 0.75rem;
+            background: var(--gray-50);
+            border-left: 1px solid var(--gray-200);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            transition: background .15s, color .15s;
+            white-space: nowrap;
+        }
+        .input-addon:hover { background: var(--gray-100); color: var(--gray-700); }
+
+        /* ── Button ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+        }
+        .btn-primary {
+            background-color: var(--black);
+            color: var(--white);
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .btn-primary:hover { background-color: var(--gray-800); }
+        .btn-primary:disabled {
+            background-color: var(--gray-300);
+            cursor: not-allowed;
+        }
+        .btn .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            display: none;
+        }
+        .btn.loading .spinner { display: block; }
+        .btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            max-width: 360px;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12);
+            font-size: 0.875rem;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity .25s, transform .25s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .toast.success { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+        .toast.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #fecaca; }
+        .toast i { font-size: 1.125rem; margin-top: 1px; }
+
+        /* ── CEP spinner ── */
+        .cep-loading {
+            display: none;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--gray-500);
+            font-size: 0.8125rem;
+            margin-top: 0.25rem;
+        }
+        .cep-loading.show { display: flex; }
+        .cep-spin {
+            width: 12px; height: 12px;
+            border: 2px solid var(--gray-300);
+            border-top-color: var(--gray-600);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray-400);
+            font-size: 0.75rem;
+        }
+        .footer a { color: var(--gray-600); text-decoration: none; font-weight: 500; }
+        .footer a:hover { color: var(--black); }
+
+        @media (max-width: 580px) {
+            .form-grid, .form-grid.cols-3 { grid-template-columns: 1fr; }
+            .col-span-2 { grid-column: span 1; }
+            .form-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <img src="../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <a href="index.html" class="back-btn">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <h1 class="page-title">Cadastrar Cliente</h1>
+        <p class="page-subtitle">Preencha os dados do cliente. O endereço será preenchido automaticamente pelo CEP.</p>
+
+        <div class="form-card">
+
+            <!-- DADOS PESSOAIS -->
+            <p class="form-section-title"><i class="bi bi-person"></i> Dados Pessoais</p>
+
+            <div class="form-group col-span-2" style="margin-bottom:1rem;">
+                <label for="nome">Nome completo</label>
+                <input type="text" id="nome" class="form-control" placeholder="Ex: João da Silva" autocomplete="off">
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" class="form-control" placeholder="000.000.000-00" maxlength="14" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="text" id="telefone" class="form-control" placeholder="(00) 00000-0000" maxlength="15" autocomplete="off">
+                </div>
+            </div>
+
+            <!-- ENDEREÇO -->
+            <p class="form-section-title" style="margin-top:1.75rem;"><i class="bi bi-geo-alt"></i> Endereço</p>
+
+            <div class="form-group" style="margin-bottom:1rem;">
+                <label for="cep">CEP</label>
+                <div class="input-group">
+                    <input type="text" id="cep" class="form-control" placeholder="00000-000" maxlength="9" autocomplete="off">
+                    <span class="input-addon" id="btnBuscarCep" onclick="buscarCep()">
+                        <i class="bi bi-search"></i>&nbsp;Buscar
+                    </span>
+                </div>
+                <div class="cep-loading" id="cepLoading">
+                    <div class="cep-spin"></div> Buscando endereço...
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom:1rem;">
+                <div class="form-group col-span-2">
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" id="logradouro" class="form-control" placeholder="Rua, Avenida..." disabled>
+                </div>
+            </div>
+
+            <div class="form-grid cols-3" style="margin-bottom:1rem;">
+                <div class="form-group">
+                    <label for="bairro">Bairro</label>
+                    <input type="text" id="bairro" class="form-control" placeholder="Bairro" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="numero">Número</label>
+                    <input type="text" id="numero" class="form-control" placeholder="Ex: 100" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="complemento">Complemento <span class="optional">(opcional)</span></label>
+                    <input type="text" id="complemento" class="form-control" placeholder="Apto, Sala..." autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" class="form-control" placeholder="Cidade" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" class="form-control" placeholder="UF" maxlength="2" disabled>
+                </div>
+            </div>
+
+            <!-- Código IBGE (oculto, preenchido automaticamente) -->
+            <input type="hidden" id="codigoIbge">
+
+            <button class="btn btn-primary" id="btnSalvar" onclick="salvarCliente()">
+                <div class="spinner"></div>
+                <span class="btn-text"><i class="bi bi-check2-circle"></i> Salvar Cliente</span>
+            </button>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> — Todos os direitos reservados</p>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script>
+        // ── Supabase ──────────────────────────────────────────────────
+        const SUPABASE_URL = 'https://adgbcgiuaqtkzttpesrv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZ2JjZ2l1YXF0a3p0dHBlc3J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMjAwODksImV4cCI6MjA1OTY5NjA4OX0.IbsuraTr2JrmCJXmMAo4Qor9IyRXMDKAQ_HTIJE6TW4';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ── Máscaras ─────────────────────────────────────────────────
+        document.getElementById('cpf').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            this.value = v;
+        });
+
+        document.getElementById('telefone').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            if (v.length <= 10) {
+                v = v.replace(/(\d{2})(\d)/, '($1) $2');
+                v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            } else {
+                v = v.replace(/(\d{2})(\d)/, '($1) $2');
+                v = v.replace(/(\d{5})(\d)/, '$1-$2');
+            }
+            this.value = v;
+        });
+
+        document.getElementById('cep').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 8);
+            v = v.replace(/(\d{5})(\d)/, '$1-$2');
+            this.value = v;
+            if (v.replace('-', '').length === 8) buscarCep();
+        });
+
+        // ── Buscar CEP ───────────────────────────────────────────────
+        async function buscarCep() {
+            const cep = document.getElementById('cep').value.replace(/\D/g, '');
+            if (cep.length !== 8) { showToast('Digite um CEP válido com 8 dígitos.', 'error'); return; }
+
+            document.getElementById('cepLoading').classList.add('show');
+            limparEndereco();
+
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+
+                if (data.erro) {
+                    showToast('CEP não encontrado. Verifique e tente novamente.', 'error');
+                    return;
+                }
+
+                document.getElementById('logradouro').value = data.logradouro || '';
+                document.getElementById('bairro').value     = data.bairro      || '';
+                document.getElementById('cidade').value     = data.localidade   || '';
+                document.getElementById('estado').value     = data.uf           || '';
+                document.getElementById('codigoIbge').value = data.ibge         || '';
+
+                // Foca no campo número após preencher endereço
+                document.getElementById('numero').focus();
+            } catch {
+                showToast('Erro ao buscar CEP. Verifique sua conexão.', 'error');
+            } finally {
+                document.getElementById('cepLoading').classList.remove('show');
+            }
+        }
+
+        function limparEndereco() {
+            ['logradouro','bairro','cidade','estado','codigoIbge'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        // ── Salvar cliente ───────────────────────────────────────────
+        async function salvarCliente() {
+            const nome     = document.getElementById('nome').value.trim();
+            const cpf      = document.getElementById('cpf').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const cep      = document.getElementById('cep').value.trim();
+            const logr     = document.getElementById('logradouro').value.trim();
+            const numero   = document.getElementById('numero').value.trim();
+            const compl    = document.getElementById('complemento').value.trim();
+            const bairro   = document.getElementById('bairro').value.trim();
+            const cidade   = document.getElementById('cidade').value.trim();
+            const estado   = document.getElementById('estado').value.trim();
+            const ibge     = document.getElementById('codigoIbge').value.trim();
+
+            // Validação básica
+            if (!nome)   { showToast('Informe o nome do cliente.', 'error'); return; }
+            if (cpf.replace(/\D/g,'').length !== 11) {
+                showToast('CPF inválido. Digite os 11 dígitos.', 'error'); return;
+            }
+
+            const btn = document.getElementById('btnSalvar');
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('clientes').insert([{
+                    nome,
+                    cpf,
+                    telefone:    telefone || null,
+                    cep:         cep      || null,
+                    logradouro:  logr     || null,
+                    numero:      numero   || null,
+                    complemento: compl    || null,
+                    bairro:      bairro   || null,
+                    cidade:      cidade   || null,
+                    estado:      estado   || null,
+                    codigo_ibge: ibge     || null
+                }]);
+
+                if (error) {
+                    if (error.code === '23505') {
+                        showToast('Este CPF já está cadastrado.', 'error');
+                    } else {
+                        showToast('Erro ao salvar: ' + error.message, 'error');
+                    }
+                    return;
+                }
+
+                showToast('Cliente cadastrado com sucesso!', 'success');
+                setTimeout(() => limparFormulario(), 1800);
+
+            } catch {
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        }
+
+        function limparFormulario() {
+            ['nome','cpf','telefone','cep','logradouro','numero','complemento',
+             'bairro','cidade','estado','codigoIbge'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        // ── Toast ────────────────────────────────────────────────────
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon  = document.getElementById('toastIcon');
+            const text  = document.getElementById('toastMsg');
+
+            icon.className = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+            text.textContent = msg;
+            toast.className = `toast ${type} show`;
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        }
+    </script>
+
+</body>
+</html>
