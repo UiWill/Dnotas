@@ -18,8 +18,8 @@ retornando em JSON todos os campos do serviço **e** todos os campos do cliente 
 
 | Parâmetro        | Valor                                    |
 |------------------|------------------------------------------|
-| **Project URL**  | `https://adgbcgiuaqtkzttpesrv.supabase.co` |
-| **Anon Key**     | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkZ2JjZ2l1YXF0a3p0dHBlc3J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMjAwODksImV4cCI6MjA1OTY5NjA4OX0.IbsuraTr2JrmCJXmMAo4Qor9IyRXMDKAQ_HTIJE6TW4` |
+| **Project URL**  | `https://reubrhhceuxwbtaqxcnq.supabase.co` |
+| **Anon Key**     | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJldWJyaGhjZXV4d2J0YXF4Y25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MDY5NDAsImV4cCI6MjA4NDQ4Mjk0MH0.A8QX4PkS4Vb0ZqZcn_L2aqbo73dxhSknfQPIFFF8un8` |
 | **Service Key**  | (pegar no painel do Supabase em Settings → API → service_role key) |
 
 ### Tabelas relevantes
@@ -174,7 +174,7 @@ npm install -D nodemon
 ### `.env`
 
 ```env
-SUPABASE_URL=https://adgbcgiuaqtkzttpesrv.supabase.co
+SUPABASE_URL=https://reubrhhceuxwbtaqxcnq.supabase.co
 SUPABASE_SERVICE_KEY=sua_service_role_key_aqui
 PORT=3001
 ```

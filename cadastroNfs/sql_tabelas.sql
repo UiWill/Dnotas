@@ -1,6 +1,6 @@
 -- ================================================================
 -- DNOTAS - Sistema de Cadastro NFS
--- Banco: adgbcgiuaqtkzttpesrv.supabase.co
+-- Banco: reubrhhceuxwbtaqxcnq.supabase.co
 -- Cole este script no SQL Editor do Supabase e execute
 -- ================================================================
 
