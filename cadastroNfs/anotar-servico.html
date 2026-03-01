@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
-    <title>Anotar Serviço - Dnotas</title>
+    <title>Painel da Empresa - Dnotas</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -140,9 +140,7 @@
         .form-control.error { border-color: var(--red); }
 
         /* Pagamento pills */
-        .pagamento-group {
-            display: flex; gap: 0.5rem; flex-wrap: wrap;
-        }
+        .pagamento-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .pagamento-pill {
             flex: 1; min-width: 80px;
             padding: 0.6rem 0.75rem;
@@ -153,14 +151,11 @@
         }
         .pagamento-pill:hover { border-color: var(--gray-500); color: var(--gray-800); }
         .pagamento-pill.selected {
-            background: var(--black); border-color: var(--black);
-            color: var(--white);
+            background: var(--black); border-color: var(--black); color: var(--white);
         }
 
         /* Cliente search */
-        .cliente-search-box {
-            display: flex; gap: 0.5rem;
-        }
+        .cliente-search-box { display: flex; gap: 0.5rem; }
         .cliente-search-box .form-control { flex: 1; }
         .btn-search-cliente {
             padding: 0.625rem 1rem;
@@ -200,10 +195,127 @@
         .cliente-selecionado.show { display: flex; }
         .btn-remover-cliente {
             background: none; border: none; cursor: pointer;
-            color: var(--green); font-size: 1rem; line-height: 1;
-            transition: color .15s;
+            color: var(--green); font-size: 1rem; line-height: 1; transition: color .15s;
         }
         .btn-remover-cliente:hover { color: var(--red); }
+
+        /* ── Dashboard ── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .dashboard-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2rem 1.75rem;
+            text-align: left;
+            display: flex; flex-direction: column; gap: 0.75rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            cursor: pointer; border: 1px solid var(--gray-200);
+            transition: box-shadow .2s, transform .2s, border-color .2s;
+            font-family: inherit;
+        }
+        .dashboard-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,.1);
+            transform: translateY(-2px);
+            border-color: var(--gray-300);
+        }
+        .dashboard-card h2 { font-size: 1.125rem; font-weight: 600; color: var(--gray-900); }
+        .dashboard-card p { font-size: 0.875rem; color: var(--gray-500); line-height: 1.5; flex: 1; }
+        .card-icon {
+            width: 48px; height: 48px;
+            background: var(--gray-100); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.375rem; color: var(--gray-700);
+        }
+        .card-arrow {
+            width: 30px; height: 30px;
+            background: var(--black); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--white); align-self: flex-end; font-size: 0.9rem;
+        }
+        .dashboard-card:hover .card-arrow { background: var(--gray-800); }
+
+        /* ── Botão voltar dentro da view ── */
+        .btn-back-view {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: none; border: none; cursor: pointer;
+            color: var(--gray-500); font-size: 0.875rem; font-weight: 500;
+            font-family: inherit; padding: 0; transition: color .15s;
+            margin-bottom: 1.5rem;
+        }
+        .btn-back-view:hover { color: var(--gray-900); }
+
+        /* ── Lista de serviços ── */
+        .lista-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .btn-refresh {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            background: var(--gray-100); border: 1px solid var(--gray-200);
+            border-radius: 8px; padding: 0.4rem 0.75rem;
+            font-size: 0.8125rem; font-weight: 500; color: var(--gray-600);
+            cursor: pointer; font-family: inherit; transition: background .15s;
+        }
+        .btn-refresh:hover { background: var(--gray-200); }
+
+        .lista-empty {
+            text-align: center; padding: 3rem 1rem;
+            background: var(--white); border: 1px solid var(--gray-200);
+            border-radius: 12px; color: var(--gray-400);
+        }
+        .lista-empty i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+        .lista-empty p { font-size: 0.9rem; }
+
+        .servico-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        }
+        .servico-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 1rem; margin-bottom: 0.5rem;
+        }
+        .servico-cliente-nome { font-size: 1rem; font-weight: 600; color: var(--gray-900); }
+        .servico-cliente-cpf  { font-size: 0.8125rem; color: var(--gray-400); font-family: monospace; margin-top: 0.1rem; }
+        .servico-valor        { font-size: 1.125rem; font-weight: 700; color: var(--gray-900); white-space: nowrap; }
+
+        .servico-atividade {
+            font-size: 0.875rem; color: var(--gray-600);
+            margin-bottom: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--gray-50); border-radius: 6px;
+        }
+        .servico-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 0.75rem;
+        }
+        .servico-footer-left { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .servico-data { font-size: 0.8125rem; color: var(--gray-400); display: flex; align-items: center; gap: 0.3rem; }
+
+        .badge-pag { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .badge-pix     { background: #d1fae5; color: #065f46; }
+        .badge-credito { background: #dbeafe; color: #1e40af; }
+        .badge-debito  { background: #fef3c7; color: #92400e; }
+        .badge-dinheiro { background: #f3e8ff; color: #6b21a8; }
+
+        .servico-acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn-acao {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px; font-size: 0.8125rem; font-weight: 600;
+            font-family: inherit; cursor: pointer; border: none; transition: opacity .15s;
+        }
+        .btn-acao:hover { opacity: 0.82; }
+        .btn-aprovar { background: #dcfce7; color: #16a34a; }
+        .btn-editar  { background: #dbeafe; color: #2563eb; }
+        .btn-excluir { background: #fee2e2; color: #dc2626; }
 
         /* ── Buttons ── */
         .btn {
@@ -225,6 +337,9 @@
         }
         .btn-outline:hover { background: var(--gray-50); }
 
+        .btn-danger { background-color: var(--red); color: var(--white); }
+        .btn-danger:hover { background-color: #b91c1c; }
+
         .btn .spinner {
             width: 16px; height: 16px;
             border: 2px solid rgba(255,255,255,.3);
@@ -240,9 +355,7 @@
             display: flex; align-items: center; gap: 0.75rem;
             margin: 1.5rem 0; color: var(--gray-400); font-size: 0.8125rem;
         }
-        .divider::before, .divider::after {
-            content: ''; flex: 1; height: 1px; background: var(--gray-200);
-        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
 
         /* ── Toast ── */
         .toast {
@@ -267,29 +380,37 @@
         .modal-overlay.show { display: flex; }
         .modal {
             background: var(--white); border-radius: 16px;
-            padding: 2rem; width: 100%; max-width: 420px;
+            padding: 2rem; width: 100%; max-width: 440px;
             box-shadow: 0 20px 60px rgba(0,0,0,.2);
         }
-        .modal-title {
-            font-size: 1.125rem; font-weight: 700;
-            letter-spacing: -0.02em; margin-bottom: 0.375rem;
-        }
+        .modal-title { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.375rem; }
         .modal-subtitle { color: var(--gray-500); font-size: 0.875rem; margin-bottom: 1.5rem; }
         .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
         .modal-actions .btn { margin-top: 0; flex: 1; }
 
         /* ── Footer ── */
-        .footer {
-            text-align: center; padding: 1.5rem;
-            color: var(--gray-400); font-size: 0.75rem;
-        }
+        .footer { text-align: center; padding: 1.5rem; color: var(--gray-400); font-size: 0.75rem; }
         .footer a { color: var(--gray-600); text-decoration: none; font-weight: 500; }
         .footer a:hover { color: var(--black); }
+
+        /* Spinner de carregamento da lista */
+        .loading-lista {
+            text-align: center; padding: 2rem;
+            color: var(--gray-400); font-size: 0.875rem;
+        }
+        .loading-lista .spin-icon {
+            display: inline-block; width: 20px; height: 20px;
+            border: 2px solid var(--gray-200); border-top-color: var(--gray-500);
+            border-radius: 50%; animation: spin .8s linear infinite;
+            margin-bottom: 0.5rem;
+        }
 
         @media (max-width: 580px) {
             .form-grid { grid-template-columns: 1fr; }
             .col-span-2 { grid-column: span 1; }
             .form-card { padding: 1.25rem; }
+            .servico-top { flex-direction: column; gap: 0.5rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -302,7 +423,7 @@
                 <button class="logout-btn" id="logoutBtn" onclick="fazerLogout()">
                     <i class="bi bi-box-arrow-right"></i> Sair
                 </button>
-                <a href="index.html" class="back-btn">
+                <a href="index.html" class="back-btn" id="backBtn">
                     <i class="bi bi-arrow-left"></i> Voltar
                 </a>
             </div>
@@ -315,8 +436,8 @@
              VIEW 1 — LOGIN
         ══════════════════════════════════════ -->
         <div class="view active" id="viewLogin">
-            <h1 class="page-title">Anotar Serviço</h1>
-            <p class="page-subtitle">Faça login com o CNPJ da empresa para registrar serviços.</p>
+            <h1 class="page-title">Painel da Empresa Parceira</h1>
+            <p class="page-subtitle">Faça login com o CNPJ da sua empresa para continuar.</p>
 
             <div class="form-card">
                 <p class="form-section-title"><i class="bi bi-lock"></i> Acesso da Empresa</p>
@@ -347,21 +468,48 @@
         </div>
 
         <!-- ══════════════════════════════════════
-             VIEW 2 — FORMULÁRIO DE SERVIÇO
+             VIEW 2 — DASHBOARD
         ══════════════════════════════════════ -->
-        <div class="view" id="viewServico">
+        <div class="view" id="viewDashboard">
             <div class="session-badge show" id="sessionBadge">
                 <i class="bi bi-building"></i>
                 <span>Empresa: <strong id="sessionNome"></strong></span>
                 <span style="margin-left:auto;color:var(--gray-500);font-family:monospace;font-size:.75rem;" id="sessionCnpj"></span>
             </div>
 
+            <h1 class="page-title">Painel da Empresa</h1>
+            <p class="page-subtitle">O que deseja fazer?</p>
+
+            <div class="dashboard-grid">
+                <button class="dashboard-card" onclick="irParaServico()">
+                    <div class="card-icon"><i class="bi bi-clipboard-plus"></i></div>
+                    <h2>Anotar Serviço</h2>
+                    <p>Registre um serviço prestado para emissão de nota fiscal.</p>
+                    <span class="card-arrow"><i class="bi bi-arrow-right"></i></span>
+                </button>
+
+                <button class="dashboard-card" onclick="irParaLista()">
+                    <div class="card-icon"><i class="bi bi-list-check"></i></div>
+                    <h2>Lista de Serviços</h2>
+                    <p>Revise e aprove os serviços anotados pelos seus clientes.</p>
+                    <span class="card-arrow"><i class="bi bi-arrow-right"></i></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 3 — FORMULÁRIO DE SERVIÇO
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewServico">
+            <button class="btn-back-view" onclick="voltarDashboard()">
+                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+            </button>
+
             <h1 class="page-title">Novo Serviço</h1>
             <p class="page-subtitle">Preencha as informações do serviço prestado.</p>
 
             <div class="form-card">
 
-                <!-- Atividade -->
                 <p class="form-section-title"><i class="bi bi-clipboard-text"></i> Serviço</p>
 
                 <div class="form-group" style="margin-bottom:1rem;">
@@ -385,19 +533,21 @@
                 <div class="form-group" style="margin-bottom:1rem;">
                     <label>Forma de pagamento</label>
                     <div class="pagamento-group">
-                        <button class="pagamento-pill" data-pag="pix"     onclick="selecionarPagamento('pix')">
+                        <button class="pagamento-pill" data-pag="pix"      onclick="selecionarPagamento('pix')">
                             <i class="bi bi-qr-code"></i> Pix
                         </button>
-                        <button class="pagamento-pill" data-pag="debito"  onclick="selecionarPagamento('debito')">
+                        <button class="pagamento-pill" data-pag="debito"   onclick="selecionarPagamento('debito')">
                             <i class="bi bi-credit-card"></i> Débito
                         </button>
-                        <button class="pagamento-pill" data-pag="credito" onclick="selecionarPagamento('credito')">
+                        <button class="pagamento-pill" data-pag="credito"  onclick="selecionarPagamento('credito')">
                             <i class="bi bi-credit-card-2-front"></i> Crédito
+                        </button>
+                        <button class="pagamento-pill" data-pag="dinheiro" onclick="selecionarPagamento('dinheiro')">
+                            <i class="bi bi-cash-coin"></i> Dinheiro
                         </button>
                     </div>
                 </div>
 
-                <!-- Cliente -->
                 <p class="form-section-title"><i class="bi bi-person-check"></i> Cliente</p>
 
                 <div class="form-group">
@@ -434,6 +584,32 @@
             </div>
         </div>
 
+        <!-- ══════════════════════════════════════
+             VIEW 4 — LISTA DE SERVIÇOS PENDENTES
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewLista">
+            <button class="btn-back-view" onclick="voltarDashboard()">
+                <i class="bi bi-arrow-left"></i> Voltar ao Painel
+            </button>
+
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:2rem;">
+                <div>
+                    <h1 class="page-title" style="margin-bottom:.25rem;">Lista de Serviços</h1>
+                    <p style="color:var(--gray-500);font-size:.9rem;">Serviços anotados pelos clientes aguardando aprovação.</p>
+                </div>
+                <button class="btn-refresh" onclick="carregarPendentes()">
+                    <i class="bi bi-arrow-clockwise"></i> Atualizar
+                </button>
+            </div>
+
+            <div id="listaContainer">
+                <div class="loading-lista">
+                    <div class="spin-icon"></div>
+                    <p>Carregando...</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer class="footer">
@@ -457,8 +633,8 @@
                     autocomplete="off" onkeydown="if(event.key==='Enter') verificarSenhaAdmin()">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="fecharModal('modalSenhaAdmin')" style="margin-top:0;">Cancelar</button>
-                <button class="btn btn-primary" onclick="verificarSenhaAdmin()" style="margin-top:0;">Confirmar</button>
+                <button class="btn btn-outline" onclick="fecharModal('modalSenhaAdmin')">Cancelar</button>
+                <button class="btn btn-primary" onclick="verificarSenhaAdmin()">Confirmar</button>
             </div>
         </div>
     </div>
@@ -479,10 +655,69 @@
                     placeholder="Ex: Salão da Maria" autocomplete="off">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="fecharModal('modalCriarLogin')" style="margin-top:0;">Cancelar</button>
-                <button class="btn btn-primary" id="btnCriarLogin" onclick="criarLogin()" style="margin-top:0;">
+                <button class="btn btn-outline" onclick="fecharModal('modalCriarLogin')">Cancelar</button>
+                <button class="btn btn-primary" id="btnCriarLogin" onclick="criarLogin()">
                     <div class="spinner"></div>
                     <span class="btn-text">Criar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar serviço pendente -->
+    <div class="modal-overlay" id="modalEditar">
+        <div class="modal">
+            <h2 class="modal-title">Editar Serviço</h2>
+            <p class="modal-subtitle">Corrija as informações e salve.</p>
+            <input type="hidden" id="editId">
+
+            <div class="form-group" style="margin-bottom:1rem;">
+                <label for="editAtividade">Atividade / Serviço</label>
+                <input type="text" id="editAtividade" class="form-control" autocomplete="off">
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div class="form-group">
+                    <label for="editValor">Valor (R$)</label>
+                    <input type="text" id="editValor" class="form-control" placeholder="0,00" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="editData">Data</label>
+                    <input type="date" id="editData" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0.25rem;">
+                <label>Forma de pagamento</label>
+                <div class="pagamento-group" id="editPagGroup">
+                    <button class="pagamento-pill" data-pag="pix"      onclick="selecionarPagEdit('pix')"><i class="bi bi-qr-code"></i> Pix</button>
+                    <button class="pagamento-pill" data-pag="debito"   onclick="selecionarPagEdit('debito')"><i class="bi bi-credit-card"></i> Débito</button>
+                    <button class="pagamento-pill" data-pag="credito"  onclick="selecionarPagEdit('credito')"><i class="bi bi-credit-card-2-front"></i> Crédito</button>
+                    <button class="pagamento-pill" data-pag="dinheiro" onclick="selecionarPagEdit('dinheiro')"><i class="bi bi-cash-coin"></i> Dinheiro</button>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="fecharModal('modalEditar')">Cancelar</button>
+                <button class="btn btn-primary" id="btnSalvarEdicao" onclick="salvarEdicao()">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-check2"></i> Salvar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirmar exclusão -->
+    <div class="modal-overlay" id="modalExcluir">
+        <div class="modal">
+            <h2 class="modal-title">Excluir Serviço</h2>
+            <p class="modal-subtitle">Esta ação removerá o serviço permanentemente. Confirma?</p>
+            <input type="hidden" id="excluirId">
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="fecharModal('modalExcluir')">Cancelar</button>
+                <button class="btn btn-danger btn-primary" id="btnConfirmarExcluir" onclick="excluirServico()" style="margin-top:0;">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-trash"></i> Excluir</span>
                 </button>
             </div>
         </div>
@@ -497,9 +732,10 @@
         });
 
         // ── Estado ────────────────────────────────────────────────────
-        let sessao = null;         // { id, cnpj, nome_empresa }
-        let clienteId = null;      // UUID do cliente selecionado
-        let pagamento = null;      // 'pix' | 'debito' | 'credito'
+        let sessao      = null;   // { id, cnpj, nome_empresa }
+        let clienteId   = null;   // UUID do cliente selecionado
+        let pagamento   = null;   // 'pix' | 'debito' | 'credito' | 'dinheiro'
+        let pagEdit     = null;   // pagamento selecionado no modal de edição
         let searchTimer = null;
 
         // ── Máscara CNPJ ─────────────────────────────────────────────
@@ -513,18 +749,26 @@
         }
 
         document.getElementById('loginCnpj').addEventListener('input', function () { maskCnpj(this); });
-        document.getElementById('novoCnpj').addEventListener('input', function () { maskCnpj(this); });
+        document.getElementById('novoCnpj').addEventListener('input',  function () { maskCnpj(this); });
 
         // Máscara valor monetário
-        document.getElementById('valor').addEventListener('input', function () {
-            let v = this.value.replace(/\D/g, '');
-            if (!v) { this.value = ''; return; }
+        function maskValor(el) {
+            let v = el.value.replace(/\D/g, '');
+            if (!v) { el.value = ''; return; }
             v = (parseInt(v) / 100).toFixed(2).replace('.', ',');
-            this.value = v;
-        });
+            el.value = v;
+        }
+        document.getElementById('valor').addEventListener('input', function () { maskValor(this); });
+        document.getElementById('editValor').addEventListener('input', function () { maskValor(this); });
 
         // Data padrão = hoje
         document.getElementById('dataServico').value = new Date().toISOString().split('T')[0];
+
+        // ── Navegação entre views ─────────────────────────────────────
+        function mostrarView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
 
         // ── Login ─────────────────────────────────────────────────────
         async function fazerLogin() {
@@ -535,7 +779,7 @@
             if (!senha)                 { showToast('Digite a senha.', 'error'); return; }
 
             const senhaCorreta = cnpjRaw.substring(0, 6);
-            if (senha !== senhaCorreta) { showToast('Senha incorreta.', 'error'); return; }
+            if (senha !== senhaCorreta)  { showToast('Senha incorreta.', 'error'); return; }
 
             const btn = document.getElementById('btnLogin');
             btn.disabled = true; btn.classList.add('loading');
@@ -553,7 +797,7 @@
                 }
 
                 sessao = data;
-                abrirServico();
+                abrirDashboard();
 
             } catch {
                 showToast('Erro de conexão. Tente novamente.', 'error');
@@ -562,29 +806,49 @@
             }
         }
 
-        function abrirServico() {
-            document.getElementById('viewLogin').classList.remove('active');
-            document.getElementById('viewServico').classList.add('active');
-            document.getElementById('logoutBtn').classList.add('show');
+        function abrirDashboard() {
             document.getElementById('sessionNome').textContent = sessao.nome_empresa;
             document.getElementById('sessionCnpj').textContent = formatCnpj(sessao.cnpj);
-            // Reset form
+            document.getElementById('logoutBtn').classList.add('show');
+            document.getElementById('backBtn').style.display = 'none';
+            mostrarView('viewDashboard');
+        }
+
+        function irParaServico() {
             limparFormServico();
+            mostrarView('viewServico');
+        }
+
+        function irParaLista() {
+            mostrarView('viewLista');
+            carregarPendentes();
+        }
+
+        function voltarDashboard() {
+            mostrarView('viewDashboard');
         }
 
         function fazerLogout() {
             sessao = null; clienteId = null; pagamento = null;
-            document.getElementById('viewServico').classList.remove('active');
-            document.getElementById('viewLogin').classList.add('active');
             document.getElementById('logoutBtn').classList.remove('show');
+            document.getElementById('backBtn').style.display = '';
             document.getElementById('loginCnpj').value = '';
             document.getElementById('loginSenha').value = '';
+            mostrarView('viewLogin');
         }
 
-        // ── Pagamento ─────────────────────────────────────────────────
+        // ── Pagamento (formulário principal) ──────────────────────────
         function selecionarPagamento(tipo) {
             pagamento = tipo;
-            document.querySelectorAll('.pagamento-pill').forEach(el => {
+            document.querySelectorAll('#viewServico .pagamento-pill').forEach(el => {
+                el.classList.toggle('selected', el.dataset.pag === tipo);
+            });
+        }
+
+        // ── Pagamento (modal edição) ───────────────────────────────────
+        function selecionarPagEdit(tipo) {
+            pagEdit = tipo;
+            document.querySelectorAll('#editPagGroup .pagamento-pill').forEach(el => {
                 el.classList.toggle('selected', el.dataset.pag === tipo);
             });
         }
@@ -600,7 +864,6 @@
             clearTimeout(searchTimer);
             searchTimer = setTimeout(async () => {
                 const cpfLimpo = termo.replace(/\D/g, '');
-
                 let query = db.from('clientes').select('id, nome, cpf').limit(8);
 
                 if (cpfLimpo.length >= 3) {
@@ -623,8 +886,8 @@
                 return;
             }
             box.innerHTML = lista.map(c => `
-                <div class="search-result-item" onclick="selecionarCliente('${c.id}','${c.nome}','${c.cpf}')">
-                    <span class="result-nome">${c.nome}</span>
+                <div class="search-result-item" onclick="selecionarCliente('${c.id}','${escHtml(c.nome)}','${c.cpf}')">
+                    <span class="result-nome">${escHtml(c.nome)}</span>
                     <span class="result-cpf">${c.cpf}</span>
                 </div>
             `).join('');
@@ -645,7 +908,7 @@
             document.getElementById('clienteSelecionado').classList.remove('show');
         }
 
-        // ── Salvar serviço ────────────────────────────────────────────
+        // ── Salvar serviço (tabela oficial) ───────────────────────────
         async function salvarServico() {
             const atividade = document.getElementById('atividade').value.trim();
             const valorStr  = document.getElementById('valor').value.replace(',', '.').replace(/[^\d.]/g, '');
@@ -693,7 +956,200 @@
             document.getElementById('searchResults').classList.remove('show');
             removerCliente();
             pagamento = null;
-            document.querySelectorAll('.pagamento-pill').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('#viewServico .pagamento-pill').forEach(el => el.classList.remove('selected'));
+        }
+
+        // ── Carregar serviços pendentes ───────────────────────────────
+        async function carregarPendentes() {
+            const container = document.getElementById('listaContainer');
+            container.innerHTML = `<div class="loading-lista"><div class="spin-icon"></div><p>Carregando...</p></div>`;
+
+            try {
+                const { data, error } = await db
+                    .from('servicos_pendentes')
+                    .select('*, clientes(nome, cpf)')
+                    .eq('cnpj_empresa', sessao.cnpj)
+                    .order('created_at', { ascending: false });
+
+                if (error) { container.innerHTML = `<p style="color:var(--red);text-align:center;">Erro ao carregar: ${error.message}</p>`; return; }
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="lista-empty">
+                            <i class="bi bi-inbox"></i>
+                            <p>Nenhum serviço pendente.<br>Os serviços anotados pelos clientes aparecerão aqui.</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = data.map(s => renderServicoCard(s)).join('');
+
+            } catch {
+                container.innerHTML = `<p style="color:var(--red);text-align:center;">Erro de conexão.</p>`;
+            }
+        }
+
+        function renderServicoCard(s) {
+            const nome = s.clientes ? escHtml(s.clientes.nome) : '<em>Cliente removido</em>';
+            const cpf  = s.clientes ? s.clientes.cpf : '—';
+            const valor = 'R$ ' + parseFloat(s.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const dataFmt = s.data ? new Date(s.data + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+            const atividade = escHtml(s.atividade);
+
+            const servicoJson = encodeURIComponent(JSON.stringify({
+                id: s.id,
+                atividade: s.atividade,
+                valor: s.valor,
+                data: s.data,
+                forma_pagamento: s.forma_pagamento
+            }));
+
+            return `
+            <div class="servico-card" id="card-${s.id}">
+                <div class="servico-top">
+                    <div>
+                        <div class="servico-cliente-nome">${nome}</div>
+                        <div class="servico-cliente-cpf">${cpf}</div>
+                    </div>
+                    <div class="servico-valor">${valor}</div>
+                </div>
+                <div class="servico-atividade">${atividade}</div>
+                <div class="servico-footer">
+                    <div class="servico-footer-left">
+                        <span class="servico-data"><i class="bi bi-calendar3"></i> ${dataFmt}</span>
+                        <span class="badge-pag badge-${s.forma_pagamento}">${labelPag(s.forma_pagamento)}</span>
+                    </div>
+                    <div class="servico-acoes">
+                        <button class="btn-acao btn-aprovar" onclick="aprovarServico(${s.id})">
+                            <i class="bi bi-check-lg"></i> Aprovar
+                        </button>
+                        <button class="btn-acao btn-editar" onclick='abrirEditarServico(decodeURIComponent("${servicoJson}"))'>
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        <button class="btn-acao btn-excluir" onclick="confirmarExcluir(${s.id})">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // ── Aprovar serviço ───────────────────────────────────────────
+        async function aprovarServico(id) {
+            try {
+                // Busca o serviço pendente
+                const { data: s, error: errBusca } = await db
+                    .from('servicos_pendentes')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (errBusca || !s) { showToast('Serviço não encontrado.', 'error'); return; }
+
+                // Insere na tabela oficial
+                const { error: errInsert } = await db.from('servicos_prestados').insert([{
+                    empresa_id:      s.empresa_id,
+                    cnpj_empresa:    s.cnpj_empresa,
+                    cliente_id:      s.cliente_id,
+                    atividade:       s.atividade,
+                    valor:           s.valor,
+                    forma_pagamento: s.forma_pagamento,
+                    data:            s.data
+                }]);
+
+                if (errInsert) { showToast('Erro ao aprovar: ' + errInsert.message, 'error'); return; }
+
+                // Remove da tabela pendentes
+                await db.from('servicos_pendentes').delete().eq('id', id);
+
+                showToast('Serviço aprovado com sucesso!', 'success');
+                carregarPendentes();
+
+            } catch {
+                showToast('Erro de conexão.', 'error');
+            }
+        }
+
+        // ── Editar serviço ────────────────────────────────────────────
+        function abrirEditarServico(jsonStr) {
+            const s = JSON.parse(jsonStr);
+            document.getElementById('editId').value = s.id;
+            document.getElementById('editAtividade').value = s.atividade;
+            document.getElementById('editData').value = s.data;
+
+            // Formata valor
+            const valFmt = parseFloat(s.valor).toFixed(2).replace('.', ',');
+            document.getElementById('editValor').value = valFmt;
+
+            // Pagamento
+            pagEdit = s.forma_pagamento;
+            document.querySelectorAll('#editPagGroup .pagamento-pill').forEach(el => {
+                el.classList.toggle('selected', el.dataset.pag === s.forma_pagamento);
+            });
+
+            document.getElementById('modalEditar').classList.add('show');
+        }
+
+        async function salvarEdicao() {
+            const id        = document.getElementById('editId').value;
+            const atividade = document.getElementById('editAtividade').value.trim();
+            const valorStr  = document.getElementById('editValor').value.replace(',', '.').replace(/[^\d.]/g, '');
+            const data      = document.getElementById('editData').value;
+
+            if (!atividade)          { showToast('Informe a atividade.', 'error'); return; }
+            if (!valorStr || parseFloat(valorStr) <= 0) { showToast('Valor inválido.', 'error'); return; }
+            if (!pagEdit)            { showToast('Selecione a forma de pagamento.', 'error'); return; }
+            if (!data)               { showToast('Informe a data.', 'error'); return; }
+
+            const btn = document.getElementById('btnSalvarEdicao');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('servicos_pendentes').update({
+                    atividade,
+                    valor:           parseFloat(valorStr),
+                    forma_pagamento: pagEdit,
+                    data
+                }).eq('id', id);
+
+                if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+
+                fecharModal('modalEditar');
+                showToast('Serviço atualizado!', 'success');
+                carregarPendentes();
+
+            } catch {
+                showToast('Erro de conexão.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        // ── Excluir serviço ───────────────────────────────────────────
+        function confirmarExcluir(id) {
+            document.getElementById('excluirId').value = id;
+            document.getElementById('modalExcluir').classList.add('show');
+        }
+
+        async function excluirServico() {
+            const id  = document.getElementById('excluirId').value;
+            const btn = document.getElementById('btnConfirmarExcluir');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('servicos_pendentes').delete().eq('id', id);
+
+                if (error) { showToast('Erro ao excluir: ' + error.message, 'error'); return; }
+
+                fecharModal('modalExcluir');
+                showToast('Serviço excluído.', 'success');
+                carregarPendentes();
+
+            } catch {
+                showToast('Erro de conexão.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
         }
 
         // ── Criar Login ───────────────────────────────────────────────
@@ -771,6 +1227,15 @@
         // ── Helpers ───────────────────────────────────────────────────
         function formatCnpj(v) {
             return v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+
+        function labelPag(tipo) {
+            const map = { pix: '⚡ Pix', debito: '💳 Débito', credito: '💳 Crédito', dinheiro: '💵 Dinheiro' };
+            return map[tipo] || tipo;
+        }
+
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
 
         let toastTimer;

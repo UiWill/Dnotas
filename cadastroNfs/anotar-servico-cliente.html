@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
+    <title>Anotar Serviço - Dnotas</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black:    #000000;
+            --white:    #ffffff;
+            --gray-50:  #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green:    #16a34a;
+            --green-bg: #dcfce7;
+            --red:      #dc2626;
+            --red-bg:   #fee2e2;
+            --blue:     #2563eb;
+            --blue-bg:  #dbeafe;
+        }
+
+        html, body {
+            min-height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        /* ── Header ── */
+        .header {
+            background-color: var(--black);
+            padding: 1rem 2rem;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .header-content {
+            max-width: 680px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { height: 34px; }
+        .empresa-header-tag {
+            font-size: 0.8125rem; color: var(--gray-400); font-weight: 500;
+            display: none;
+        }
+        .empresa-header-tag.show { display: block; }
+
+        /* ── Main ── */
+        .main-container {
+            max-width: 680px; margin: 0 auto;
+            padding: 2rem 1rem 3rem;
+        }
+
+        /* ── Views ── */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .page-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.375rem; }
+        .page-subtitle { color: var(--gray-500); font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* ── Form Card ── */
+        .form-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+            margin-bottom: 1rem;
+        }
+
+        .form-section-title {
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .06em; color: var(--gray-400);
+            margin: 1.5rem 0 0.875rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid var(--gray-100);
+        }
+        .form-section-title:first-of-type { margin-top: 0; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid.cols-3 { grid-template-columns: 2fr 1fr 1fr; }
+        .col-span-2 { grid-column: span 2; }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.375rem; margin-bottom: 1rem; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-group label { font-size: 0.8125rem; font-weight: 500; color: var(--gray-700); }
+        .form-group label .optional { font-weight: 400; color: var(--gray-400); font-size: 0.75rem; margin-left: 0.25rem; }
+
+        .form-control {
+            width: 100%; padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300); border-radius: 8px;
+            font-size: 0.875rem; font-family: inherit;
+            color: var(--gray-900); background: var(--white);
+            transition: border-color .15s, box-shadow .15s; outline: none;
+        }
+        .form-control:focus { border-color: var(--black); box-shadow: 0 0 0 3px rgba(0,0,0,.07); }
+        .form-control:disabled { background: var(--gray-50); color: var(--gray-500); cursor: not-allowed; }
+        .form-control.error { border-color: var(--red); }
+
+        /* Input group (CEP) */
+        .input-group {
+            display: flex; align-items: center;
+            border: 1px solid var(--gray-300); border-radius: 8px; overflow: hidden;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .input-group:focus-within { border-color: var(--black); box-shadow: 0 0 0 3px rgba(0,0,0,.07); }
+        .input-group .form-control { border: none; border-radius: 0; flex: 1; box-shadow: none !important; }
+        .input-addon {
+            padding: 0 0.75rem; background: var(--gray-50);
+            border-left: 1px solid var(--gray-200); height: 100%;
+            display: flex; align-items: center; cursor: pointer;
+            color: var(--gray-500); font-size: 0.875rem;
+            transition: background .15s, color .15s; white-space: nowrap;
+        }
+        .input-addon:hover { background: var(--gray-100); color: var(--gray-700); }
+
+        /* Hint de validação CPF */
+        .cpf-hint {
+            font-size: 0.75rem; margin-top: 0.25rem; display: none;
+        }
+        .cpf-hint.valid   { color: var(--green);  display: flex; align-items: center; gap: 0.3rem; }
+        .cpf-hint.invalid { color: var(--red);    display: flex; align-items: center; gap: 0.3rem; }
+
+        /* Pagamento pills */
+        .pagamento-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .pagamento-pill {
+            flex: 1; min-width: 80px; padding: 0.6rem 0.75rem;
+            border: 1px solid var(--gray-300); border-radius: 8px;
+            background: var(--white); font-family: inherit;
+            font-size: 0.875rem; font-weight: 500; color: var(--gray-600);
+            cursor: pointer; text-align: center; transition: all .15s;
+        }
+        .pagamento-pill:hover { border-color: var(--gray-500); color: var(--gray-800); }
+        .pagamento-pill.selected { background: var(--black); border-color: var(--black); color: var(--white); }
+
+        /* Search results */
+        .cliente-search-box { display: flex; gap: 0.5rem; }
+        .cliente-search-box .form-control { flex: 1; }
+        .btn-buscar {
+            padding: 0.625rem 1rem;
+            background: var(--gray-100); border: 1px solid var(--gray-300);
+            border-radius: 8px; cursor: pointer; font-family: inherit;
+            font-size: 0.875rem; font-weight: 500; color: var(--gray-700);
+            display: flex; align-items: center; gap: 0.375rem;
+            white-space: nowrap; transition: background .15s;
+        }
+        .btn-buscar:hover { background: var(--gray-200); }
+
+        .search-results {
+            display: none; margin-top: 0.5rem;
+            border: 1px solid var(--gray-200); border-radius: 8px;
+            overflow: hidden; background: var(--white);
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        }
+        .search-results.show { display: block; }
+        .search-result-item {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer; transition: background .1s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .search-result-item:last-child { border-bottom: none; }
+        .search-result-item:hover { background: var(--gray-50); }
+        .result-nome { font-size: 0.9rem; font-weight: 600; color: var(--gray-900); }
+        .result-cpf  { font-size: 0.8125rem; color: var(--gray-400); font-family: monospace; }
+
+        /* Cliente badge */
+        .cliente-badge {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--green-bg); border: 1px solid #bbf7d0;
+            border-radius: 10px; font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        .cliente-badge strong { color: var(--green); }
+        .cliente-badge span   { color: var(--green); opacity: 0.75; font-family: monospace; font-size: 0.8125rem; }
+
+        /* Botão link voltar */
+        .link-voltar {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            color: var(--gray-500); font-size: 0.8125rem; font-weight: 500;
+            cursor: pointer; background: none; border: none;
+            font-family: inherit; padding: 0; margin-top: 1rem;
+            transition: color .15s;
+        }
+        .link-voltar:hover { color: var(--gray-800); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin: 1.5rem 0; color: var(--gray-400); font-size: 0.8125rem;
+        }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+        /* CEP spinner */
+        .cep-loading { display: none; align-items: center; gap: 0.4rem; color: var(--gray-500); font-size: 0.8125rem; margin-top: 0.25rem; }
+        .cep-loading.show { display: flex; }
+        .cep-spin { width: 12px; height: 12px; border: 2px solid var(--gray-300); border-top-color: var(--gray-600); border-radius: 50%; animation: spin .8s linear infinite; }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; padding: 0.75rem 1.5rem;
+            border-radius: 8px; font-size: 0.9375rem; font-weight: 600;
+            font-family: inherit; cursor: pointer; border: none; transition: all .2s;
+        }
+        .btn-primary { background-color: var(--black); color: var(--white); width: 100%; margin-top: 1.5rem; }
+        .btn-primary:hover { background-color: var(--gray-800); }
+        .btn-primary:disabled { background-color: var(--gray-300); cursor: not-allowed; }
+
+        .btn-outline { background: var(--white); color: var(--gray-700); border: 1px solid var(--gray-300); width: 100%; margin-top: 0.75rem; }
+        .btn-outline:hover { background: var(--gray-50); }
+
+        .btn .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+            border-radius: 50%; animation: spin .8s linear infinite; display: none;
+        }
+        .btn.loading .spinner { display: block; }
+        .btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Sucesso ── */
+        .sucesso-box {
+            text-align: center;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 16px; padding: 3rem 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .sucesso-icon {
+            width: 72px; height: 72px;
+            background: var(--green-bg);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 2rem; color: var(--green);
+        }
+        .sucesso-box h2 { font-size: 1.375rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .sucesso-box p  { color: var(--gray-500); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.75rem; }
+
+        /* ── Erro ── */
+        .erro-box {
+            text-align: center; padding: 3rem 1rem;
+        }
+        .erro-box i { font-size: 3rem; color: var(--gray-300); display: block; margin-bottom: 1rem; }
+        .erro-box h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .erro-box p { color: var(--gray-500); font-size: 0.9rem; }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            max-width: 360px; padding: 1rem 1.25rem; border-radius: 10px;
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,.12); font-size: 0.875rem;
+            z-index: 200; opacity: 0; transform: translateY(10px);
+            transition: opacity .25s, transform .25s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .toast.success { background: var(--green-bg); color: var(--green); border: 1px solid #bbf7d0; }
+        .toast.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #fecaca; }
+        .toast i { font-size: 1.125rem; margin-top: 1px; }
+
+        /* ── Footer ── */
+        .footer { text-align: center; padding: 1.5rem; color: var(--gray-400); font-size: 0.75rem; }
+        .footer a { color: var(--gray-600); text-decoration: none; font-weight: 500; }
+        .footer a:hover { color: var(--black); }
+
+        /* Loading inicial */
+        #viewCarregando {
+            text-align: center; padding: 4rem 1rem;
+        }
+        #viewCarregando .spin-big {
+            width: 36px; height: 36px;
+            border: 3px solid var(--gray-200); border-top-color: var(--gray-500);
+            border-radius: 50%; animation: spin .8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        #viewCarregando p { color: var(--gray-400); }
+
+        @media (max-width: 580px) {
+            .form-grid, .form-grid.cols-3 { grid-template-columns: 1fr; }
+            .col-span-2 { grid-column: span 1; }
+            .form-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <img src="../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <span class="empresa-header-tag" id="empresaHeaderTag"></span>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <!-- Carregando -->
+        <div class="view active" id="viewCarregando">
+            <div class="spin-big"></div>
+            <p>Verificando link...</p>
+        </div>
+
+        <!-- Erro: link inválido -->
+        <div class="view" id="viewErro">
+            <div class="erro-box">
+                <i class="bi bi-link-45deg"></i>
+                <h2>Link inválido</h2>
+                <p>Este link não está associado a nenhuma empresa cadastrada.<br>
+                Verifique o link e tente novamente, ou peça à empresa um novo link.</p>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 1 — BUSCAR CLIENTE
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewBuscar">
+            <h1 class="page-title">Anotar Serviço</h1>
+            <p class="page-subtitle">Parceiro: <strong id="empresaNomeBuscar"></strong></p>
+
+            <div class="form-card">
+                <p class="form-section-title"><i class="bi bi-person-search"></i> Encontre seu cadastro</p>
+
+                <div class="form-group">
+                    <label>CPF ou Nome</label>
+                    <div class="cliente-search-box">
+                        <input type="text" id="buscaInput" class="form-control"
+                            placeholder="Digite seu CPF ou nome..."
+                            oninput="pesquisarCliente()"
+                            autocomplete="off">
+                        <button class="btn-buscar" onclick="pesquisarCliente()">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+
+                <div class="divider">ou</div>
+
+                <button class="btn btn-outline" onclick="mostrarView('viewCadastro')" style="margin-top:0;">
+                    <i class="bi bi-person-plus"></i> Ainda não tenho cadastro
+                </button>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 2 — CADASTRAR CLIENTE
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewCadastro">
+            <h1 class="page-title">Criar Cadastro</h1>
+            <p class="page-subtitle">Preencha seus dados para continuar. O endereço é preenchido pelo CEP.</p>
+
+            <div class="form-card">
+
+                <p class="form-section-title"><i class="bi bi-person"></i> Dados Pessoais</p>
+
+                <div class="form-group">
+                    <label for="cad_nome">Nome completo</label>
+                    <input type="text" id="cad_nome" class="form-control" placeholder="Ex: Maria da Silva" autocomplete="off">
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cad_cpf">CPF</label>
+                        <input type="text" id="cad_cpf" class="form-control" placeholder="000.000.000-00" maxlength="14" autocomplete="off">
+                        <div class="cpf-hint" id="cpfHint"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cad_telefone">Telefone</label>
+                        <input type="text" id="cad_telefone" class="form-control" placeholder="(00) 00000-0000" maxlength="15" autocomplete="off">
+                    </div>
+                </div>
+
+                <p class="form-section-title" style="margin-top:1.75rem;"><i class="bi bi-geo-alt"></i> Endereço</p>
+
+                <div class="form-group">
+                    <label for="cad_cep">CEP</label>
+                    <div class="input-group">
+                        <input type="text" id="cad_cep" class="form-control" placeholder="00000-000" maxlength="9" autocomplete="off">
+                        <span class="input-addon" onclick="buscarCep()">
+                            <i class="bi bi-search"></i>&nbsp;Buscar
+                        </span>
+                    </div>
+                    <div class="cep-loading" id="cepLoading">
+                        <div class="cep-spin"></div> Buscando endereço...
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cad_logradouro">Logradouro</label>
+                    <input type="text" id="cad_logradouro" class="form-control" placeholder="Rua, Avenida..." disabled>
+                </div>
+
+                <div class="form-grid cols-3">
+                    <div class="form-group">
+                        <label for="cad_bairro">Bairro</label>
+                        <input type="text" id="cad_bairro" class="form-control" placeholder="Bairro" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="cad_numero">Número</label>
+                        <input type="text" id="cad_numero" class="form-control" placeholder="Ex: 100" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="cad_complemento">Complemento <span class="optional">(opcional)</span></label>
+                        <input type="text" id="cad_complemento" class="form-control" placeholder="Apto, Sala..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cad_cidade">Cidade</label>
+                        <input type="text" id="cad_cidade" class="form-control" placeholder="Cidade" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="cad_estado">Estado</label>
+                        <input type="text" id="cad_estado" class="form-control" placeholder="UF" maxlength="2" disabled>
+                    </div>
+                </div>
+
+                <input type="hidden" id="cad_ibge">
+
+                <button class="btn btn-primary" id="btnCadastrar" onclick="cadastrarCliente()">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-check2-circle"></i> Cadastrar e Anotar Serviço</span>
+                </button>
+
+            </div>
+
+            <button class="link-voltar" onclick="mostrarView('viewBuscar')">
+                <i class="bi bi-arrow-left"></i> Voltar à busca
+            </button>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 3 — FORMULÁRIO DE SERVIÇO
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewServico">
+
+            <div class="cliente-badge" id="clienteBadge">
+                <i class="bi bi-person-check-fill" style="color:var(--green);font-size:1.125rem;"></i>
+                <div>
+                    <strong id="clienteNomeBadge"></strong>
+                    <span id="clienteCpfBadge" style="display:block;"></span>
+                </div>
+            </div>
+
+            <h1 class="page-title">Informações do Serviço</h1>
+            <p class="page-subtitle">Preencha os dados do serviço realizado.</p>
+
+            <div class="form-card">
+
+                <div class="form-group">
+                    <label for="srv_atividade">Descrição do serviço</label>
+                    <input type="text" id="srv_atividade" class="form-control"
+                        placeholder="Ex: Corte de cabelo, manicure..." autocomplete="off">
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="srv_valor">Valor (R$)</label>
+                        <input type="text" id="srv_valor" class="form-control" placeholder="0,00" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="srv_data">Data</label>
+                        <input type="date" id="srv_data" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Forma de pagamento</label>
+                    <div class="pagamento-group">
+                        <button class="pagamento-pill" data-pag="pix"      onclick="selecionarPag('pix')">
+                            <i class="bi bi-qr-code"></i> Pix
+                        </button>
+                        <button class="pagamento-pill" data-pag="debito"   onclick="selecionarPag('debito')">
+                            <i class="bi bi-credit-card"></i> Débito
+                        </button>
+                        <button class="pagamento-pill" data-pag="credito"  onclick="selecionarPag('credito')">
+                            <i class="bi bi-credit-card-2-front"></i> Crédito
+                        </button>
+                        <button class="pagamento-pill" data-pag="dinheiro" onclick="selecionarPag('dinheiro')">
+                            <i class="bi bi-cash-coin"></i> Dinheiro
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="btnFinalizarServico" onclick="finalizarServico()">
+                    <div class="spinner"></div>
+                    <span class="btn-text"><i class="bi bi-check2-circle"></i> Finalizar e Anotar Serviço</span>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             VIEW 4 — SUCESSO
+        ══════════════════════════════════════ -->
+        <div class="view" id="viewSucesso">
+            <div class="sucesso-box">
+                <div class="sucesso-icon">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <h2>Serviço anotado!</h2>
+                <p>
+                    Seu serviço foi registrado com sucesso.<br>
+                    A empresa <strong id="empresaNomeSucesso"></strong> receberá sua anotação e confirmará em breve.
+                </p>
+                <button class="btn btn-primary" style="max-width:320px;margin:0 auto;" onclick="reiniciar()">
+                    <i class="bi bi-plus-circle"></i> Anotar outro serviço
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> — Todos os direitos reservados</p>
+    </footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script>
+        // ── Supabase ──────────────────────────────────────────────────
+        const SUPABASE_URL = 'https://reubrhhceuxwbtaqxcnq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJldWJyaGhjZXV4d2J0YXF4Y25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5MDY5NDAsImV4cCI6MjA4NDQ4Mjk0MH0.A8QX4PkS4Vb0ZqZcn_L2aqbo73dxhSknfQPIFFF8un8';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { autoRefreshToken: false, persistSession: false, detectSessionFromUrl: false }
+        });
+
+        // ── Estado ────────────────────────────────────────────────────
+        let empresaData  = null;   // { id, cnpj, nome_empresa }
+        let clienteData  = null;   // { id, nome, cpf }
+        let pagSelecionado = null;
+        let searchTimer  = null;
+
+        // ── Init: lê CNPJ da URL ──────────────────────────────────────
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const cnpjParam = (params.get('cnpj') || params.get('empresa') || '').replace(/\D/g, '');
+
+            if (!cnpjParam || cnpjParam.length !== 14) {
+                mostrarView('viewErro');
+                return;
+            }
+
+            try {
+                const { data, error } = await db
+                    .from('empresas_nfs')
+                    .select('*')
+                    .eq('cnpj', cnpjParam)
+                    .single();
+
+                if (error || !data) {
+                    mostrarView('viewErro');
+                    return;
+                }
+
+                empresaData = data;
+                document.getElementById('empresaNomeBuscar').textContent  = data.nome_empresa;
+                document.getElementById('empresaNomeSucesso').textContent = data.nome_empresa;
+                document.getElementById('empresaHeaderTag').textContent   = data.nome_empresa;
+                document.getElementById('empresaHeaderTag').classList.add('show');
+                document.title = `Anotar Serviço — ${data.nome_empresa}`;
+
+                mostrarView('viewBuscar');
+
+            } catch {
+                mostrarView('viewErro');
+            }
+        }
+
+        // ── Navegação de views ────────────────────────────────────────
+        function mostrarView(id) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // ── Buscar cliente ────────────────────────────────────────────
+        async function pesquisarCliente() {
+            const termo = document.getElementById('buscaInput').value.trim();
+            const box   = document.getElementById('searchResults');
+
+            if (termo.length < 2) { box.classList.remove('show'); return; }
+
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(async () => {
+                const cpfLimpo = termo.replace(/\D/g, '');
+                let query = db.from('clientes').select('id, nome, cpf').limit(8);
+
+                if (cpfLimpo.length >= 3) {
+                    query = query.ilike('cpf', `%${cpfLimpo}%`);
+                } else {
+                    query = query.ilike('nome', `%${termo}%`);
+                }
+
+                const { data } = await query;
+                renderBusca(data || []);
+            }, 300);
+        }
+
+        function renderBusca(lista) {
+            const box = document.getElementById('searchResults');
+            if (!lista.length) {
+                box.innerHTML = `
+                    <div class="search-result-item" style="flex-direction:column;align-items:flex-start;gap:.25rem;">
+                        <span style="color:var(--gray-500);font-size:.875rem;">Nenhum resultado encontrado.</span>
+                        <button onclick="mostrarView('viewCadastro')" style="background:none;border:none;color:var(--blue);font-size:.8125rem;cursor:pointer;font-family:inherit;padding:0;font-weight:500;">
+                            <i class="bi bi-person-plus"></i> Criar cadastro agora
+                        </button>
+                    </div>`;
+                box.classList.add('show');
+                return;
+            }
+            box.innerHTML = lista.map(c => `
+                <div class="search-result-item" onclick="confirmarCliente('${c.id}','${escHtml(c.nome)}','${c.cpf}')">
+                    <div>
+                        <div class="result-nome">${escHtml(c.nome)}</div>
+                        <div class="result-cpf">${c.cpf}</div>
+                    </div>
+                    <i class="bi bi-chevron-right" style="color:var(--gray-300);"></i>
+                </div>
+            `).join('');
+            box.classList.add('show');
+        }
+
+        function confirmarCliente(id, nome, cpf) {
+            clienteData = { id, nome, cpf };
+            document.getElementById('searchResults').classList.remove('show');
+            document.getElementById('buscaInput').value = '';
+            irParaServico();
+        }
+
+        // ── Cadastrar cliente ─────────────────────────────────────────
+        document.getElementById('cad_cpf').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            this.value = v;
+
+            const hint = document.getElementById('cpfHint');
+            const raw  = v.replace(/\D/g, '');
+            if (raw.length === 11) {
+                if (validarCpf(raw)) {
+                    this.classList.remove('error');
+                    hint.className = 'cpf-hint valid';
+                    hint.innerHTML = '<i class="bi bi-check-circle-fill"></i> CPF válido';
+                } else {
+                    this.classList.add('error');
+                    hint.className = 'cpf-hint invalid';
+                    hint.innerHTML = '<i class="bi bi-x-circle-fill"></i> CPF inválido';
+                }
+            } else {
+                this.classList.remove('error');
+                hint.className = 'cpf-hint';
+            }
+        });
+
+        document.getElementById('cad_telefone').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 11);
+            if (v.length <= 10) {
+                v = v.replace(/(\d{2})(\d)/, '($1) $2');
+                v = v.replace(/(\d{4})(\d)/, '$1-$2');
+            } else {
+                v = v.replace(/(\d{2})(\d)/, '($1) $2');
+                v = v.replace(/(\d{5})(\d)/, '$1-$2');
+            }
+            this.value = v;
+        });
+
+        document.getElementById('cad_cep').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '').slice(0, 8);
+            v = v.replace(/(\d{5})(\d)/, '$1-$2');
+            this.value = v;
+            if (v.replace('-', '').length === 8) buscarCep();
+        });
+
+        async function buscarCep() {
+            const cep = document.getElementById('cad_cep').value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            document.getElementById('cepLoading').classList.add('show');
+            limparEndereco();
+
+            try {
+                const res  = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+
+                if (data.erro) { showToast('CEP não encontrado.', 'error'); return; }
+
+                document.getElementById('cad_logradouro').value = data.logradouro || '';
+                document.getElementById('cad_bairro').value     = data.bairro      || '';
+                document.getElementById('cad_cidade').value     = data.localidade   || '';
+                document.getElementById('cad_estado').value     = data.uf           || '';
+                document.getElementById('cad_ibge').value       = data.ibge         || '';
+
+                document.getElementById('cad_numero').focus();
+            } catch {
+                showToast('Erro ao buscar CEP.', 'error');
+            } finally {
+                document.getElementById('cepLoading').classList.remove('show');
+            }
+        }
+
+        function limparEndereco() {
+            ['cad_logradouro','cad_bairro','cad_cidade','cad_estado','cad_ibge'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        async function cadastrarCliente() {
+            const nome     = document.getElementById('cad_nome').value.trim();
+            const cpfFmt   = document.getElementById('cad_cpf').value.trim();
+            const cpfRaw   = cpfFmt.replace(/\D/g, '');
+            const telefone = document.getElementById('cad_telefone').value.trim();
+            const cep      = document.getElementById('cad_cep').value.trim();
+            const logr     = document.getElementById('cad_logradouro').value.trim();
+            const numero   = document.getElementById('cad_numero').value.trim();
+            const compl    = document.getElementById('cad_complemento').value.trim();
+            const bairro   = document.getElementById('cad_bairro').value.trim();
+            const cidade   = document.getElementById('cad_cidade').value.trim();
+            const estado   = document.getElementById('cad_estado').value.trim();
+            const ibge     = document.getElementById('cad_ibge').value.trim();
+
+            if (!nome) { showToast('Informe seu nome completo.', 'error'); return; }
+            if (cpfRaw.length !== 11) { showToast('Digite o CPF completo (11 dígitos).', 'error'); return; }
+            if (!validarCpf(cpfRaw)) { showToast('CPF inválido. Verifique e tente novamente.', 'error'); return; }
+
+            const btn = document.getElementById('btnCadastrar');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { data, error } = await db.from('clientes').insert([{
+                    nome,
+                    cpf:         cpfFmt,
+                    telefone:    telefone || null,
+                    cep:         cep      || null,
+                    logradouro:  logr     || null,
+                    numero:      numero   || null,
+                    complemento: compl    || null,
+                    bairro:      bairro   || null,
+                    cidade:      cidade   || null,
+                    estado:      estado   || null,
+                    codigo_ibge: ibge     || null
+                }]).select('id, nome, cpf').single();
+
+                if (error) {
+                    if (error.code === '23505') {
+                        showToast('Este CPF já está cadastrado. Faça a busca pelo seu nome ou CPF.', 'error');
+                    } else {
+                        showToast('Erro ao cadastrar: ' + error.message, 'error');
+                    }
+                    return;
+                }
+
+                clienteData = { id: data.id, nome: data.nome, cpf: data.cpf };
+                showToast('Cadastro criado com sucesso!', 'success');
+                setTimeout(() => irParaServico(), 800);
+
+            } catch {
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        // ── Ir para formulário de serviço ─────────────────────────────
+        function irParaServico() {
+            document.getElementById('clienteNomeBadge').textContent = clienteData.nome;
+            document.getElementById('clienteCpfBadge').textContent  = clienteData.cpf;
+            document.getElementById('srv_data').value = new Date().toISOString().split('T')[0];
+            pagSelecionado = null;
+            document.querySelectorAll('#viewServico .pagamento-pill').forEach(el => el.classList.remove('selected'));
+            document.getElementById('srv_atividade').value = '';
+            document.getElementById('srv_valor').value     = '';
+            mostrarView('viewServico');
+        }
+
+        // ── Pagamento ─────────────────────────────────────────────────
+        function selecionarPag(tipo) {
+            pagSelecionado = tipo;
+            document.querySelectorAll('#viewServico .pagamento-pill').forEach(el => {
+                el.classList.toggle('selected', el.dataset.pag === tipo);
+            });
+        }
+
+        // Máscara valor
+        document.getElementById('srv_valor').addEventListener('input', function () {
+            let v = this.value.replace(/\D/g, '');
+            if (!v) { this.value = ''; return; }
+            v = (parseInt(v) / 100).toFixed(2).replace('.', ',');
+            this.value = v;
+        });
+
+        // ── Finalizar serviço ─────────────────────────────────────────
+        async function finalizarServico() {
+            const atividade = document.getElementById('srv_atividade').value.trim();
+            const valorStr  = document.getElementById('srv_valor').value.replace(',', '.').replace(/[^\d.]/g, '');
+            const data      = document.getElementById('srv_data').value;
+
+            if (!atividade) { showToast('Descreva o serviço realizado.', 'error'); return; }
+            if (!valorStr || isNaN(parseFloat(valorStr)) || parseFloat(valorStr) <= 0) {
+                showToast('Informe um valor válido.', 'error'); return;
+            }
+            if (!pagSelecionado) { showToast('Selecione a forma de pagamento.', 'error'); return; }
+            if (!data)           { showToast('Informe a data do serviço.', 'error'); return; }
+
+            const btn = document.getElementById('btnFinalizarServico');
+            btn.disabled = true; btn.classList.add('loading');
+
+            try {
+                const { error } = await db.from('servicos_pendentes').insert([{
+                    empresa_id:      empresaData.id,
+                    cnpj_empresa:    empresaData.cnpj,
+                    cliente_id:      clienteData.id,
+                    atividade,
+                    valor:           parseFloat(valorStr),
+                    forma_pagamento: pagSelecionado,
+                    data
+                }]);
+
+                if (error) { showToast('Erro ao registrar: ' + error.message, 'error'); return; }
+
+                mostrarView('viewSucesso');
+
+            } catch {
+                showToast('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                btn.disabled = false; btn.classList.remove('loading');
+            }
+        }
+
+        // ── Reiniciar (anotar outro serviço) ──────────────────────────
+        function reiniciar() {
+            clienteData = null;
+            pagSelecionado = null;
+            document.getElementById('buscaInput').value = '';
+            document.getElementById('searchResults').classList.remove('show');
+            mostrarView('viewBuscar');
+        }
+
+        // ── Validação de CPF ──────────────────────────────────────────
+        function validarCpf(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11) return false;
+            if (/^(\d)\1+$/.test(cpf)) return false;  // todos iguais
+
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+            let resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf[9])) return false;
+
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            return resto === parseInt(cpf[10]);
+        }
+
+        // ── Helpers ───────────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastIcon').className =
+                type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = `toast ${type} show`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+        }
+
+        // ── Start ─────────────────────────────────────────────────────
+        init();
+    </script>
+
+</body>
+</html>

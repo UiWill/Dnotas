@@ -98,10 +98,51 @@ CREATE POLICY "servicos_insert" ON servicos_prestados
     FOR INSERT WITH CHECK (true);
 
 
+-- ============================================
+-- TABELA 4: servicos_pendentes
+-- Servicos anotados pelos clientes via link publico
+-- Aguardam aprovacao da empresa antes de ir para servicos_prestados
+-- ============================================
+CREATE TABLE IF NOT EXISTS servicos_pendentes (
+    id              BIGSERIAL   PRIMARY KEY,
+    empresa_id      UUID        NOT NULL REFERENCES empresas_nfs(id),
+    cnpj_empresa    VARCHAR(14) NOT NULL,
+    cliente_id      UUID        REFERENCES clientes(id) ON DELETE SET NULL,
+    atividade       TEXT        NOT NULL,
+    valor           NUMERIC(10,2) NOT NULL CHECK (valor >= 0),
+    forma_pagamento VARCHAR(10) NOT NULL CHECK (forma_pagamento IN ('pix', 'debito', 'credito', 'dinheiro')),
+    data            DATE        NOT NULL DEFAULT CURRENT_DATE,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pendentes_empresa ON servicos_pendentes(cnpj_empresa);
+CREATE INDEX IF NOT EXISTS idx_pendentes_cliente ON servicos_pendentes(cliente_id);
+
+ALTER TABLE servicos_pendentes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "pendentes_select" ON servicos_pendentes FOR SELECT USING (true);
+CREATE POLICY "pendentes_insert" ON servicos_pendentes FOR INSERT WITH CHECK (true);
+CREATE POLICY "pendentes_update" ON servicos_pendentes FOR UPDATE USING (true);
+CREATE POLICY "pendentes_delete" ON servicos_pendentes FOR DELETE USING (true);
+
+
+-- ============================================
+-- Adicionar 'dinheiro' a servicos_prestados
+-- Execute em bancos existentes:
+-- ============================================
+ALTER TABLE servicos_prestados
+    DROP CONSTRAINT IF EXISTS servicos_prestados_forma_pagamento_check;
+
+ALTER TABLE servicos_prestados
+    ADD CONSTRAINT servicos_prestados_forma_pagamento_check
+    CHECK (forma_pagamento IN ('pix', 'debito', 'credito', 'dinheiro'));
+
+
 -- ================================================================
 -- FIM DO SCRIPT
 -- Tabelas criadas:
---   clientes          - cadastro de clientes com endereco via CEP
---   empresas_nfs      - empresas com acesso ao sistema (login por CNPJ)
---   servicos_prestados - servicos anotados para emissao de NFS-e
+--   clientes           - cadastro de clientes com endereco via CEP
+--   empresas_nfs       - empresas com acesso ao sistema (login por CNPJ)
+--   servicos_prestados - servicos aprovados para emissao de NFS-e
+--   servicos_pendentes - servicos anotados pelos clientes aguardando aprovacao
 -- ================================================================
