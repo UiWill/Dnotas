@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon-rmdev.ico">
+    <title>Relatório de NFe - Graha</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-black: #000000;
+            --color-white: #ffffff;
+            --color-gray-50: #f9fafb;
+            --color-gray-100: #f3f4f6;
+            --color-gray-200: #e5e7eb;
+            --color-gray-300: #d1d5db;
+            --color-gray-400: #9ca3af;
+            --color-gray-500: #6b7280;
+            --color-gray-600: #4b5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1f2937;
+            --color-gray-900: #111827;
+            --color-accent: #2563eb;
+            --color-accent-light: #eff6ff;
+            --color-accent-mid: #dbeafe;
+            --color-green: #16a34a;
+            --color-green-light: #dcfce7;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-900);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background-color: var(--color-black);
+            padding: 1rem 2rem;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            height: 36px;
+        }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.125rem;
+        }
+
+        .header-title {
+            color: var(--color-white);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .header-subtitle {
+            color: var(--color-gray-400);
+            font-size: 0.75rem;
+        }
+
+        /* ===== MAIN ===== */
+        .main-container {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ===== DATE FILTER CARD ===== */
+        .filter-card {
+            background-color: var(--color-white);
+            border-radius: 16px;
+            padding: 1.75rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+            margin-bottom: 1.75rem;
+        }
+
+        .filter-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-gray-400);
+            margin-bottom: 1rem;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+            flex: 1;
+            min-width: 160px;
+            max-width: 220px;
+        }
+
+        .filter-label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--color-gray-700);
+        }
+
+        .filter-input {
+            border: 1.5px solid var(--color-gray-200);
+            border-radius: 10px;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            color: var(--color-gray-900);
+            background-color: var(--color-gray-50);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+            width: 100%;
+        }
+
+        .filter-input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background-color: var(--color-white);
+        }
+
+        .btn-consultar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border: none;
+            border-radius: 10px;
+            padding: 0.625rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            white-space: nowrap;
+            height: 42px;
+        }
+
+        .btn-consultar:hover {
+            background-color: var(--color-gray-800);
+        }
+
+        .btn-consultar:active {
+            transform: scale(0.98);
+        }
+
+        .btn-consultar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-consultar.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        /* ===== STATES ===== */
+        .state-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .state-icon {
+            font-size: 3.5rem;
+            color: var(--color-gray-300);
+        }
+
+        .state-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+        }
+
+        .state-desc {
+            font-size: 0.875rem;
+            color: var(--color-gray-500);
+            max-width: 360px;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--color-gray-200);
+            border-top-color: var(--color-black);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== PERIOD BADGE ===== */
+        .period-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background-color: var(--color-accent-light);
+            color: var(--color-accent);
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            border: 1px solid var(--color-accent-mid);
+        }
+
+        /* ===== SUMMARY CARDS ===== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .kpi-card {
+            background-color: var(--color-white);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .kpi-card.highlight {
+            background-color: var(--color-black);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-gray-500);
+        }
+
+        .kpi-card.highlight .kpi-label {
+            color: var(--color-gray-400);
+        }
+
+        .kpi-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background-color: var(--color-gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--color-gray-600);
+        }
+
+        .kpi-card.highlight .kpi-icon {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--color-gray-300);
+        }
+
+        .kpi-value {
+            font-size: 1.875rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--color-gray-900);
+        }
+
+        .kpi-card.highlight .kpi-value {
+            color: var(--color-white);
+        }
+
+        .kpi-sub {
+            font-size: 0.75rem;
+            color: var(--color-gray-400);
+        }
+
+        /* ===== PRODUCTS SECTION ===== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: var(--color-gray-900);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--color-gray-400);
+        }
+
+        .badge-count {
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-700);
+            padding: 0.2rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ===== PRODUCT SUMMARY TABLE ===== */
+        .product-summary-card {
+            background-color: var(--color-white);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 1.75rem;
+        }
+
+        .product-summary-card .section-header {
+            padding: 1rem 1.5rem;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        /* ===== DATA TABLE ===== */
+        .data-card {
+            background-color: var(--color-white);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 1.75rem;
+        }
+
+        .data-card .section-header {
+            padding: 1rem 1.5rem;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scroll shadow hint */
+        .table-wrapper::after {
+            content: '';
+            display: block;
+            height: 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--color-gray-500);
+            background-color: var(--color-gray-50);
+            border-bottom: 1px solid var(--color-gray-200);
+            white-space: nowrap;
+        }
+
+        .data-table th.right {
+            text-align: right;
+        }
+
+        .data-table td.right {
+            text-align: right;
+        }
+
+        .data-table tfoot td.right {
+            text-align: right;
+        }
+
+        .data-table td {
+            padding: 0.8125rem 1.25rem;
+            border-bottom: 1px solid var(--color-gray-100);
+            font-size: 0.875rem;
+            vertical-align: middle;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: var(--color-gray-50);
+        }
+
+        /* Summary table footer */
+        .data-table tfoot td {
+            padding: 0.875rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            border-top: 2px solid var(--color-gray-200);
+            border-bottom: none;
+            background-color: var(--color-gray-50);
+        }
+
+        .nf-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 26px;
+            padding: 0 0.625rem;
+            background-color: var(--color-gray-100);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+        }
+
+        .date-cell {
+            color: var(--color-gray-600);
+            font-size: 0.8125rem;
+        }
+
+        .product-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .product-chip.sinter-h {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .product-chip.sinter-m {
+            background-color: #f0fdf4;
+            color: #15803d;
+        }
+
+        .product-chip.sinter-l {
+            background-color: #fff7ed;
+            color: #c2410c;
+        }
+
+        .product-chip.other {
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-700);
+        }
+
+        .qty-cell {
+            font-weight: 500;
+            color: var(--color-gray-800);
+            text-align: right;
+        }
+
+        .unit-cell {
+            color: var(--color-gray-600);
+            font-size: 0.8125rem;
+            text-align: right;
+        }
+
+        .value-cell {
+            font-weight: 700;
+            color: var(--color-gray-900);
+            text-align: right;
+        }
+
+        .total-row td {
+            background-color: var(--color-gray-900) !important;
+            color: var(--color-white) !important;
+            font-weight: 700;
+        }
+
+        /* Product summary row */
+        .prod-row {
+            cursor: default;
+        }
+
+        .prod-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .prod-bar {
+            flex: 1;
+            height: 6px;
+            background-color: var(--color-gray-100);
+            border-radius: 9999px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .prod-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background-color: var(--color-accent);
+        }
+
+        .prod-bar-fill.sinter-m { background-color: #22c55e; }
+        .prod-bar-fill.sinter-l { background-color: #f97316; }
+
+        .prod-pct {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-gray-500);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* Sub-info visível só no mobile */
+        .mobile-sub {
+            display: none;
+            font-size: 0.7rem;
+            color: var(--color-gray-500);
+            margin-top: 0.2rem;
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-sub { display: block; }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 1.25rem;
+            color: var(--color-gray-400);
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .footer a {
+            color: var(--color-gray-600);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover { color: var(--color-black); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header { padding: 0.875rem 1rem; }
+            .header-subtitle { display: none; }
+            .logo { height: 28px; }
+
+            .main-container { padding: 1rem; }
+
+            .filter-card { padding: 1.25rem 1rem; border-radius: 12px; }
+            .filter-form { flex-direction: column; gap: 0.75rem; }
+            .filter-group { max-width: 100%; min-width: 0; }
+            .btn-consultar { width: 100%; justify-content: center; height: 46px; font-size: 0.9375rem; }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+                margin-bottom: 1.25rem;
+            }
+            .kpi-card { padding: 1rem; border-radius: 12px; }
+            .kpi-value { font-size: 1.375rem; }
+            .kpi-icon { width: 32px; height: 32px; font-size: 0.875rem; }
+            .kpi-sub { font-size: 0.6875rem; }
+
+            .product-summary-card,
+            .data-card { border-radius: 12px; margin-bottom: 1.25rem; }
+
+            .product-summary-card .section-header,
+            .data-card .section-header { padding: 0.875rem 1rem; }
+
+            .section-title { font-size: 0.875rem; }
+
+            /* Scroll hint on tables */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .data-table th { padding: 0.625rem 0.875rem; font-size: 0.65rem; }
+            .data-table td { padding: 0.75rem 0.875rem; font-size: 0.8125rem; }
+            .data-table tfoot td { padding: 0.75rem 0.875rem; }
+
+            .data-table .hide-mobile { display: none; }
+
+            .nf-number { min-width: 38px; font-size: 0.7rem; }
+            .product-chip { padding: 0.2rem 0.5rem; font-size: 0.7rem; }
+
+            .prod-bar { min-width: 40px; }
+
+            /* Period badge row */
+            #content > div:first-child {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .period-badge { font-size: 0.75rem; }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+            .kpi-value { font-size: 1.25rem; }
+        }
+
+        @media (max-width: 360px) {
+            .summary-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <div class="header-right">
+                <span class="header-title">Relatório de NFe — Graha</span>
+                <span class="header-subtitle">Produtos por período</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main-container">
+
+        <!-- Filter Card -->
+        <div class="filter-card">
+            <p class="filter-title">Selecionar período</p>
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label class="filter-label" for="dataInicio">Data inicial</label>
+                    <input type="date" id="dataInicio" class="filter-input">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label" for="dataFim">Data final</label>
+                    <input type="date" id="dataFim" class="filter-input">
+                </div>
+                <button class="btn-consultar" id="btnConsultar" onclick="consultar()">
+                    <i class="bi bi-search"></i>
+                    Consultar
+                </button>
+            </div>
+        </div>
+
+        <!-- Dynamic Content -->
+        <div id="content">
+            <!-- Initial State -->
+            <div class="state-container">
+                <i class="bi bi-calendar-range state-icon"></i>
+                <p class="state-title">Selecione um período</p>
+                <p class="state-desc">Escolha a data inicial e final acima para consultar os produtos das NFe emitidas.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> — Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        // ── Helpers ─────────────────────────────────────────────────────────────
+
+        function formatCurrency(v) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+        }
+
+        function formatQty(v) {
+            return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+        }
+
+        // "2026-03-27T00:00:00.000Z" → "27/03/2026"
+        function formatDate(isoStr) {
+            const d = new Date(isoStr);
+            const day   = String(d.getUTCDate()).padStart(2, '0');
+            const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const year  = d.getUTCFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // "YYYY-MM-DD" (input date) → "DD/MM/YYYY" (API param)
+        function inputToApi(val) {
+            const [y, m, d] = val.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        // "YYYY-MM-DD" → "DD/MM/YYYY" (display)
+        function inputToDisplay(val) {
+            const [y, m, d] = val.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getProductClass(produto) {
+            const p = (produto || '').toUpperCase();
+            if (p.includes('SINTER') && p.includes('H')) return 'sinter-h';
+            if (p.includes('SINTER') && p.includes('M')) return 'sinter-m';
+            if (p.includes('SINTER') && p.includes('L')) return 'sinter-l';
+            return 'other';
+        }
+
+        function showLoading() {
+            document.getElementById('content').innerHTML = `
+                <div class="state-container">
+                    <div class="spinner"></div>
+                    <p class="state-desc">Consultando dados...</p>
+                </div>
+            `;
+        }
+
+        function showError(msg) {
+            document.getElementById('content').innerHTML = `
+                <div class="state-container">
+                    <i class="bi bi-exclamation-circle state-icon"></i>
+                    <p class="state-title">Erro ao consultar</p>
+                    <p class="state-desc">${msg}</p>
+                </div>
+            `;
+        }
+
+        // ── Group by product ─────────────────────────────────────────────────────
+
+        function groupByProduct(registros) {
+            const map = {};
+            for (const r of registros) {
+                const key = (r.produto || 'Outros').trim();
+                if (!map[key]) map[key] = { produto: key, qty: 0, valor: 0, count: 0 };
+                map[key].qty   += r.quantidade;
+                map[key].valor += r.valor_total;
+                map[key].count += 1;
+            }
+            return Object.values(map).sort((a, b) => b.valor - a.valor);
+        }
+
+        // ── Render ───────────────────────────────────────────────────────────────
+
+        function render(data, periodoInicio, periodoFim) {
+            const registros  = data.registros;
+            const totalValor = registros.reduce((s, r) => s + r.valor_total, 0);
+            const totalQty   = registros.reduce((s, r) => s + r.quantidade, 0);
+            const produtos   = groupByProduct(registros);
+
+            // KPI cards
+            const kpiHtml = `
+                <div class="summary-grid">
+                    <div class="kpi-card highlight">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Valor Total</span>
+                            <div class="kpi-icon"><i class="bi bi-currency-dollar"></i></div>
+                        </div>
+                        <div class="kpi-value">${formatCurrency(totalValor)}</div>
+                        <span class="kpi-sub">no período selecionado</span>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Qtd. Total (ton)</span>
+                            <div class="kpi-icon"><i class="bi bi-boxes"></i></div>
+                        </div>
+                        <div class="kpi-value">${formatQty(totalQty)}</div>
+                        <span class="kpi-sub">toneladas entregues</span>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Notas Fiscais</span>
+                            <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
+                        </div>
+                        <div class="kpi-value">${data.total_registros}</div>
+                        <span class="kpi-sub">registros no período</span>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Produtos</span>
+                            <div class="kpi-icon"><i class="bi bi-grid-1x2"></i></div>
+                        </div>
+                        <div class="kpi-value">${produtos.length}</div>
+                        <span class="kpi-sub">tipos diferentes</span>
+                    </div>
+                </div>
+            `;
+
+            // Product summary table
+            const prodSummaryHtml = `
+                <div class="product-summary-card">
+                    <div class="section-header">
+                        <span class="section-title">
+                            <i class="bi bi-bar-chart"></i>
+                            Resumo por Produto
+                        </span>
+                        <span class="badge-count">${produtos.length} produtos</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="right hide-mobile">NFs</th>
+                                    <th class="right hide-mobile">Quantidade (ton)</th>
+                                    <th class="right">Valor Total</th>
+                                    <th class="right hide-mobile">Participação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${produtos.map(p => {
+                                    const cls = getProductClass(p.produto);
+                                    const pct = totalValor > 0 ? (p.valor / totalValor * 100) : 0;
+                                    return `
+                                    <tr class="prod-row">
+                                        <td>
+                                            <span class="product-chip ${cls}">${p.produto}</span>
+                                            <div class="mobile-sub">${p.count} NFs · ${formatQty(p.qty)} ton</div>
+                                        </td>
+                                        <td class="right hide-mobile" style="color:var(--color-gray-600);font-size:0.8125rem;">${p.count}</td>
+                                        <td class="right qty-cell hide-mobile">${formatQty(p.qty)}</td>
+                                        <td class="value-cell">${formatCurrency(p.valor)}</td>
+                                        <td class="right hide-mobile">
+                                            <div class="prod-bar-container">
+                                                <div class="prod-bar">
+                                                    <div class="prod-bar-fill ${cls}" style="width:${pct.toFixed(1)}%"></div>
+                                                </div>
+                                                <span class="prod-pct">${pct.toFixed(1)}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total</td>
+                                    <td class="right hide-mobile">${data.total_registros}</td>
+                                    <td class="right hide-mobile">${formatQty(totalQty)}</td>
+                                    <td class="right">${formatCurrency(totalValor)}</td>
+                                    <td class="hide-mobile"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            // Detail table
+            const detailHtml = `
+                <div class="data-card">
+                    <div class="section-header">
+                        <span class="section-title">
+                            <i class="bi bi-list-ul"></i>
+                            Detalhamento por NF
+                        </span>
+                        <span class="badge-count">${data.total_registros} registros</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nº NF</th>
+                                    <th class="hide-mobile">Data</th>
+                                    <th>Produto</th>
+                                    <th class="right hide-mobile">Qtd (ton)</th>
+                                    <th class="right hide-mobile">Vlr Unit.</th>
+                                    <th class="right">Vlr Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${registros.map(r => `
+                                    <tr>
+                                        <td><span class="nf-number">${r.numero_nf}</span></td>
+                                        <td class="date-cell hide-mobile">${formatDate(r.data_emissao)}</td>
+                                        <td>
+                                            <span class="product-chip ${getProductClass(r.produto)}">${r.produto}</span>
+                                            <div class="mobile-sub">${formatQty(r.quantidade)} ton · ${formatDate(r.data_emissao)}</div>
+                                        </td>
+                                        <td class="right qty-cell hide-mobile">${formatQty(r.quantidade)}</td>
+                                        <td class="right unit-cell hide-mobile">${formatCurrency(r.valor_unit)}</td>
+                                        <td class="value-cell">${formatCurrency(r.valor_total)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            // Period badge
+            const periodHtml = `
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+                    <span class="period-badge">
+                        <i class="bi bi-calendar3"></i>
+                        ${inputToDisplay(periodoInicio)} — ${inputToDisplay(periodoFim)}
+                    </span>
+                    <button onclick="consultar()" style="background:none;border:1px solid var(--color-gray-200);border-radius:8px;padding:0.375rem 0.875rem;font-size:0.8125rem;font-family:inherit;cursor:pointer;color:var(--color-gray-600);display:flex;align-items:center;gap:0.375rem;" onmouseover="this.style.background='var(--color-gray-100)'" onmouseout="this.style.background='none'">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = periodHtml + kpiHtml + prodSummaryHtml + detailHtml;
+        }
+
+        // ── Main fetch ───────────────────────────────────────────────────────────
+
+        async function consultar() {
+            const inicio = document.getElementById('dataInicio').value;
+            const fim    = document.getElementById('dataFim').value;
+
+            if (!inicio || !fim) {
+                alert('Selecione a data inicial e a data final.');
+                return;
+            }
+
+            if (inicio > fim) {
+                alert('A data inicial deve ser menor ou igual à data final.');
+                return;
+            }
+
+            const btn = document.getElementById('btnConsultar');
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Consultando...';
+
+            showLoading();
+
+            try {
+                const url = `http://api.dnotas.com.br:7005/api/nfe/produtos?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
+                const res = await fetch(url);
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    showError(data.message || 'A API retornou um erro.');
+                    return;
+                }
+
+                if (!data.registros || data.registros.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="state-container">
+                            <i class="bi bi-inbox state-icon"></i>
+                            <p class="state-title">Nenhum registro encontrado</p>
+                            <p class="state-desc">Não há NFe registradas no período de ${inputToDisplay(inicio)} a ${inputToDisplay(fim)}.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                render(data, inicio, fim);
+
+            } catch (err) {
+                console.error(err);
+                showError('Não foi possível conectar à API. Verifique a conexão e tente novamente.');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="bi bi-search"></i> Consultar';
+            }
+        }
+
+        // ── Init: default dates (current month) ──────────────────────────────────
+
+        (function init() {
+            const today = new Date();
+            const year  = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day   = String(today.getDate()).padStart(2, '0');
+
+            const firstDay = `${year}-${month}-01`;
+            const lastDay  = `${year}-${month}-${day}`;
+
+            document.getElementById('dataInicio').value = firstDay;
+            document.getElementById('dataFim').value    = lastDay;
+        })();
+    </script>
+</body>
+</html>
