@@ -975,7 +975,7 @@
             showLoading();
 
             try {
-                const url = `https://api.dnotas.com.br:7005/api/nfe/produtos?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
+                const url = `https://api.dnotas.com.br/api/nfe/produtos?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
                 const res = await fetch(url);
 
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
