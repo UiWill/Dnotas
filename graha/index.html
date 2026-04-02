@@ -833,7 +833,11 @@
         // ── Download Excel ───────────────────────────────────────────────────────
 
         async function downloadExcel() {
-            if (!_lastData || !_lastData.registros || _lastData.registros.length === 0) {
+            const inicio = document.getElementById('dataInicio').value;
+            const fim    = document.getElementById('dataFim').value;
+            const datesChanged = (inicio !== _lastInicio || fim !== _lastFim);
+
+            if (!_lastData || !_lastData.registros || _lastData.registros.length === 0 || datesChanged) {
                 await consultar();
                 if (!_lastData || !_lastData.registros || _lastData.registros.length === 0) return;
             }
