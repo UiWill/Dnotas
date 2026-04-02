@@ -728,7 +728,7 @@
                     <i class="bi bi-search"></i>
                     Consultar
                 </button>
-                <button class="btn-excel" id="btnExcel" onclick="downloadExcel()" disabled>
+                <button class="btn-excel" id="btnExcel" onclick="downloadExcel()">
                     <i class="bi bi-file-earmark-excel"></i>
                     Baixar VENDAS
                 </button>
@@ -833,7 +833,10 @@
         // ── Download Excel ───────────────────────────────────────────────────────
 
         async function downloadExcel() {
-            if (!_lastData || !_lastData.registros || _lastData.registros.length === 0) return;
+            if (!_lastData || !_lastData.registros || _lastData.registros.length === 0) {
+                await consultar();
+                if (!_lastData || !_lastData.registros || _lastData.registros.length === 0) return;
+            }
 
             const registros = _lastData.registros;
             const totalQty   = registros.reduce((s, r) => s + r.quantidade, 0);
@@ -1124,7 +1127,6 @@
                 }
 
                 render(data, inicio, fim);
-                document.getElementById('btnExcel').disabled = false;
 
             } catch (err) {
                 console.error(err);
