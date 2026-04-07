@@ -963,7 +963,7 @@
                 btnCompras.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
 
                 try {
-                    const url = `http://api.dnotas.com.br:7005/api/nfe/entradas?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
+                    const url = `https://api.dnotas.com.br/api/nfe/entradas?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
                     const res = await fetch(url);
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const data = await res.json();
