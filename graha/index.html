@@ -202,6 +202,32 @@
             animation: spin 1s linear infinite;
         }
 
+        .btn-compras {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #2563eb;
+            color: var(--color-white);
+            border: none;
+            border-radius: 10px;
+            padding: 0 1.125rem;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            white-space: nowrap;
+            height: 42px;
+        }
+
+        .btn-compras:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-compras:active {
+            transform: scale(0.98);
+        }
+
         .btn-excel {
             display: flex;
             align-items: center;
@@ -640,7 +666,7 @@
             .filter-card { padding: 1.25rem 1rem; border-radius: 12px; }
             .filter-form { flex-direction: column; gap: 0.75rem; align-items: stretch; }
             .filter-group { max-width: 100%; min-width: 0; }
-            .btn-consultar, .btn-excel { width: 100%; justify-content: center; height: 46px; font-size: 0.9375rem; }
+            .btn-consultar, .btn-excel, .btn-compras { width: 100%; justify-content: center; height: 46px; font-size: 0.9375rem; }
 
             .summary-grid {
                 grid-template-columns: 1fr 1fr;
@@ -732,6 +758,10 @@
                     <i class="bi bi-file-earmark-excel"></i>
                     Baixar VENDAS
                 </button>
+                <button class="btn-compras" id="btnCompras" onclick="downloadCompras()">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Baixar COMPRAS
+                </button>
             </div>
         </div>
 
@@ -757,6 +787,10 @@
         let _lastData = null;
         let _lastInicio = null;
         let _lastFim = null;
+
+        let _lastComprasData = null;
+        let _lastComprasInicio = null;
+        let _lastComprasFim = null;
 
         // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -912,6 +946,106 @@
             const a      = document.createElement('a');
             a.href       = url;
             a.download   = `Graha_Vendas_${_lastInicio}_${_lastFim}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ── Download Compras ─────────────────────────────────────────────────────
+
+        async function downloadCompras() {
+            const inicio = document.getElementById('dataInicio').value;
+            const fim    = document.getElementById('dataFim').value;
+            const datesChanged = (inicio !== _lastComprasInicio || fim !== _lastComprasFim);
+
+            if (!_lastComprasData || !_lastComprasData.registros || _lastComprasData.registros.length === 0 || datesChanged) {
+                const btnCompras = document.getElementById('btnCompras');
+                btnCompras.disabled = true;
+                btnCompras.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
+
+                try {
+                    const url = `http://api.dnotas.com.br:7005/api/nfe/entradas?data_inicio=${inputToApi(inicio)}&data_fim=${inputToApi(fim)}`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    _lastComprasData  = data;
+                    _lastComprasInicio = inicio;
+                    _lastComprasFim   = fim;
+                } catch (e) {
+                    alert('Erro ao buscar compras: ' + e.message);
+                    return;
+                } finally {
+                    btnCompras.disabled = false;
+                    btnCompras.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Baixar COMPRAS';
+                }
+            }
+
+            if (!_lastComprasData.registros || _lastComprasData.registros.length === 0) {
+                alert('Nenhuma compra encontrada no período.');
+                return;
+            }
+
+            const registros = _lastComprasData.registros;
+            const totalQty   = registros.reduce((s, r) => s + r.quantidade, 0);
+            const totalValor = registros.reduce((s, r) => s + r.valor_total, 0);
+
+            const wb = new ExcelJS.Workbook();
+            const ws = wb.addWorksheet('COMPRA');
+
+            ws.columns = [
+                { key: 'a', width: 18 },
+                { key: 'b', width: 16 },
+                { key: 'c', width: 26 },
+                { key: 'd', width: 14 },
+                { key: 'e', width: 17 },
+                { key: 'f', width: 15 },
+            ];
+
+            const borderAll = {
+                top:    { style: 'thin', color: { argb: 'FFB0B0B0' } },
+                left:   { style: 'thin', color: { argb: 'FFB0B0B0' } },
+                bottom: { style: 'thin', color: { argb: 'FFB0B0B0' } },
+                right:  { style: 'thin', color: { argb: 'FFB0B0B0' } },
+            };
+            function applyBorder(row) {
+                row.eachCell({ includeEmpty: true }, cell => { cell.border = borderAll; });
+            }
+
+            const headerRow = ws.addRow([
+                'NÚMERO DA NOTA', 'DATA DA COMPRA', 'DESCRIÇÃO DO PRODUTO',
+                'QUANTIDADE', 'VALOR UNITÁRIO', 'VALOR TOTAL'
+            ]);
+            headerRow.font      = { bold: true, color: { argb: 'FFFFFFFF' } };
+            headerRow.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2563EB' } };
+            headerRow.height    = 18;
+            headerRow.alignment = { vertical: 'middle' };
+            applyBorder(headerRow);
+
+            for (const r of registros) {
+                const [y, m, d] = r.data_emissao.substring(0, 10).split('-');
+                const row = ws.addRow([
+                    r.numero_nf,
+                    `${d}/${m}/${y}`,
+                    r.produto,
+                    r.quantidade,
+                    r.valor_unit,
+                    r.valor_total,
+                ]);
+                applyBorder(row);
+            }
+
+            const totalRow = ws.addRow(['', '', '', totalQty, '', totalValor]);
+            totalRow.font = { bold: true };
+            [4, 6].forEach(col => {
+                totalRow.getCell(col).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+            });
+            applyBorder(totalRow);
+
+            const buffer = await wb.xlsx.writeBuffer();
+            const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url    = URL.createObjectURL(blob);
+            const a      = document.createElement('a');
+            a.href       = url;
+            a.download   = `Graha_Compras_${_lastComprasInicio}_${_lastComprasFim}.xlsx`;
             a.click();
             URL.revokeObjectURL(url);
         }
