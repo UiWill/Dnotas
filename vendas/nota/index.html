@@ -137,21 +137,21 @@
         /* Cupom (recibo) - monocromatico, compacto, monoespacado (fiel ao DANFCe real) */
         .cupom {
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             margin: 0 auto;
             background-color: var(--color-white);
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.1rem 1rem;
+            padding: 1rem 0.9rem;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.72rem;
-            line-height: 1.35;
+            font-size: 0.62rem;
+            font-weight: 700;
+            line-height: 1.3;
             color: #000000;
         }
 
         .cupom-cnpj-nome {
             text-align: center;
-            font-weight: 700;
         }
 
         .cupom-endereco {
@@ -196,11 +196,10 @@
         }
 
         .totais-row.principal {
-            font-weight: 700;
+            font-size: 0.7rem;
         }
 
         .pagamento-header-row {
-            font-weight: 700;
             text-transform: uppercase;
         }
 
@@ -215,8 +214,7 @@
 
         .chave-valor {
             text-align: center;
-            letter-spacing: 0.03em;
-            word-break: break-all;
+            white-space: nowrap;
             margin-top: 0.2rem;
         }
 
