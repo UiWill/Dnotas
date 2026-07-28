@@ -450,6 +450,24 @@
             font-size: 0.75rem;
         }
 
+        .print-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: var(--color-gray-100);
+            color: var(--color-gray-700);
+            text-decoration: none;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .print-btn:hover {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -748,6 +766,7 @@
                                         <th>Nota Fiscal</th>
                                         <th>Pagamento</th>
                                         <th style="text-align: right;">Valor</th>
+                                        <th style="text-align: center;">Cupom</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -766,6 +785,11 @@
                                                 </span>
                                             </td>
                                             <td class="sale-value">${formatCurrency(venda.valor)}</td>
+                                            <td style="text-align: center;">
+                                                <a href="/vendas/nota/${venda.chave_acesso}" target="_blank" rel="noopener" class="print-btn" title="Ver / imprimir cupom">
+                                                    <i class="bi bi-printer"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
