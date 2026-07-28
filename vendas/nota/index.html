@@ -134,7 +134,7 @@
             max-width: 400px;
         }
 
-        /* Cupom (recibo) */
+        /* Cupom (recibo) - monocromatico, compacto, monoespacado (fiel ao DANFCe real) */
         .cupom {
             width: 100%;
             max-width: 380px;
@@ -142,127 +142,104 @@
             background-color: var(--color-white);
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem 1.25rem;
+            padding: 1.1rem 1rem;
             font-family: 'Courier New', Courier, monospace;
-            color: var(--color-gray-900);
+            font-size: 0.72rem;
+            line-height: 1.35;
+            color: #000000;
         }
 
-        .cupom-header {
+        .cupom-cnpj-nome {
             text-align: center;
-            margin-bottom: 0.75rem;
-        }
-
-        .cupom-empresa {
-            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: -0.01em;
         }
 
-        .cupom-fantasia {
-            font-size: 0.8rem;
-            color: var(--color-gray-600);
+        .cupom-endereco {
+            text-align: center;
         }
 
-        .cupom-linha {
-            font-size: 0.75rem;
-            color: var(--color-gray-700);
+        .cupom-doc-auxiliar {
+            text-align: center;
+            font-style: italic;
         }
 
         .cupom-divider {
-            border-top: 1px dashed var(--color-gray-300);
-            margin: 0.75rem 0;
+            border-top: 1px dashed #cccccc;
+            margin: 0.4rem 0;
         }
 
-        .cupom-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--color-gray-700);
+        .cupom-nfce-linha {
+            text-align: center;
         }
 
         .cupom-titulo {
             text-align: center;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            font-weight: 700;
             text-transform: uppercase;
-            color: var(--color-gray-500);
-            margin: 0.5rem 0;
+            margin: 0.3rem 0;
         }
 
         .item-row {
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
         }
 
-        .item-descricao {
+        .item-linha2 {
             display: flex;
             justify-content: space-between;
-            gap: 0.5rem;
         }
 
-        .item-codigo {
-            color: var(--color-gray-500);
-        }
-
-        .item-detalhe {
-            display: flex;
-            justify-content: space-between;
-            color: var(--color-gray-600);
-            font-size: 0.75rem;
-        }
-
-        .item-total {
-            font-weight: 700;
-            color: var(--color-gray-900);
-        }
-
-        .totais-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .totais-row.principal {
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1.05rem;
-        }
-
+        .totais-row,
+        .pagamento-header-row,
         .pagamento-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.8rem;
         }
 
-        .chave-label {
+        .totais-row.principal {
+            font-weight: 700;
+        }
+
+        .pagamento-header-row {
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .chave-intro {
             text-align: center;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.7rem;
-            color: var(--color-gray-500);
-            margin-top: 0.5rem;
+        }
+
+        .chave-link {
+            text-align: center;
+            color: #1a56db;
         }
 
         .chave-valor {
             text-align: center;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.03em;
             word-break: break-all;
-            margin-top: 0.25rem;
+            margin-top: 0.2rem;
+        }
+
+        .consumidor-linha {
+            text-align: center;
+            margin-top: 0.4rem;
         }
 
         .qrcode-wrapper {
             display: flex;
             justify-content: center;
-            margin-top: 1rem;
+            margin: 0.75rem 0;
         }
 
         .qrcode-wrapper img,
         .qrcode-wrapper canvas {
             image-rendering: pixelated;
+        }
+
+        .tributos-linha {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.68rem;
         }
 
         /* Footer */
@@ -329,17 +306,32 @@
     </footer>
 
     <script>
-        // Funcao para formatar valor em Real
-        function formatCurrency(value) {
+        // Funcao para formatar valor sem simbolo de moeda (padrao BR, usado nas colunas do cupom)
+        function formatValor(value) {
             return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             }).format(value);
+        }
+
+        // Funcao para formatar quantidade (virgula decimal, 2 casas)
+        function formatQuantidade(qtd) {
+            return qtd.toFixed(2).replace('.', ',');
         }
 
         // Funcao para formatar CNPJ
         function formatCNPJ(cnpj) {
             return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+
+        // Funcao para formatar CPF
+        function formatCPF(cpf) {
+            return String(cpf).replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+        }
+
+        // Funcao para formatar Inscricao Estadual
+        function formatIE(ie) {
+            return String(ie).replace(/^(\d{3})(\d{3})(\d{3})(\d{4})$/, '$1.$2.$3/$4');
         }
 
         // Funcao para formatar CEP
@@ -352,9 +344,9 @@
         function formatPhone(phone) {
             const digits = String(phone);
             if (digits.length === 11) {
-                return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+                return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1)$2-$3');
             }
-            return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+            return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1)$2-$3');
         }
 
         // Funcao para formatar data de emissao
@@ -366,6 +358,18 @@
         // Chave de acesso em grupos de 4 digitos
         function formatChave(chave) {
             return chave.replace(/(\d{4})(?=\d)/g, '$1 ');
+        }
+
+        // A API ainda nao retorna dados do consumidor; quando retornar
+        // (data.consumidor.cpf ou .cnpj), passa a identificar aqui
+        function formatConsumidor(data) {
+            if (data.consumidor && data.consumidor.cpf) {
+                return `CONSUMIDOR: ${formatCPF(data.consumidor.cpf)}`;
+            }
+            if (data.consumidor && data.consumidor.cnpj) {
+                return `CONSUMIDOR: ${formatCNPJ(data.consumidor.cnpj)}`;
+            }
+            return 'CONSUMIDOR NÃO IDENTIFICADO';
         }
 
         // O CNPJ do emitente vem embutido na chave de acesso (posicoes 7-20,
@@ -408,40 +412,40 @@
             const emit = data.emitente;
             const endereco = emit.endereco;
 
+            const enderecoPartes = [
+                `${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}`,
+                endereco.bairro,
+                `- ${endereco.municipio} ${endereco.uf}`,
+                formatCEP(endereco.cep)
+            ];
+            if (emit.telefone) {
+                enderecoPartes.push(`Fone: ${formatPhone(emit.telefone)}`);
+            }
+            enderecoPartes.push(`I.E.: ${formatIE(emit.inscricao_estadual)}`);
+
+            const numeroPad = String(data.numero_nf).padStart(8, '0');
+            const seriePad = String(data.serie).padStart(3, '0');
+
             mainContent.innerHTML = `
                 <div class="cupom">
-                    <div class="cupom-header">
-                        <div class="cupom-empresa">${emit.razao_social}</div>
-                        ${emit.nome_fantasia ? `<div class="cupom-fantasia">${emit.nome_fantasia}</div>` : ''}
-                        <div class="cupom-linha">${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}</div>
-                        <div class="cupom-linha">${endereco.bairro} - ${endereco.municipio}/${endereco.uf} - ${formatCEP(endereco.cep)}</div>
-                        <div class="cupom-linha">CNPJ: ${formatCNPJ(emit.cnpj)} - IE: ${emit.inscricao_estadual}</div>
-                        ${emit.telefone ? `<div class="cupom-linha">${formatPhone(emit.telefone)}</div>` : ''}
-                    </div>
+                    <div class="cupom-cnpj-nome">CNPJ: ${formatCNPJ(emit.cnpj)} ${emit.razao_social}</div>
+                    <div class="cupom-endereco">${enderecoPartes.join(' ')}</div>
+                    <div class="cupom-doc-auxiliar">DOCUMENTO AUXILIAR DA NOTA FISCAL DE CONSUMIDOR ELETRÔNICA</div>
 
                     <div class="cupom-divider"></div>
 
-                    <div class="cupom-meta">
-                        <span>NFC-e nº ${data.numero_nf}</span>
-                        <span>Série ${data.serie}</span>
-                    </div>
-                    <div class="cupom-meta">
-                        <span>Emissão</span>
-                        <span>${formatDataEmissao(data.data_emissao)}</span>
-                    </div>
+                    <div class="cupom-nfce-linha">NFC-e nº ${numeroPad} Série ${seriePad} ${formatDataEmissao(data.data_emissao)}</div>
 
                     <div class="cupom-divider"></div>
 
                     <div class="cupom-titulo">Itens</div>
 
-                    ${data.itens.map(item => `
+                    ${data.itens.map((item, index) => `
                         <div class="item-row">
-                            <div class="item-descricao">
-                                <span><span class="item-codigo">${item.item}.</span> ${item.descricao}</span>
-                            </div>
-                            <div class="item-detalhe">
-                                <span>${item.quantidade} ${item.unidade} x ${formatCurrency(item.valor_unitario)}</span>
-                                <span class="item-total">${formatCurrency(item.valor_total)}</span>
+                            <div class="item-linha1">${String(index + 1).padStart(3, '0')} ${item.codigo} ${item.descricao}</div>
+                            <div class="item-linha2">
+                                <span>${formatQuantidade(item.quantidade)} ${item.unidade} X ${formatValor(item.valor_unitario)}</span>
+                                <span>${formatValor(item.valor_total)}</span>
                             </div>
                         </div>
                     `).join('')}
@@ -449,34 +453,38 @@
                     <div class="cupom-divider"></div>
 
                     <div class="totais-row">
-                        <span>Qtd. Itens</span>
-                        <span>${data.totais.quantidade_itens}</span>
+                        <span>QTD. TOTAL DE ITENS</span>
+                        <span>${String(data.totais.quantidade_itens).padStart(3, '0')}</span>
                     </div>
                     <div class="totais-row principal">
-                        <span>Total</span>
-                        <span>${formatCurrency(data.totais.valor_total)}</span>
-                    </div>
-                    <div class="totais-row">
-                        <span>Tributos aprox. (Lei 12.741/12)</span>
-                        <span>${formatCurrency(data.totais.tributos_aproximados)}</span>
+                        <span>VALOR TOTAL R$</span>
+                        <span>${formatValor(data.totais.valor_total)}</span>
                     </div>
 
                     <div class="cupom-divider"></div>
 
+                    <div class="pagamento-header-row">
+                        <span>FORMA DE PAGAMENTO</span>
+                        <span>Valor Pago</span>
+                    </div>
                     ${data.pagamentos.map(pag => `
                         <div class="pagamento-row">
                             <span>${pag.forma_pagamento}</span>
-                            <span>${formatCurrency(pag.valor)}</span>
+                            <span>${formatValor(pag.valor)}</span>
                         </div>
                     `).join('')}
 
                     <div class="cupom-divider"></div>
 
-                    <div class="chave-label">Consulte pela Chave de Acesso em</div>
-                    <div class="chave-label">${new URL(data.url_impressao).hostname}</div>
+                    <div class="chave-intro">Consulte pela Chave de Acesso em</div>
+                    <div class="chave-link">${new URL(data.url_impressao).hostname}</div>
                     <div class="chave-valor">${formatChave(data.chave_acesso)}</div>
 
+                    <div class="consumidor-linha">${formatConsumidor(data)}</div>
+
                     <div class="qrcode-wrapper" id="qrcode"></div>
+
+                    <div class="tributos-linha">Tributos aprox. (Lei 12.741/12): R$ ${formatValor(data.totais.tributos_aproximados)}</div>
                 </div>
             `;
 
