@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/favicon-rmdev.ico">
+    <title>Cupom Fiscal - Dnotas</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- QRCode.js (geracao client-side a partir de url_impressao) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-black: #000000;
+            --color-white: #ffffff;
+            --color-gray-50: #f9fafb;
+            --color-gray-100: #f3f4f6;
+            --color-gray-200: #e5e7eb;
+            --color-gray-300: #d1d5db;
+            --color-gray-400: #9ca3af;
+            --color-gray-500: #6b7280;
+            --color-gray-600: #4b5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1f2937;
+            --color-gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-900);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--color-black);
+            padding: 1rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            height: 36px;
+        }
+
+        .header-title {
+            color: var(--color-white);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: -0.025em;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--color-gray-200);
+            border-top-color: var(--color-black);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--color-gray-500);
+            font-size: 1rem;
+        }
+
+        /* Error State */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--color-gray-300);
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-gray-900);
+        }
+
+        .error-message {
+            color: var(--color-gray-500);
+            max-width: 400px;
+        }
+
+        /* Cupom (recibo) */
+        .cupom {
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            background-color: var(--color-white);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 1.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--color-gray-900);
+        }
+
+        .cupom-header {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .cupom-empresa {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .cupom-fantasia {
+            font-size: 0.8rem;
+            color: var(--color-gray-600);
+        }
+
+        .cupom-linha {
+            font-size: 0.75rem;
+            color: var(--color-gray-700);
+        }
+
+        .cupom-divider {
+            border-top: 1px dashed var(--color-gray-300);
+            margin: 0.75rem 0;
+        }
+
+        .cupom-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--color-gray-700);
+        }
+
+        .cupom-titulo {
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--color-gray-500);
+            margin: 0.5rem 0;
+        }
+
+        .item-row {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-descricao {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .item-codigo {
+            color: var(--color-gray-500);
+        }
+
+        .item-detalhe {
+            display: flex;
+            justify-content: space-between;
+            color: var(--color-gray-600);
+            font-size: 0.75rem;
+        }
+
+        .item-total {
+            font-weight: 700;
+            color: var(--color-gray-900);
+        }
+
+        .totais-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .totais-row.principal {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .pagamento-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+
+        .chave-label {
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            color: var(--color-gray-500);
+            margin-top: 0.5rem;
+        }
+
+        .chave-valor {
+            text-align: center;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            word-break: break-all;
+            margin-top: 0.25rem;
+        }
+
+        .qrcode-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .qrcode-wrapper img,
+        .qrcode-wrapper canvas {
+            image-rendering: pixelated;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--color-gray-500);
+            font-size: 0.75rem;
+        }
+
+        .footer a {
+            color: var(--color-gray-700);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            color: var(--color-black);
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .cupom {
+                padding: 1.25rem 1rem;
+            }
+        }
+
+        @media print {
+            .header,
+            .footer {
+                display: none;
+            }
+
+            .cupom {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <img src="../../assets/img/SUA-LOGO-AQUI.png" alt="Dnotas" class="logo">
+            <span class="header-title">Cupom Fiscal Eletronico</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container" id="mainContent">
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p class="loading-text">Carregando cupom...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 <a href="https://dnotas.com.br">Dnotas</a> - Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        // Funcao para formatar valor em Real
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        // Funcao para formatar CNPJ
+        function formatCNPJ(cnpj) {
+            return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+        }
+
+        // Funcao para formatar CEP
+        function formatCEP(cep) {
+            const digits = String(cep).padStart(8, '0');
+            return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+        }
+
+        // Funcao para formatar telefone (10 ou 11 digitos)
+        function formatPhone(phone) {
+            const digits = String(phone);
+            if (digits.length === 11) {
+                return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+            }
+            return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+        }
+
+        // Funcao para formatar data de emissao
+        function formatDataEmissao(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Chave de acesso em grupos de 4 digitos
+        function formatChave(chave) {
+            return chave.replace(/(\d{4})(?=\d)/g, '$1 ');
+        }
+
+        // O CNPJ do emitente vem embutido na chave de acesso (posicoes 7-20,
+        // apos UF (2) + AAMM (4)), entao nao precisa ser passado na URL
+        function extractCnpjFromChave(chave) {
+            return chave.substring(6, 20);
+        }
+
+        // Funcao para extrair a chave de acesso da URL
+        function getUrlParams() {
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(p => p);
+
+            // Espera formato: /vendas/nota/CHAVE
+            const notaIndex = parts.indexOf('nota');
+            if (notaIndex !== -1 && parts.length > notaIndex + 1) {
+                return { chave: parts[notaIndex + 1] };
+            }
+
+            // Tenta pegar da query string como fallback
+            const urlParams = new URLSearchParams(window.location.search);
+            return { chave: urlParams.get('chave') };
+        }
+
+        // Funcao para mostrar erro
+        function showError(title, message) {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="error-container">
+                    <i class="bi bi-exclamation-circle error-icon"></i>
+                    <h2 class="error-title">${title}</h2>
+                    <p class="error-message">${message}</p>
+                </div>
+            `;
+        }
+
+        // Funcao para renderizar o cupom
+        function renderCupom(data) {
+            const mainContent = document.getElementById('mainContent');
+            const emit = data.emitente;
+            const endereco = emit.endereco;
+
+            mainContent.innerHTML = `
+                <div class="cupom">
+                    <div class="cupom-header">
+                        <div class="cupom-empresa">${emit.razao_social}</div>
+                        ${emit.nome_fantasia ? `<div class="cupom-fantasia">${emit.nome_fantasia}</div>` : ''}
+                        <div class="cupom-linha">${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}</div>
+                        <div class="cupom-linha">${endereco.bairro} - ${endereco.municipio}/${endereco.uf} - ${formatCEP(endereco.cep)}</div>
+                        <div class="cupom-linha">CNPJ: ${formatCNPJ(emit.cnpj)} - IE: ${emit.inscricao_estadual}</div>
+                        ${emit.telefone ? `<div class="cupom-linha">${formatPhone(emit.telefone)}</div>` : ''}
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="cupom-meta">
+                        <span>NFC-e nº ${data.numero_nf}</span>
+                        <span>Série ${data.serie}</span>
+                    </div>
+                    <div class="cupom-meta">
+                        <span>Emissão</span>
+                        <span>${formatDataEmissao(data.data_emissao)}</span>
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="cupom-titulo">Itens</div>
+
+                    ${data.itens.map(item => `
+                        <div class="item-row">
+                            <div class="item-descricao">
+                                <span><span class="item-codigo">${item.item}.</span> ${item.descricao}</span>
+                            </div>
+                            <div class="item-detalhe">
+                                <span>${item.quantidade} ${item.unidade} x ${formatCurrency(item.valor_unitario)}</span>
+                                <span class="item-total">${formatCurrency(item.valor_total)}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="totais-row">
+                        <span>Qtd. Itens</span>
+                        <span>${data.totais.quantidade_itens}</span>
+                    </div>
+                    <div class="totais-row principal">
+                        <span>Total</span>
+                        <span>${formatCurrency(data.totais.valor_total)}</span>
+                    </div>
+                    <div class="totais-row">
+                        <span>Tributos aprox. (Lei 12.741/12)</span>
+                        <span>${formatCurrency(data.totais.tributos_aproximados)}</span>
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    ${data.pagamentos.map(pag => `
+                        <div class="pagamento-row">
+                            <span>${pag.forma_pagamento}</span>
+                            <span>${formatCurrency(pag.valor)}</span>
+                        </div>
+                    `).join('')}
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="chave-label">Consulte pela Chave de Acesso em</div>
+                    <div class="chave-label">${new URL(data.url_impressao).hostname}</div>
+                    <div class="chave-valor">${formatChave(data.chave_acesso)}</div>
+
+                    <div class="qrcode-wrapper" id="qrcode"></div>
+                </div>
+            `;
+
+            new QRCode(document.getElementById('qrcode'), {
+                text: data.url_impressao,
+                width: 160,
+                height: 160,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+
+        // Funcao principal para buscar dados
+        async function fetchCupom() {
+            const params = getUrlParams();
+
+            if (!params.chave) {
+                showError('Parametros invalidos', 'A URL deve conter a chave de acesso. Exemplo: /vendas/nota/31260759220500000181650010000269761751139397');
+                return;
+            }
+
+            // Validar formato da chave (44 digitos)
+            if (!/^\d{44}$/.test(params.chave)) {
+                showError('Chave invalida', 'A chave de acesso deve conter exatamente 44 digitos numericos.');
+                return;
+            }
+
+            const cnpj = extractCnpjFromChave(params.chave);
+
+            try {
+                const apiUrl = `https://api.dnotas.com.br/api/relatorio/cupom/${cnpj}/${params.chave}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderCupom(result.data);
+                } else {
+                    showError(
+                        result.error || 'Erro',
+                        result.message || 'Nao foi possivel carregar o cupom.'
+                    );
+                }
+            } catch (error) {
+                console.error('Erro ao buscar dados:', error);
+                showError(
+                    'Erro de conexao',
+                    'Nao foi possivel conectar ao servidor. Verifique sua conexao e tente novamente.'
+                );
+            }
+        }
+
+        // Inicializar quando a pagina carregar
+        document.addEventListener('DOMContentLoaded', fetchCupom);
+    </script>
+</body>
+</html>
