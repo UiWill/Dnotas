@@ -904,12 +904,14 @@
                     throw new Error(result.message || result.error || 'Nao foi possivel carregar o cupom.');
                 }
 
+                // Renderiza em fluxo normal (nao usa position:fixed/left negativo):
+                // html2canvas falha silenciosamente (canvas em branco) para conteudo
+                // posicionado fora do viewport com offsets negativos. Fica visivel
+                // por uma fracao de segundo no fim da pagina enquanto o PDF e gerado.
                 const qrId = 'qrcode-pdf-' + chave;
                 wrapper = document.createElement('div');
-                wrapper.style.position = 'fixed';
-                wrapper.style.top = '0';
-                wrapper.style.left = '-9999px';
                 wrapper.style.width = '400px';
+                wrapper.style.margin = '0 auto';
                 wrapper.innerHTML = buildCupomMarkup(result.data, qrId);
                 document.body.appendChild(wrapper);
 
@@ -919,6 +921,9 @@
                     height: 160,
                     correctLevel: QRCode.CorrectLevel.M
                 });
+
+                // Espera o navegador pintar o frame antes de capturar
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
                 const cupomEl = wrapper.querySelector('.cupom');
                 const pxToMm = 25.4 / 96;
