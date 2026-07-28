@@ -12,6 +12,10 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+    <!-- QRCode.js e html2pdf.js: usados para montar o cupom e baixar o PDF sem sair desta pagina -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -468,6 +472,133 @@
             color: var(--color-white);
         }
 
+        .print-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* Cupom offscreen (usado apenas para gerar o PDF, nunca fica visivel na tela) */
+        .cupom {
+            width: 100%;
+            background-color: var(--color-white);
+            padding: 1.5rem 1.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--color-gray-900);
+        }
+
+        .cupom-header {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .cupom-empresa {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .cupom-fantasia {
+            font-size: 0.8rem;
+            color: var(--color-gray-600);
+        }
+
+        .cupom-linha {
+            font-size: 0.75rem;
+            color: var(--color-gray-700);
+        }
+
+        .cupom-divider {
+            border-top: 1px dashed var(--color-gray-300);
+            margin: 0.75rem 0;
+        }
+
+        .cupom-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--color-gray-700);
+        }
+
+        .cupom-titulo {
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--color-gray-500);
+            margin: 0.5rem 0;
+        }
+
+        .item-row {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-descricao {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .item-codigo {
+            color: var(--color-gray-500);
+        }
+
+        .item-detalhe {
+            display: flex;
+            justify-content: space-between;
+            color: var(--color-gray-600);
+            font-size: 0.75rem;
+        }
+
+        .item-total {
+            font-weight: 700;
+            color: var(--color-gray-900);
+        }
+
+        .totais-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .totais-row.principal {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .pagamento-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+
+        .chave-label {
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            color: var(--color-gray-500);
+            margin-top: 0.5rem;
+        }
+
+        .chave-valor {
+            text-align: center;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            word-break: break-all;
+            margin-top: 0.25rem;
+        }
+
+        .qrcode-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -638,6 +769,171 @@
             return 'bi-wallet2';
         }
 
+        // ---- Geracao do cupom em PDF (a partir do botao "Cupom" da tabela) ----
+
+        function formatCEP(cep) {
+            const digits = String(cep).padStart(8, '0');
+            return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+        }
+
+        function formatPhone(phone) {
+            const digits = String(phone);
+            if (digits.length === 11) {
+                return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+            }
+            return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+        }
+
+        function formatChaveGrupos(chave) {
+            return chave.replace(/(\d{4})(?=\d)/g, '$1 ');
+        }
+
+        function formatDataCupom(dateString) {
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        }
+
+        // O CNPJ do emitente vem embutido na chave de acesso (posicoes 7-20,
+        // apos UF (2) + AAMM (4)), entao nao precisa ser buscado em outro lugar
+        function extractCnpjFromChave(chave) {
+            return chave.substring(6, 20);
+        }
+
+        function buildCupomMarkup(data, qrId) {
+            const emit = data.emitente;
+            const endereco = emit.endereco;
+
+            return `
+                <div class="cupom">
+                    <div class="cupom-header">
+                        <div class="cupom-empresa">${emit.razao_social}</div>
+                        ${emit.nome_fantasia ? `<div class="cupom-fantasia">${emit.nome_fantasia}</div>` : ''}
+                        <div class="cupom-linha">${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}</div>
+                        <div class="cupom-linha">${endereco.bairro} - ${endereco.municipio}/${endereco.uf} - ${formatCEP(endereco.cep)}</div>
+                        <div class="cupom-linha">CNPJ: ${formatCNPJ(emit.cnpj)} - IE: ${emit.inscricao_estadual}</div>
+                        ${emit.telefone ? `<div class="cupom-linha">${formatPhone(emit.telefone)}</div>` : ''}
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="cupom-meta">
+                        <span>NFC-e nº ${data.numero_nf}</span>
+                        <span>Série ${data.serie}</span>
+                    </div>
+                    <div class="cupom-meta">
+                        <span>Emissão</span>
+                        <span>${formatDataCupom(data.data_emissao)}</span>
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="cupom-titulo">Itens</div>
+
+                    ${data.itens.map(item => `
+                        <div class="item-row">
+                            <div class="item-descricao">
+                                <span><span class="item-codigo">${item.item}.</span> ${item.descricao}</span>
+                            </div>
+                            <div class="item-detalhe">
+                                <span>${item.quantidade} ${item.unidade} x ${formatCurrency(item.valor_unitario)}</span>
+                                <span class="item-total">${formatCurrency(item.valor_total)}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="totais-row">
+                        <span>Qtd. Itens</span>
+                        <span>${data.totais.quantidade_itens}</span>
+                    </div>
+                    <div class="totais-row principal">
+                        <span>Total</span>
+                        <span>${formatCurrency(data.totais.valor_total)}</span>
+                    </div>
+                    <div class="totais-row">
+                        <span>Tributos aprox. (Lei 12.741/12)</span>
+                        <span>${formatCurrency(data.totais.tributos_aproximados)}</span>
+                    </div>
+
+                    <div class="cupom-divider"></div>
+
+                    ${data.pagamentos.map(pag => `
+                        <div class="pagamento-row">
+                            <span>${pag.forma_pagamento}</span>
+                            <span>${formatCurrency(pag.valor)}</span>
+                        </div>
+                    `).join('')}
+
+                    <div class="cupom-divider"></div>
+
+                    <div class="chave-label">Consulte pela Chave de Acesso em</div>
+                    <div class="chave-label">${new URL(data.url_impressao).hostname}</div>
+                    <div class="chave-valor">${formatChaveGrupos(data.chave_acesso)}</div>
+
+                    <div class="qrcode-wrapper" id="${qrId}"></div>
+                </div>
+            `;
+        }
+
+        // Busca os dados do cupom, monta o recibo fora da tela e converte em PDF para download
+        async function baixarCupomPdf(buttonEl, chave, numeroNf) {
+            const originalIcon = buttonEl.innerHTML;
+            buttonEl.disabled = true;
+            buttonEl.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+            let wrapper;
+            try {
+                const cnpj = extractCnpjFromChave(chave);
+                const apiUrl = `https://api.dnotas.com.br/api/relatorio/cupom/${cnpj}/${chave}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || result.error || 'Nao foi possivel carregar o cupom.');
+                }
+
+                const qrId = 'qrcode-pdf-' + chave;
+                wrapper = document.createElement('div');
+                wrapper.style.position = 'fixed';
+                wrapper.style.top = '0';
+                wrapper.style.left = '-9999px';
+                wrapper.style.width = '380px';
+                wrapper.innerHTML = buildCupomMarkup(result.data, qrId);
+                document.body.appendChild(wrapper);
+
+                new QRCode(document.getElementById(qrId), {
+                    text: result.data.url_impressao,
+                    width: 160,
+                    height: 160,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+
+                const cupomEl = wrapper.querySelector('.cupom');
+                const pxToMm = 25.4 / 96;
+
+                await html2pdf().set({
+                    margin: 0,
+                    filename: `cupom-${numeroNf}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, backgroundColor: '#ffffff' },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: [cupomEl.offsetWidth * pxToMm, cupomEl.offsetHeight * pxToMm],
+                        orientation: 'portrait'
+                    }
+                }).from(cupomEl).save();
+            } catch (error) {
+                console.error('Erro ao gerar PDF do cupom:', error);
+                alert('Nao foi possivel baixar o cupom. Tente novamente.');
+            } finally {
+                if (wrapper) {
+                    document.body.removeChild(wrapper);
+                }
+                buttonEl.disabled = false;
+                buttonEl.innerHTML = originalIcon;
+            }
+        }
+
         // Funcao para extrair parametros da URL
         function getUrlParams() {
             const path = window.location.pathname;
@@ -786,9 +1082,9 @@
                                             </td>
                                             <td class="sale-value">${formatCurrency(venda.valor)}</td>
                                             <td style="text-align: center;">
-                                                <a href="/vendas/nota/${venda.chave_acesso}" target="_blank" rel="noopener" class="print-btn" title="Ver / imprimir cupom">
+                                                <button type="button" class="print-btn" onclick="baixarCupomPdf(this, '${venda.chave_acesso}', '${venda.numero_nf}')" title="Baixar cupom em PDF">
                                                     <i class="bi bi-printer"></i>
-                                                </a>
+                                                </button>
                                             </td>
                                         </tr>
                                     `).join('')}
