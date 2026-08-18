@@ -172,22 +172,6 @@
             text-align: center;
         }
 
-        .cupom-titulo {
-            text-align: center;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin: 0.3rem 0;
-        }
-
-        .item-row {
-            margin-bottom: 0.35rem;
-        }
-
-        .item-linha2 {
-            display: flex;
-            justify-content: space-between;
-        }
-
         .totais-row,
         .pagamento-header-row,
         .pagamento-row {
@@ -312,11 +296,6 @@
             }).format(value);
         }
 
-        // Funcao para formatar quantidade (virgula decimal, 2 casas)
-        function formatQuantidade(qtd) {
-            return qtd.toFixed(2).replace('.', ',');
-        }
-
         // Funcao para formatar CNPJ
         function formatCNPJ(cnpj) {
             return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
@@ -433,20 +412,6 @@
                     <div class="cupom-divider"></div>
 
                     <div class="cupom-nfce-linha">NFC-e nº ${numeroPad} Série ${seriePad} ${formatDataEmissao(data.data_emissao)}</div>
-
-                    <div class="cupom-divider"></div>
-
-                    <div class="cupom-titulo">Itens</div>
-
-                    ${data.itens.map((item, index) => `
-                        <div class="item-row">
-                            <div class="item-linha1">${String(index + 1).padStart(3, '0')} ${item.codigo} ${item.descricao}</div>
-                            <div class="item-linha2">
-                                <span>${formatQuantidade(item.quantidade)} ${item.unidade} X ${formatValor(item.valor_unitario)}</span>
-                                <span>${formatValor(item.valor_total)}</span>
-                            </div>
-                        </div>
-                    `).join('')}
 
                     <div class="cupom-divider"></div>
 
