@@ -382,10 +382,16 @@
         .saldo-detail-row {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
+            gap: 0.75rem;
             margin-top: 0.5rem;
             font-size: 0.875rem;
             color: var(--color-gray-600);
         }
+
+        .saldo-detail-label { display: flex; flex-direction: column; gap: 0.1rem; }
+        .saldo-detail-desc { font-size: 0.72rem; color: var(--color-gray-400); font-weight: 400; }
+        .saldo-detail-valor { white-space: nowrap; font-weight: 600; color: var(--color-gray-900); }
 
         .saldo-alerta {
             margin-top: 0.75rem;
@@ -400,10 +406,18 @@
             gap: 0.5rem;
         }
 
-        .saldo-card.alerta-negativo .saldo-value,
-        .saldo-card.alerta-positivo .saldo-value {
-            color: #dc2626;
+        /* Cor do valor do saldo segue o SINAL (positivo/negativo), não o
+           limite de alerta - é um indicador visual sempre ativo. */
+        .saldo-value.positivo { color: #16a34a; }
+        .saldo-value.negativo { color: #dc2626; }
+
+        .saldo-status-linha {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
+        .saldo-status-linha.positivo { color: #16a34a; }
+        .saldo-status-linha.negativo { color: #dc2626; }
 
         /* Mes em andamento (antes do dia 15): mostra que existe um resultado,
            mas embaçado - evita dar um alerta prematuro com poucos dias de dado */
@@ -1106,6 +1120,12 @@
             }
             const classeAlerta = saldo.alerta ? `alerta-${saldo.alerta}` : '';
             const bloqueado = deveBloquearSaldo(saldo.mes);
+            // Cor do valor segue o sinal do saldo (sempre ativo), independente
+            // do alerta de limite (que só aparece quando foge muito do padrão).
+            const sinal = saldo.saldo > 0 ? 'positivo' : (saldo.saldo < 0 ? 'negativo' : '');
+            const percentualTexto = saldo.percentual_compras == null
+                ? ''
+                : saldo.percentual_compras.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
             return `
                 <div class="summary-card saldo-card ${classeAlerta}">
                     <div class="summary-card-header">
@@ -1114,17 +1134,28 @@
                     </div>
                     <div class="saldo-card-conteudo ${bloqueado ? 'bloqueado' : ''}">
                         <div class="saldo-blur-alvo">
-                            <div class="saldo-value">${formatCurrency(saldo.saldo)}</div>
+                            <div class="saldo-value ${sinal}">${formatCurrency(saldo.saldo)}</div>
                             <p class="total-label">Faturamento - Compras do mês</p>
                             <div class="saldo-detail-row">
-                                <span>Faturamento Total</span>
-                                <span>${formatCurrency(saldo.faturamento_total)}</span>
+                                <span class="saldo-detail-label">
+                                    <span>Faturamento Total</span>
+                                    <span class="saldo-detail-desc">Vendas NFC-e + NFe (Receita)</span>
+                                </span>
+                                <span class="saldo-detail-valor">${formatCurrency(saldo.faturamento_total)}</span>
                             </div>
                             <div class="saldo-detail-row">
-                                <span>Valor de Compras</span>
-                                <span>${formatCurrency(saldo.valor_compras)}</span>
+                                <span class="saldo-detail-label">
+                                    <span>Valor de Compras</span>
+                                    <span class="saldo-detail-desc">Compras NF-e (Despesas)</span>
+                                </span>
+                                <span class="saldo-detail-valor">${formatCurrency(saldo.valor_compras)}</span>
                             </div>
                             ${buildSaldoAlertaMarkup(saldo.alerta)}
+                            ${sinal && percentualTexto ? `
+                                <p class="saldo-status-linha ${sinal}">
+                                    Saldo está ${sinal} — Percentual de Compras sobre o Faturamento: ${percentualTexto}
+                                </p>
+                            ` : ''}
                         </div>
                         ${bloqueado ? `
                             <div class="saldo-overlay-bloqueio">
