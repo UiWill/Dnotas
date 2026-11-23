@@ -405,6 +405,44 @@
             color: #dc2626;
         }
 
+        /* Mes em andamento (antes do dia 15): mostra que existe um resultado,
+           mas embaçado - evita dar um alerta prematuro com poucos dias de dado */
+        .saldo-card-conteudo {
+            position: relative;
+        }
+
+        .saldo-card-conteudo.bloqueado .saldo-blur-alvo {
+            filter: blur(6px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .saldo-overlay-bloqueio {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+        }
+
+        .saldo-overlay-bloqueio i {
+            font-size: 1.5rem;
+            color: var(--color-gray-500);
+        }
+
+        .saldo-overlay-bloqueio p {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-gray-700);
+            max-width: 240px;
+        }
+
         /* Sales List */
         .sales-section {
             background-color: var(--color-white);
@@ -1041,6 +1079,17 @@
             `;
         }
 
+        // O saldo do mes corrente so fica visivel (sem embacar) a partir do
+        // dia 15 - com poucos dias de movimento o resultado ainda nao diz
+        // muita coisa e pode disparar um alerta sem sentido. Mes passado
+        // (ja fechado) sempre mostra normal, nao importa o dia de hoje.
+        function deveBloquearSaldo(mesStr) {
+            const [mesNum, anoNum] = mesStr.split('/').map(Number);
+            const hoje = new Date();
+            const ehMesAtual = mesNum === (hoje.getMonth() + 1) && anoNum === hoje.getFullYear();
+            return ehMesAtual && hoje.getDate() < 15;
+        }
+
         // Monta o card de Saldo do Mes (entra no lugar de onde era o Resumo por
         // Forma de Pagamento, que agora fica dentro do card preto de Total do Dia)
         function buildSaldoCardMarkup(saldo) {
@@ -1056,23 +1105,34 @@
                 `;
             }
             const classeAlerta = saldo.alerta ? `alerta-${saldo.alerta}` : '';
+            const bloqueado = deveBloquearSaldo(saldo.mes);
             return `
                 <div class="summary-card saldo-card ${classeAlerta}">
                     <div class="summary-card-header">
                         <i class="bi bi-bar-chart-line summary-card-icon"></i>
                         <h3 class="summary-card-title">Saldo do Mês (${saldo.mes})</h3>
                     </div>
-                    <div class="saldo-value">${formatCurrency(saldo.saldo)}</div>
-                    <p class="total-label">Faturamento - Compras do mês</p>
-                    <div class="saldo-detail-row">
-                        <span>Faturamento Total</span>
-                        <span>${formatCurrency(saldo.faturamento_total)}</span>
+                    <div class="saldo-card-conteudo ${bloqueado ? 'bloqueado' : ''}">
+                        <div class="saldo-blur-alvo">
+                            <div class="saldo-value">${formatCurrency(saldo.saldo)}</div>
+                            <p class="total-label">Faturamento - Compras do mês</p>
+                            <div class="saldo-detail-row">
+                                <span>Faturamento Total</span>
+                                <span>${formatCurrency(saldo.faturamento_total)}</span>
+                            </div>
+                            <div class="saldo-detail-row">
+                                <span>Valor de Compras</span>
+                                <span>${formatCurrency(saldo.valor_compras)}</span>
+                            </div>
+                            ${buildSaldoAlertaMarkup(saldo.alerta)}
+                        </div>
+                        ${bloqueado ? `
+                            <div class="saldo-overlay-bloqueio">
+                                <i class="bi bi-eye-slash"></i>
+                                <p>Saldo visível a partir do dia 15 de cada mês. O mês ainda está em andamento e o resultado pode mudar bastante até lá.</p>
+                            </div>
+                        ` : ''}
                     </div>
-                    <div class="saldo-detail-row">
-                        <span>Valor de Compras</span>
-                        <span>${formatCurrency(saldo.valor_compras)}</span>
-                    </div>
-                    ${buildSaldoAlertaMarkup(saldo.alerta)}
                 </div>
             `;
         }
