@@ -393,19 +393,6 @@
         .saldo-detail-desc { font-size: 0.72rem; color: var(--color-gray-400); font-weight: 400; }
         .saldo-detail-valor { white-space: nowrap; font-weight: 600; color: var(--color-gray-900); }
 
-        .saldo-alerta {
-            margin-top: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
-            background-color: #fee2e2;
-            color: #991b1b;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         /* Cor do valor do saldo segue o SINAL (positivo/negativo), não o
            limite de alerta - é um indicador visual sempre ativo. */
         .saldo-value.positivo { color: #16a34a; }
@@ -1079,20 +1066,6 @@
             `;
         }
 
-        // Monta o bloco de alerta do saldo mensal (compras x vendas fora do padrao)
-        function buildSaldoAlertaMarkup(alerta) {
-            if (!alerta) return '';
-            const texto = alerta === 'negativo'
-                ? 'Compras muito acima do padrão de vendas este mês'
-                : 'Saldo muito acima do padrão de compras este mês';
-            return `
-                <div class="saldo-alerta">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    ${texto}
-                </div>
-            `;
-        }
-
         // O saldo do mes corrente so fica visivel (sem embacar) a partir do
         // dia 15 - com poucos dias de movimento o resultado ainda nao diz
         // muita coisa e pode disparar um alerta sem sentido. Mes passado
@@ -1150,7 +1123,6 @@
                                 </span>
                                 <span class="saldo-detail-valor">${formatCurrency(saldo.valor_compras)}</span>
                             </div>
-                            ${buildSaldoAlertaMarkup(saldo.alerta)}
                             ${sinal && percentualTexto ? `
                                 <p class="saldo-status-linha ${sinal}">
                                     Saldo está ${sinal} — Percentual de Compras sobre o Faturamento: ${percentualTexto}
