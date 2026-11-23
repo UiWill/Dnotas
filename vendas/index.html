@@ -331,6 +331,80 @@
             font-weight: 600;
         }
 
+        /* Resumo por forma de pagamento, agora dentro do card preto - lado a
+           lado (nao empilhado), pra nao deixar o quadrado preto gigante */
+        .total-card .payment-summary-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-gray-700);
+            max-height: none;
+            overflow: visible;
+        }
+
+        .total-card .payment-summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 0.25rem;
+            border-bottom: none;
+            padding: 0;
+            flex: 1 1 auto;
+            min-width: 110px;
+        }
+
+        .total-card .payment-name {
+            color: var(--color-white);
+            font-size: 0.8rem;
+        }
+
+        .total-card .payment-count {
+            color: var(--color-gray-400);
+            margin-left: 0;
+        }
+
+        .total-card .payment-total {
+            color: var(--color-white);
+            font-size: 1rem;
+        }
+
+        /* Card de Saldo do Mes (entra no lugar onde ficava o Resumo por Forma de Pagamento) */
+        .saldo-value {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--color-gray-900);
+        }
+
+        .saldo-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--color-gray-600);
+        }
+
+        .saldo-alerta {
+            margin-top: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            background-color: #fee2e2;
+            color: #991b1b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .saldo-card.alerta-negativo .saldo-value,
+        .saldo-card.alerta-positivo .saldo-value {
+            color: #dc2626;
+        }
+
         /* Sales List */
         .sales-section {
             background-color: var(--color-white);
@@ -953,8 +1027,58 @@
             `;
         }
 
+        // Monta o bloco de alerta do saldo mensal (compras x vendas fora do padrao)
+        function buildSaldoAlertaMarkup(alerta) {
+            if (!alerta) return '';
+            const texto = alerta === 'negativo'
+                ? 'Compras muito acima do padrão de vendas este mês'
+                : 'Saldo muito acima do padrão de compras este mês';
+            return `
+                <div class="saldo-alerta">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    ${texto}
+                </div>
+            `;
+        }
+
+        // Monta o card de Saldo do Mes (entra no lugar de onde era o Resumo por
+        // Forma de Pagamento, que agora fica dentro do card preto de Total do Dia)
+        function buildSaldoCardMarkup(saldo) {
+            if (!saldo) {
+                return `
+                    <div class="summary-card saldo-card">
+                        <div class="summary-card-header">
+                            <i class="bi bi-bar-chart-line summary-card-icon"></i>
+                            <h3 class="summary-card-title">Saldo do Mês</h3>
+                        </div>
+                        <p class="total-label">Saldo do mês indisponível no momento.</p>
+                    </div>
+                `;
+            }
+            const classeAlerta = saldo.alerta ? `alerta-${saldo.alerta}` : '';
+            return `
+                <div class="summary-card saldo-card ${classeAlerta}">
+                    <div class="summary-card-header">
+                        <i class="bi bi-bar-chart-line summary-card-icon"></i>
+                        <h3 class="summary-card-title">Saldo do Mês (${saldo.mes})</h3>
+                    </div>
+                    <div class="saldo-value">${formatCurrency(saldo.saldo)}</div>
+                    <p class="total-label">Faturamento - Compras do mês</p>
+                    <div class="saldo-detail-row">
+                        <span>Faturamento Total</span>
+                        <span>${formatCurrency(saldo.faturamento_total)}</span>
+                    </div>
+                    <div class="saldo-detail-row">
+                        <span>Valor de Compras</span>
+                        <span>${formatCurrency(saldo.valor_compras)}</span>
+                    </div>
+                    ${buildSaldoAlertaMarkup(saldo.alerta)}
+                </div>
+            `;
+        }
+
         // Funcao para renderizar o relatorio
-        function renderReport(data) {
+        function renderReport(data, saldo) {
             const mainContent = document.getElementById('mainContent');
 
             // Formatar data para exibicao
@@ -983,7 +1107,7 @@
 
                     <!-- Summary Section (ANTES da lista de vendas) -->
                     <div class="summary-section">
-                        <!-- Total Card -->
+                        <!-- Total Card (agora com o Resumo por Forma de Pagamento dentro) -->
                         <div class="summary-card total-card">
                             <div class="summary-card-header">
                                 <i class="bi bi-graph-up-arrow summary-card-icon"></i>
@@ -1002,30 +1126,25 @@
                                         <span class="total-detail-value">${data.totais_por_forma_pagamento.length}</span>
                                     </div>
                                 </div>
+                                <div class="payment-summary-list">
+                                    ${data.totais_por_forma_pagamento.map(item => `
+                                        <div class="payment-summary-item">
+                                            <div class="payment-info">
+                                                <span class="payment-name">
+                                                    <i class="bi ${getPaymentIcon(item.forma_pagamento)}"></i>
+                                                    ${item.forma_pagamento}
+                                                </span>
+                                                <span class="payment-count">${item.quantidade} ${item.quantidade === 1 ? 'venda' : 'vendas'}</span>
+                                            </div>
+                                            <span class="payment-total">${formatCurrency(item.total)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Payment Summary -->
-                        <div class="summary-card">
-                            <div class="summary-card-header">
-                                <i class="bi bi-pie-chart summary-card-icon"></i>
-                                <h3 class="summary-card-title">Resumo por Forma de Pagamento</h3>
-                            </div>
-                            <div class="payment-summary-list">
-                                ${data.totais_por_forma_pagamento.map(item => `
-                                    <div class="payment-summary-item">
-                                        <div class="payment-info">
-                                            <span class="payment-name">
-                                                <i class="bi ${getPaymentIcon(item.forma_pagamento)}"></i>
-                                                ${item.forma_pagamento}
-                                            </span>
-                                            <span class="payment-count">${item.quantidade} ${item.quantidade === 1 ? 'venda' : 'vendas'}</span>
-                                        </div>
-                                        <span class="payment-total">${formatCurrency(item.total)}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
+                        <!-- Saldo do Mes -->
+                        ${buildSaldoCardMarkup(saldo)}
                     </div>
 
                     <!-- Sales List (com scroll interno) -->
@@ -1101,12 +1220,20 @@
             }
 
             try {
-                const apiUrl = `https://api.dnotas.com.br/api/relatorio/vendas/${params.data}/${params.cnpj}`;
-                const response = await fetch(apiUrl);
-                const result = await response.json();
+                // DDMMYYYY -> MMYYYY, pro relatorio de saldo (que e mensal, nao diario)
+                const mes = params.data.substring(2);
+                const apiUrlVendas = `https://api.dnotas.com.br/api/relatorio/vendas/${params.data}/${params.cnpj}`;
+                const apiUrlSaldo = `https://api.dnotas.com.br/api/relatorio/saldo-mensal/${mes}/${params.cnpj}`;
+
+                const [result, resultSaldo] = await Promise.all([
+                    fetch(apiUrlVendas).then(r => r.json()),
+                    // Saldo mensal e um complemento - se falhar, o relatorio de vendas
+                    // (o principal) continua aparecendo normalmente.
+                    fetch(apiUrlSaldo).then(r => r.json()).catch(() => null)
+                ]);
 
                 if (result.success) {
-                    renderReport(result.data);
+                    renderReport(result.data, resultSaldo && resultSaldo.success ? resultSaldo.data : null);
                 } else {
                     showError(
                         result.error || 'Erro',
