@@ -12,10 +12,6 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <!-- QRCode.js e html2pdf.js: usados para montar o cupom e baixar o PDF sem sair desta pagina -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
         * {
             margin: 0;
@@ -444,6 +440,76 @@
             max-width: 240px;
         }
 
+        /* Popup de aviso (ex: funcionalidade em atualizacao) */
+        .aviso-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(17, 24, 39, 0.55);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .aviso-overlay.is-aberto {
+            display: flex;
+        }
+
+        .aviso-modal {
+            background-color: var(--color-white);
+            border-radius: 12px;
+            max-width: 360px;
+            width: 100%;
+            padding: 1.75rem 1.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .aviso-modal i {
+            font-size: 1.75rem;
+            color: var(--color-gray-900);
+            background-color: var(--color-gray-100);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .aviso-modal h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .aviso-modal p {
+            font-size: 0.85rem;
+            color: var(--color-gray-600);
+            line-height: 1.5;
+            margin-bottom: 1.25rem;
+        }
+
+        .aviso-modal button {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .aviso-modal button:hover {
+            opacity: 0.85;
+        }
+
         /* Sales List */
         .sales-section {
             background-color: var(--color-white);
@@ -588,88 +654,6 @@
         .print-btn:disabled {
             opacity: 0.6;
             cursor: wait;
-        }
-
-        /* Cupom offscreen (usado apenas para gerar o PDF, nunca fica visivel na tela) */
-        /* monocromatico, compacto, monoespacado (fiel ao DANFCe real) */
-        .cupom {
-            width: 100%;
-            background-color: var(--color-white);
-            padding: 1rem 0.9rem;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.62rem;
-            font-weight: 700;
-            line-height: 1.3;
-            color: #000000;
-        }
-
-        .cupom-cnpj-nome {
-            text-align: center;
-        }
-
-        .cupom-endereco {
-            text-align: center;
-        }
-
-        .cupom-doc-auxiliar {
-            text-align: center;
-            font-style: italic;
-        }
-
-        .cupom-divider {
-            border-top: 1px dashed #cccccc;
-            margin: 0.4rem 0;
-        }
-
-        .cupom-nfce-linha {
-            text-align: center;
-        }
-
-        .totais-row,
-        .pagamento-header-row,
-        .pagamento-row {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .totais-row.principal {
-            font-size: 0.7rem;
-        }
-
-        .pagamento-header-row {
-            text-transform: uppercase;
-        }
-
-        .chave-intro {
-            text-align: center;
-        }
-
-        .chave-link {
-            text-align: center;
-            color: #1a56db;
-        }
-
-        .chave-valor {
-            text-align: center;
-            white-space: nowrap;
-            margin-top: 0.2rem;
-        }
-
-        .consumidor-linha {
-            text-align: center;
-            margin-top: 0.4rem;
-        }
-
-        .qrcode-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 0.75rem 0;
-        }
-
-        .tributos-linha {
-            text-align: center;
-            margin-top: 0.5rem;
-            font-size: 0.68rem;
         }
 
         /* Footer */
@@ -842,192 +826,10 @@
             return 'bi-wallet2';
         }
 
-        // ---- Geracao do cupom em PDF (a partir do botao "Cupom" da tabela) ----
-
-        // Valor sem simbolo de moeda (padrao BR), usado nas colunas do cupom
-        function formatValor(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(value);
-        }
-
-        function formatCPF(cpf) {
-            return String(cpf).replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-        }
-
-        function formatIE(ie) {
-            return String(ie).replace(/^(\d{3})(\d{3})(\d{3})(\d{4})$/, '$1.$2.$3/$4');
-        }
-
-        function formatCEP(cep) {
-            const digits = String(cep).padStart(8, '0');
-            return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2');
-        }
-
-        function formatPhone(phone) {
-            const digits = String(phone);
-            if (digits.length === 11) {
-                return digits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1)$2-$3');
-            }
-            return digits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1)$2-$3');
-        }
-
-        function formatChaveGrupos(chave) {
-            return chave.replace(/(\d{4})(?=\d)/g, '$1 ');
-        }
-
-        function formatDataCupom(dateString) {
-            return new Date(dateString).toLocaleDateString('pt-BR');
-        }
-
-        // O CNPJ do emitente vem embutido na chave de acesso (posicoes 7-20,
-        // apos UF (2) + AAMM (4)), entao nao precisa ser buscado em outro lugar
-        function extractCnpjFromChave(chave) {
-            return chave.substring(6, 20);
-        }
-
-        // A API ainda nao retorna dados do consumidor; quando retornar
-        // (data.consumidor.cpf ou .cnpj), passa a identificar aqui
-        function formatConsumidor(data) {
-            if (data.consumidor && data.consumidor.cpf) {
-                return `CONSUMIDOR: ${formatCPF(data.consumidor.cpf)}`;
-            }
-            if (data.consumidor && data.consumidor.cnpj) {
-                return `CONSUMIDOR: ${formatCNPJ(data.consumidor.cnpj)}`;
-            }
-            return 'CONSUMIDOR NÃO IDENTIFICADO';
-        }
-
-        function buildCupomMarkup(data, qrId) {
-            const emit = data.emitente;
-            const endereco = emit.endereco;
-
-            const enderecoPartes = [
-                `${endereco.logradouro}, ${endereco.numero}${endereco.complemento ? ' - ' + endereco.complemento : ''}`,
-                endereco.bairro,
-                `- ${endereco.municipio} ${endereco.uf}`,
-                formatCEP(endereco.cep)
-            ];
-            if (emit.telefone) {
-                enderecoPartes.push(`Fone: ${formatPhone(emit.telefone)}`);
-            }
-            enderecoPartes.push(`I.E.: ${formatIE(emit.inscricao_estadual)}`);
-
-            const numeroPad = String(data.numero_nf).padStart(8, '0');
-            const seriePad = String(data.serie).padStart(3, '0');
-
-            return `
-                <div class="cupom">
-                    <div class="cupom-cnpj-nome">CNPJ: ${formatCNPJ(emit.cnpj)} ${emit.razao_social}</div>
-                    <div class="cupom-endereco">${enderecoPartes.join(' ')}</div>
-                    <div class="cupom-doc-auxiliar">DOCUMENTO AUXILIAR DA NOTA FISCAL DE CONSUMIDOR ELETRÔNICA</div>
-
-                    <div class="cupom-divider"></div>
-
-                    <div class="cupom-nfce-linha">NFC-e nº ${numeroPad} Série ${seriePad} ${formatDataCupom(data.data_emissao)}</div>
-
-                    <div class="cupom-divider"></div>
-
-                    <div class="totais-row">
-                        <span>QTD. TOTAL DE ITENS</span>
-                        <span>${String(data.totais.quantidade_itens).padStart(3, '0')}</span>
-                    </div>
-                    <div class="totais-row principal">
-                        <span>VALOR TOTAL R$</span>
-                        <span>${formatValor(data.totais.valor_total)}</span>
-                    </div>
-
-                    <div class="cupom-divider"></div>
-
-                    <div class="pagamento-header-row">
-                        <span>FORMA DE PAGAMENTO</span>
-                        <span>Valor Pago</span>
-                    </div>
-                    ${data.pagamentos.map(pag => `
-                        <div class="pagamento-row">
-                            <span>${pag.forma_pagamento}</span>
-                            <span>${formatValor(pag.valor)}</span>
-                        </div>
-                    `).join('')}
-
-                    <div class="cupom-divider"></div>
-
-                    <div class="chave-intro">Consulte pela Chave de Acesso em</div>
-                    <div class="chave-link">${new URL(data.url_impressao).hostname}</div>
-                    <div class="chave-valor">${formatChaveGrupos(data.chave_acesso)}</div>
-
-                    <div class="consumidor-linha">${formatConsumidor(data)}</div>
-
-                    <div class="qrcode-wrapper" id="${qrId}"></div>
-
-                    <div class="tributos-linha">Tributos Totais Incidentes(Lei Federal 12.741/12): R$ ${formatValor(data.totais.tributos_aproximados)}</div>
-                </div>
-            `;
-        }
-
-        // Busca os dados do cupom, monta o recibo fora da tela e converte em PDF para download
-        async function baixarCupomPdf(buttonEl, chave, numeroNf) {
-            const originalIcon = buttonEl.innerHTML;
-            buttonEl.disabled = true;
-            buttonEl.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-
-            let wrapper;
-            try {
-                const cnpj = extractCnpjFromChave(chave);
-                const apiUrl = `https://api.dnotas.com.br/api/relatorio/cupom/${cnpj}/${chave}`;
-                const response = await fetch(apiUrl);
-                const result = await response.json();
-
-                if (!result.success) {
-                    throw new Error(result.message || result.error || 'Nao foi possivel carregar o cupom.');
-                }
-
-                // Renderiza em fluxo normal (nao usa position:fixed/left negativo):
-                // html2canvas falha silenciosamente (canvas em branco) para conteudo
-                // posicionado fora do viewport com offsets negativos. Fica visivel
-                // por uma fracao de segundo no fim da pagina enquanto o PDF e gerado.
-                const qrId = 'qrcode-pdf-' + chave;
-                wrapper = document.createElement('div');
-                wrapper.style.width = '400px';
-                wrapper.style.margin = '0 auto';
-                wrapper.innerHTML = buildCupomMarkup(result.data, qrId);
-                document.body.appendChild(wrapper);
-
-                new QRCode(document.getElementById(qrId), {
-                    text: result.data.url_impressao,
-                    width: 160,
-                    height: 160,
-                    correctLevel: QRCode.CorrectLevel.M
-                });
-
-                // Espera o navegador pintar o frame antes de capturar
-                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-                const cupomEl = wrapper.querySelector('.cupom');
-                const pxToMm = 25.4 / 96;
-
-                await html2pdf().set({
-                    margin: 0,
-                    filename: `cupom-${numeroNf}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, backgroundColor: '#ffffff' },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: [cupomEl.offsetWidth * pxToMm, cupomEl.offsetHeight * pxToMm],
-                        orientation: 'portrait'
-                    }
-                }).from(cupomEl).save();
-            } catch (error) {
-                console.error('Erro ao gerar PDF do cupom:', error);
-                alert('Nao foi possivel baixar o cupom. Tente novamente.');
-            } finally {
-                if (wrapper) {
-                    document.body.removeChild(wrapper);
-                }
-                buttonEl.disabled = false;
-                buttonEl.innerHTML = originalIcon;
-            }
+        // Baixar cupom em PDF esta temporariamente desativado enquanto a
+        // funcionalidade passa por uma atualizacao (so mostra o aviso).
+        function baixarCupomPdf() {
+            abrirModalManutencao();
         }
 
         // Funcao para extrair parametros da URL
@@ -1247,7 +1049,7 @@
                                             </td>
                                             <td class="sale-value">${formatCurrency(venda.valor)}</td>
                                             <td style="text-align: center;">
-                                                <button type="button" class="print-btn" onclick="baixarCupomPdf(this, '${venda.chave_acesso}', '${venda.numero_nf}')" title="Baixar cupom em PDF">
+                                                <button type="button" class="print-btn" onclick="baixarCupomPdf()" title="Cupom">
                                                     <i class="bi bi-printer"></i>
                                                 </button>
                                             </td>
@@ -1314,6 +1116,29 @@
 
         // Inicializar quando a pagina carregar
         document.addEventListener('DOMContentLoaded', fetchVendas);
+    </script>
+
+    <div class="aviso-overlay" id="avisoManutencaoOverlay">
+        <div class="aviso-modal">
+            <i class="bi bi-gear-wide-connected"></i>
+            <h3>Funcionalidade em atualização</h3>
+            <p>Estamos atualizando esta funcionalidade para deixá-la mais ágil e segura. Agradecemos a compreensão! 🚀</p>
+            <button type="button" onclick="fecharModalManutencao()">Entendi</button>
+        </div>
+    </div>
+    <script>
+        function abrirModalManutencao() {
+            document.getElementById('avisoManutencaoOverlay').classList.add('is-aberto');
+        }
+        function fecharModalManutencao() {
+            document.getElementById('avisoManutencaoOverlay').classList.remove('is-aberto');
+        }
+        document.getElementById('avisoManutencaoOverlay').addEventListener('click', (ev) => {
+            if (ev.target.id === 'avisoManutencaoOverlay') fecharModalManutencao();
+        });
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') fecharModalManutencao();
+        });
     </script>
 </body>
 </html>
